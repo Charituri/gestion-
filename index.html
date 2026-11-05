@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Charituri Gestion</title>
+<meta name="theme-color" content="#6B1A1F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Charituri">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap">
+<style>
+:root{
+  --bg:#F7F3F0; --surface:#FFFFFF; --ink:#2B1C1D; --muted:#7B6B69; --line:#E7DDD9;
+  --wine:#6B1A1F; --wine-ink:#FFFFFF; --gold:#D9A441; --gold-soft:#F6E7C4;
+  --good:#2E7D4F; --good-soft:#DDF0E4; --warn:#9A6500; --warn-soft:#FBEBC8; --bad:#B3261E; --bad-soft:#F9DEDB; --info-soft:#EDE4E1;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif; --sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#181112; --surface:#241A1B; --ink:#F4EAE7; --muted:#B9A8A5; --line:#3B2D2E;
+  --wine:#A8343B; --wine-ink:#FFFFFF; --gold:#E3B15A; --gold-soft:#3D3020;
+  --good:#6CC28D; --good-soft:#1E3326; --warn:#E8B04A; --warn-soft:#3B2D14; --bad:#F2877F; --bad-soft:#40201E; --info-soft:#33292A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#181112; --surface:#241A1B; --ink:#F4EAE7; --muted:#B9A8A5; --line:#3B2D2E;
+  --wine:#A8343B; --wine-ink:#FFFFFF; --gold:#E3B15A; --gold-soft:#3D3020;
+  --good:#6CC28D; --good-soft:#1E3326; --warn:#E8B04A; --warn-soft:#3B2D14; --bad:#F2877F; --bad-soft:#40201E; --info-soft:#33292A; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--wine);z-index:30}
+button,select,input,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--serif);margin:0;text-wrap:balance}
+a{color:var(--wine)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) a{color:var(--gold)}}
+:root[data-theme="dark"] a{color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+[hidden]{display:none!important}
+/* connexion */
+.login{max-width:440px;margin:0 auto;padding-block:28px 40px;display:grid;gap:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:48px;height:48px;border-radius:50%;background:var(--wine);object-fit:contain;padding:4px}
+.brand b{font-family:var(--serif);font-size:22px;display:block}
+.brand small{display:block;color:var(--muted);font-size:13px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px}
+.field{display:grid;gap:4px}
+.field label{font-size:13px;color:var(--muted);font-weight:600}
+.field input,.field select,.field textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-height:44px;width:100%}
+.field textarea{min-height:70px;resize:vertical}
+.link{background:none;border:0;padding:6px 0;color:var(--wine);font-weight:600;cursor:pointer;text-align:left;text-decoration:underline}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .link{color:var(--gold)}}
+:root[data-theme="dark"] .link{color:var(--gold)}
+.msg{border-radius:10px;padding:10px 12px;font-size:14px;background:var(--info-soft)}
+.msg.err{background:var(--bad-soft);color:var(--bad)}
+.msg.ok{background:var(--good-soft);color:var(--good)}
+.msg.warn{background:var(--gold-soft);border:1px solid var(--gold);color:var(--ink)}
+/* coque */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px))) calc(-1 * max(16px,env(safe-area-inset-right,0px)));padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));background:var(--wine);color:#fff;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.top img{width:34px;height:34px;object-fit:contain}
+.top .t{display:flex;flex-direction:column;line-height:1.15;margin-right:auto;min-width:0}
+.top .t b{font-family:var(--serif);font-size:18px}
+.top .t span{font-size:12.5px;opacity:.85}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.28)}
+.chip.off{background:var(--gold);color:#2B1C1D;border-color:var(--gold)}
+.layout{display:grid;grid-template-columns:1fr;gap:20px;padding-block:18px 96px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));gap:4px}
+.nav button{position:relative;flex:1;min-width:0;background:none;border:0;border-radius:10px;padding:8px 4px;display:grid;gap:2px;justify-items:center;font-size:11.5px;color:var(--muted);cursor:pointer;font-weight:600}
+.nav button .i{font-size:19px;line-height:1}
+.nav button[aria-current="page"]{color:var(--wine);background:var(--gold-soft)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .nav button[aria-current="page"]{color:var(--gold)}}
+:root[data-theme="dark"] .nav button[aria-current="page"]{color:var(--gold)}
+.bdg{position:absolute;top:2px;right:calc(50% - 26px);background:var(--bad);color:#fff;border-radius:999px;font-size:11px;min-width:18px;height:18px;padding:0 5px;display:grid;place-items:center;font-weight:700}
+@media (min-width:900px){
+  .layout{grid-template-columns:220px minmax(0,1fr);padding-bottom:40px;max-width:1180px;margin:0 auto;width:100%}
+  .nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 78px);align-self:start;flex-direction:column;border:1px solid var(--line);border-radius:12px;padding:8px;z-index:1}
+  .nav button{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14.5px;justify-items:unset;text-align:left}
+  .nav button .i{width:22px;text-align:center}
+  .bdg{position:static;margin-left:auto}
+}
+main{min-width:0;display:grid;gap:16px;align-content:start}
+.h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.h h2{font-size:22px}.h p{margin:0;color:var(--muted);font-size:13.5px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.kpi small{color:var(--muted);font-weight:600;font-size:12.5px;display:block}
+.kpi b{font-family:var(--serif);font-size:21px;display:block;margin-top:2px;overflow-wrap:anywhere}
+.list{display:grid;gap:10px}
+.ord{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;min-width:0;cursor:pointer;text-align:left;width:100%}
+.ord:hover{border-color:var(--wine)}
+.ord .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.ord .cl{font-weight:700;overflow-wrap:anywhere}
+.ord .meta{color:var(--muted);font-size:13.5px;overflow-wrap:anywhere}
+.ord .tot{font-family:var(--serif);font-weight:700;font-size:18px;white-space:nowrap}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:700}
+.p-recue{background:var(--info-soft);color:var(--ink)}
+.p-prep{background:var(--warn-soft);color:var(--warn)}
+.p-pret{background:var(--gold-soft);color:var(--ink)}
+.p-liv{background:var(--gold-soft);color:var(--ink);border:1px solid var(--gold)}
+.p-ok{background:var(--good-soft);color:var(--good)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:10px 14px;min-height:44px;cursor:pointer;font-weight:700}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.pri{background:var(--wine);color:var(--wine-ink);border-color:var(--wine)}
+.btn.good{background:var(--good);color:#fff;border-color:var(--good)}
+.btn.bad{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.good{color:#10241A}}
+:root[data-theme="dark"] .btn.good{color:#10241A}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:14px}
+.btn.block{width:100%}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:600;font-size:13.5px;min-height:36px}
+.seg button[aria-pressed="true"]{background:var(--wine);color:var(--wine-ink);border-color:var(--wine)}
+.lines{display:grid;gap:12px}
+.line{display:grid;grid-template-columns:minmax(0,1fr) 84px 96px 36px;gap:8px;align-items:end;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.line .field{min-width:0}
+.line .pn{grid-column:1 / -1}
+@media (max-width:520px){.line{grid-template-columns:minmax(0,1fr) 78px 36px}.line .pp{grid-column:1 / 3}}
+.sum{display:grid;gap:4px;font-size:14.5px}
+.sum div{display:flex;justify-content:space-between;gap:12px}
+.sum .t{font-family:var(--serif);font-size:19px;font-weight:700;border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
+.sugg{display:grid;gap:4px}
+.sugg button{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.sugg small{color:var(--muted);display:block}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:20px;text-align:center;color:var(--muted)}
+.detail{display:grid;gap:14px}
+.dl{display:grid;gap:6px;font-size:14.5px}
+.dl div{display:flex;justify-content:space-between;gap:12px}
+.dl span:first-child{color:var(--muted)}
+.dl span:last-child{text-align:right;overflow-wrap:anywhere}
+.note{background:var(--gold-soft);border-left:4px solid var(--gold);border-radius:6px;padding:8px 12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.ln{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:6px 0}
+.ln:last-child{border-bottom:0}
+.ln small{color:var(--muted);display:block}
+.mem{display:grid;gap:10px}
+.mem h3{font-size:16px}
+.mem small{color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13.5px;font-weight:600;min-height:34px}
+.chips button[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:40;font-weight:600;max-width:90vw;text-align:center}
+@media (min-width:900px){.toast{bottom:24px}}
+.codebox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;font-weight:700;letter-spacing:.06em;background:var(--info-soft);border-radius:8px;padding:10px 12px;overflow-wrap:anywhere}
+/* ticket 58 mm */
+#ticket{display:none}
+@media print{
+  @page{size:58mm auto;margin:0}
+  body>*:not(#ticket){display:none!important}
+  body::before{display:none}
+  html,body{background:#fff!important;padding:0!important;margin:0!important;min-height:0}
+  #ticket{display:block;width:54mm;margin:0 auto;padding:2mm 0 6mm;font:12px/1.3 "Courier New",monospace;color:#000;background:#fff}
+  #ticket img{display:block;margin:0 auto 2mm;width:16mm;filter:grayscale(1) contrast(1.4)}
+  #ticket .c{text-align:center}
+  #ticket .b{font-weight:700}
+  #ticket hr{border:0;border-top:1px dashed #000;margin:2mm 0}
+  #ticket .r{display:flex;justify-content:space-between;gap:4px}
+  #ticket .big{font-size:15px;font-weight:700}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="toast" class="toast" hidden role="status"></div>
+<div id="ticket"></div>
+
+<script>
+"use strict";
+/* ================= Réglages ================= */
+const SB_URL = "https://znnhnunblrkmlpxxlogi.supabase.co";
+const SB_KEY = "sb_publishable_MS08MJL3xpwxJRKduDY9Zg_oIyzddGt";
+const TZ = "Africa/Lubumbashi";
+const ROLES = {directeur:"Directeur", exploitation:"Responsable d'exploitation", reception:"Réception", stock:"Stock", boucher:"Boucher", livreur:"Livreur", comptable:"Comptable", commercial:"Commercial"};
+const ROLE_ORDER = Object.keys(ROLES);
+const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
+/* Traductions : clé = texte français. Lingala (ln), Swahili du Congo (sb) à ajouter plus tard. */
+const LANG = {ln:{}, sb:{}};
+const t = s => ((LANG[S.lang] || {})[s]) || s;
+
+/* ================= Utilitaires ================= */
+const $ = s => document.querySelector(s);
+const e = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fc = n => Math.round(Number(n) || 0).toLocaleString("fr-FR") + " FC";
+const num = v => { const x = parseFloat(String(v).replace(",", ".")); return isFinite(x) ? x : 0; };
+const fmtD = iso => iso ? new Date(iso).toLocaleString("fr-FR", {timeZone: TZ, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}) : "";
+const ls = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (_) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (_) {} }
+};
+function toast(m, ms) { const el = $("#toast"); el.textContent = m; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, ms || 3200); }
+
+/* ================= État ================= */
+const S = {
+  lang: ls.get("chg_lang", "fr"), sess: ls.get("chg_sess", null), prof: null, tab: "cmd", detail: null, authView: "login", authMsg: null,
+  cmds: [], seen: null, filter: null, lignes: {}, livreurs: [], produits: [], clients: [], tarifs: [], team: [], te: {},
+  nc: null, queue: ls.get("chg_q", []), recovery: null, af: {nm:"",em:"",pw:"",cd:""}, code: null, busy: false, online: navigator.onLine, pickLiv: "", fraisIn: "", cancelAsk: false, installEvt: null, params: {}
+};
+const roles = () => S.prof ? [S.prof.role].concat(S.prof.roles_extra || []) : [];
+const has = (...r) => roles().some(x => r.indexOf(x) >= 0);
+const isActive = () => S.prof && S.prof.actif && S.prof.role !== "en_attente";
+const canSeeCmd = () => has("directeur","exploitation","reception","comptable","commercial","boucher","livreur");
+
+/* ================= Client Supabase minimal ================= */
+class NetErr extends Error {}
+async function raw(path, o) {
+  o = o || {};
+  const h = Object.assign({apikey: SB_KEY, "Content-Type": "application/json"}, o.headers || {});
+  const tok = o.token === undefined ? (S.sess && S.sess.access_token) : o.token;
+  h.Authorization = "Bearer " + (tok || SB_KEY);
+  let r;
+  try { r = await fetch(SB_URL + path, {method: o.method || "GET", headers: h, body: o.body ? JSON.stringify(o.body) : undefined}); }
+  catch (_) { throw new NetErr("Pas de réseau"); }
+  let d = null; const txt = await r.text(); if (txt) { try { d = JSON.parse(txt); } catch (_) { d = txt; } }
+  if (!r.ok) {
+    const er = new Error(msgErr(d, r.status)); er.status = r.status; er.data = d; throw er;
+  }
+  return d;
+}
+function msgErr(d, st) {
+  const m = String((d && (d.msg || d.error_description || d.message || d.error)) || d || "Erreur " + st);
+  if (/Invalid login/i.test(m)) return "E-mail ou mot de passe incorrect.";
+  if (/already registered|already been registered/i.test(m)) return "Un compte existe déjà avec cet e-mail.";
+  if (/Database error saving new user|Code entreprise/i.test(m)) return "Code entreprise invalide.";
+  if (/Password should be|at least 6/i.test(m)) return "Le mot de passe doit avoir au moins 6 caractères.";
+  if (/rate limit|too many/i.test(m)) return "Trop d'essais. Patientez une minute puis réessayez.";
+  if (/Email not confirmed/i.test(m)) return "E-mail non confirmé. Contactez le directeur.";
+  if (/valid email|invalid format/i.test(m)) return "Adresse e-mail non valide.";
+  return m;
+}
+let refreshing = null;
+async function refresh() {
+  if (!S.sess || !S.sess.refresh_token) throw new Error("Session expirée");
+  if (!refreshing) refreshing = raw("/auth/v1/token?grant_type=refresh_token", {method: "POST", token: null, body: {refresh_token: S.sess.refresh_token}})
+    .then(d => { setSess(d); }).finally(() => refreshing = null);
+  return refreshing;
+}
+function setSess(d) {
+  S.sess = {access_token: d.access_token, refresh_token: d.refresh_token, expires_at: d.expires_at || (Math.floor(Date.now() / 1000) + (d.expires_in || 3600)), uid: (d.user && d.user.id) || (S.sess && S.sess.uid), email: (d.user && d.user.email) || (S.sess && S.sess.email)};
+  ls.set("chg_sess", S.sess);
+}
+async function api(path, o) {
+  if (S.sess && S.sess.expires_at - 60 < Date.now() / 1000) { try { await refresh(); } catch (er) { if (er instanceof NetErr) throw er; } }
+  try { return await raw(path, o); }
+  catch (er) {
+    if (er.status === 401 && S.sess && (!o || o.token === undefined)) { await refresh(); return raw(path, o); }
+    throw er;
+  }
+}
+const rest = (p, o) => api("/rest/v1/" + p, o);
+const rpc = (n, a) => api("/rest/v1/rpc/" + n, {method: "POST", body: a || {}});
+
+/* ================= Authentification ================= */
+async function signIn(email, pw) {
+  const d = await raw("/auth/v1/token?grant_type=password", {method: "POST", token: null, body: {email, password: pw}});
+  setSess(d); await boot();
+}
+async function signUp(nom, email, pw, code) {
+  const d = await raw("/auth/v1/signup", {method: "POST", token: null, body: {email, password: pw, data: {nom, code}}});
+  if (d && d.access_token) { setSess(d); await boot(); return true; }
+  return false;
+}
+function signOut() {
+  S.sess = null; S.prof = null; S.cmds = []; S.seen = null; S.team = []; ls.del("chg_sess"); S.authView = "login"; S.authMsg = null; S.tab = "cmd"; S.detail = null; render();
+}
+async function loadProfile() {
+  const uid = S.sess.uid || JSON.parse(atob(S.sess.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub;
+  S.sess.uid = uid;
+  const r = await rest("profiles?id=eq." + uid + "&select=*");
+  S.prof = r && r[0] || null;
+}
+async function boot() {
+  S.af = {nm:"",em:"",pw:"",cd:""};
+  await loadProfile();
+  if (isActive()) await loadAll();
+  render();
+}
+async function loadAll() {
+  const jobs = [];
+  if (canSeeCmd()) jobs.push(loadCmd());
+  if (has("directeur","exploitation","reception")) {
+    jobs.push(rest("produits?actif=eq.true&select=*&order=categorie,ordre,nom").then(r => S.produits = r).catch(() => {}));
+    jobs.push(rest("clients?select=id,nom,telephone,whatsapp,quartier,adresse&order=nom&limit=2000").then(r => S.clients = r).catch(() => {}));
+    jobs.push(rest("livraison_tarifs?select=*&order=poids_max").then(r => S.tarifs = r).catch(() => {}));
+    jobs.push(rpc("liste_livreurs").then(r => S.livreurs = r).catch(() => {}));
+  }
+  jobs.push(rest("parametres?select=*").then(r => { S.params = {}; (r || []).forEach(p => S.params[p.cle] = p.valeur); }).catch(() => {}));
+  if (has("directeur")) jobs.push(loadTeam());
+  await Promise.all(jobs);
+}
+async function loadCmd() {
+  const r = await rest("v_commandes?select=*&order=id.desc&limit=400");
+  detectNew(r);
+  S.cmds = r;
+}
+async function loadTeam() { S.team = await rest("profiles?select=*&order=created_at.desc"); }
+
+/* ================= Alertes ================= */
+let actx = null;
+function beep() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+    [880, 1175, 880].forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f; o.type = "sine";
+      g.gain.setValueAtTime(0.0001, actx.currentTime + i * 0.22); g.gain.exponentialRampToValueAtTime(0.35, actx.currentTime + i * 0.22 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + i * 0.22 + 0.2);
+      o.connect(g); g.connect(actx.destination); o.start(actx.currentTime + i * 0.22); o.stop(actx.currentTime + i * 0.22 + 0.22);
+    });
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  } catch (_) {}
+}
+function detectNew(list) {
+  const ids = {}; list.forEach(c => ids[c.id] = c.statut);
+  if (S.seen) {
+    const nw = list.filter(c => !(c.id in S.seen));
+    const ch = list.filter(c => c.id in S.seen && S.seen[c.id] !== c.statut && c.statut === "En livraison" && has("livreur") && c.livreur_id === S.prof.id);
+    const watchRecv = has("directeur","exploitation","reception","boucher");
+    const a = nw.filter(c => (c.statut === "Reçue" && watchRecv) || (c.statut === "En livraison" && has("livreur")));
+    if (a.length || ch.length) {
+      beep();
+      const x = a[0] || ch[0];
+      toast((x.statut === "En livraison" ? "Nouvelle livraison" : "Nouvelle commande") + " #" + x.id + " · " + x.client_nom + (a.length + ch.length > 1 ? " (+" + (a.length + ch.length - 1) + ")" : ""), 6000);
+    }
+  }
+  S.seen = ids;
+}
+
+/* ================= File d'attente hors ligne ================= */
+function qSave() { ls.set("chg_q", S.queue); }
+async function flushQueue() {
+  if (!S.queue.length || !S.sess) return;
+  let changed = false;
+  while (S.queue.length) {
+    const it = S.queue[0];
+    try { await rpc(it.rpc, it.args); S.queue.shift(); changed = true; }
+    catch (er) {
+      if (er instanceof NetErr) break;
+      S.queue.shift(); changed = true; toast("Action #" + it.id + " refusée : " + er.message, 6000);
+    }
+  }
+  qSave();
+  if (changed) { try { await loadCmd(); } catch (_) {} softRender(); }
+}
+async function act(rpcName, args, id, patch) {
+  try { await rpc(rpcName, args); toast("Enregistré"); await loadCmd(); }
+  catch (er) {
+    if (er instanceof NetErr) {
+      S.queue.push({rpc: rpcName, args, id}); qSave();
+      const c = S.cmds.find(x => x.id === id); if (c && patch) Object.assign(c, patch);
+      toast("Hors ligne : enregistré, sera envoyé dès le retour du réseau.", 5000);
+    } else { toast(er.message, 5000); }
+  }
+  S.cancelAsk = false; render();
+}
+
+/* ================= Rendu ================= */
+function render() {
+  const root = $("#root");
+  document.documentElement.setAttribute("lang", S.lang === "sb" ? "sw" : S.lang);
+  if (S.recovery) { root.innerHTML = vRecovery(); return; }
+  if (!S.sess || !S.prof) { root.innerHTML = vAuth(); return; }
+  if (!S.prof.actif) { root.innerHTML = vWait("Compte désactivé", "Votre compte a été désactivé. Contactez le directeur."); return; }
+  if (S.prof.role === "en_attente") { root.innerHTML = vWait("Compte en attente", "Votre compte est créé. Le directeur doit maintenant l'activer et vous attribuer un poste. Vous pouvez fermer cette page et revenir plus tard."); return; }
+  root.innerHTML = vShell();
+  updateTitle();
+}
+function softRender() {
+  const a = document.activeElement;
+  if (a && /INPUT|SELECT|TEXTAREA/.test(a.tagName) && $("#root").contains(a)) { updateBadges(); return; }
+  if (S.tab === "new" && !S.detail) { updateBadges(); return; }
+  const sc = window.scrollY; render(); window.scrollTo(0, sc);
+}
+function brandHead() {
+  return `<div class="brand"><img src="logo.webp" alt=""><div><b>Charituri Gestion</b><small>Charcuterie de l'Ituri SARL · Bunia</small></div></div>`;
+}
+function vAuth() {
+  const v = S.authView, m = S.authMsg ? `<div class="msg ${S.authMsg.k || ""}">${e(S.authMsg.t)}</div>` : "";
+  let body = "";
+  if (v === "login") body = `
+    <form class="card" data-f="login">
+      <div class="field"><label for="em">${t("Adresse e-mail")}</label><input id="em" type="email" autocomplete="username" inputmode="email" required data-m="af.em" value="${e(S.af.em)}"></div>
+      <div class="field"><label for="pw">${t("Mot de passe")}</label><input id="pw" type="password" autocomplete="current-password" required data-m="af.pw" value="${e(S.af.pw)}"></div>
+      <button class="btn pri block" ${S.busy ? "disabled" : ""}>${t("Se connecter")}</button>
+      <button type="button" class="link" data-a="auth" data-v="forgot">${t("Mot de passe oublié ?")}</button>
+      <button type="button" class="link" data-a="auth" data-v="signup">${t("Créer mon compte (code entreprise requis)")}</button>
+    </form>`;
+  else if (v === "signup") body = `
+    <form class="card" data-f="signup">
+      <div class="field"><label for="nm">${t("Nom complet")}</label><input id="nm" autocomplete="name" required data-m="af.nm" value="${e(S.af.nm)}"></div>
+      <div class="field"><label for="em">${t("Adresse e-mail")}</label><input id="em" type="email" autocomplete="username" inputmode="email" required data-m="af.em" value="${e(S.af.em)}"></div>
+      <div class="field"><label for="pw">${t("Mot de passe (6 caractères minimum)")}</label><input id="pw" type="password" autocomplete="new-password" minlength="6" required data-m="af.pw" value="${e(S.af.pw)}"></div>
+      <div class="field"><label for="cd">${t("Code entreprise")}</label><input id="cd" autocapitalize="characters" autocomplete="off" required placeholder="CHARI-0000" data-m="af.cd" value="${e(S.af.cd)}"></div>
+      <p style="margin:0;color:var(--muted);font-size:13.5px">${t("Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.")}</p>
+      <button class="btn pri block" ${S.busy ? "disabled" : ""}>${t("Créer mon compte")}</button>
+      <button type="button" class="link" data-a="auth" data-v="login">${t("J'ai déjà un compte")}</button>
+    </form>`;
+  else body = `
+    <form class="card" data-f="forgot">
+      <p style="margin:0">${t("Entrez votre e-mail : vous recevrez un lien pour choisir un nouveau mot de passe.")}</p>
+      <div class="field"><label for="em">${t("Adresse e-mail")}</label><input id="em" type="email" inputmode="email" required data-m="af.em" value="${e(S.af.em)}"></div>
+      <button class="btn pri block" ${S.busy ? "disabled" : ""}>${t("Envoyer le lien")}</button>
+      <button type="button" class="link" data-a="auth" data-v="login">${t("Retour à la connexion")}</button>
+    </form>`;
+  return `<div class="login">${brandHead()}${m}${body}${langPick()}</div>`;
+}
+function langPick() {
+  return ""; /* Sélecteur de langue : à activer quand le Lingala et le Swahili seront traduits */
+}
+function vWait(titre, txt) {
+  return `<div class="login">${brandHead()}<div class="card"><h2>${t(titre)}</h2><p style="margin:0">${t(txt)}</p>
+    <button class="btn pri block" data-a="recheck">${t("Vérifier maintenant")}</button>
+    <button class="link" data-a="logout">${t("Se déconnecter")}</button></div></div>`;
+}
+function vRecovery() {
+  const m = S.authMsg ? `<div class="msg ${S.authMsg.k || ""}">${e(S.authMsg.t)}</div>` : "";
+  return `<div class="login">${brandHead()}${m}<form class="card" data-f="recovery"><h2>${t("Nouveau mot de passe")}</h2>
+    <div class="field"><label for="pw">${t("Nouveau mot de passe (6 caractères minimum)")}</label><input id="pw" type="password" autocomplete="new-password" minlength="6" required></div>
+    <button class="btn pri block" ${S.busy ? "disabled" : ""}>${t("Enregistrer")}</button></form></div>`;
+}
+
+/* ----- coque ----- */
+function navItems() {
+  const n = [];
+  if (canSeeCmd()) n.push(["cmd", "📋", "Commandes"]);
+  if (has("directeur","exploitation","reception")) n.push(["new", "➕", "Nouvelle"]);
+  if (has("stock") && !canSeeCmd()) n.push(["cmd", "📦", "Stock"]);
+  if (has("directeur")) n.push(["team", "👥", "Équipe"]);
+  n.push(["me", "👤", "Compte"]);
+  return n;
+}
+function pendingCount() { return S.team.filter(p => p.role === "en_attente" && p.actif).length; }
+function todoCount() {
+  if (has("boucher") && !has("directeur","exploitation","reception")) return S.cmds.filter(c => c.statut === "Reçue").length;
+  if (has("livreur") && !has("directeur","exploitation","reception")) return S.cmds.filter(c => c.statut === "En livraison").length;
+  return S.cmds.filter(c => c.statut === "Reçue").length;
+}
+function badgeFor(k) { const n = k === "team" ? pendingCount() : k === "cmd" ? todoCount() : 0; return n ? `<span class="bdg" data-bdg="${k}">${n}</span>` : ""; }
+function vShell() {
+  const nav = navItems();
+  if (!nav.some(x => x[0] === S.tab)) S.tab = nav[0][0];
+  const off = !S.online || S.queue.length;
+  const top = `<header class="top"><img src="logo.webp" alt=""><div class="t"><b>Charituri</b><span>${e(S.prof.nom)} · ${e(roles().map(r => ROLES[r]).join(", "))}</span></div>
+    ${off ? `<span class="chip off">${!S.online ? t("Hors ligne") : t("Envoi en cours")}${S.queue.length ? " · " + S.queue.length : ""}</span>` : ""}</header>`;
+  const nv = `<nav class="nav" aria-label="Menu">${nav.map(x => `<button data-a="tab" data-k="${x[0]}" ${S.tab === x[0] && !(S.detail && x[0] === "cmd") ? 'aria-current="page"' : S.tab === x[0] ? 'aria-current="page"' : ""}><span class="i">${x[1]}</span>${t(x[2])}${badgeFor(x[0])}</button>`).join("")}</nav>`;
+  let main = "";
+  if (S.tab === "cmd") main = S.detail ? vDetail() : (canSeeCmd() ? vCmd() : vStock());
+  else if (S.tab === "new") main = vNew();
+  else if (S.tab === "team") main = vTeam();
+  else main = vMe();
+  return `${top}<div class="layout">${nv}<main>${main}</main></div>`;
+}
+function updateBadges() {
+  document.querySelectorAll(".bdg").forEach(b => b.remove());
+  document.querySelectorAll(".nav button").forEach(b => { const k = b.dataset.k; const h = badgeFor(k); if (h) b.insertAdjacentHTML("beforeend", h); });
+  updateTitle();
+}
+function updateTitle() { const n = (isActive() ? todoCount() : 0) + (isActive() && has("directeur") ? pendingCount() : 0); document.title = (n ? "(" + n + ") " : "") + "Charituri Gestion"; }
+
+/* ----- commandes ----- */
+function pillCls(s) { return {"Reçue": "p-recue", "En préparation": "p-prep", "Prête": "p-pret", "En livraison": "p-liv", "Livrée": "p-ok", "Annulée": "p-bad"}[s] || "p-recue"; }
+function canCash() { return has("directeur","exploitation","comptable","livreur"); }
+function filters() {
+  const f = [["cours", "En cours"]];
+  if (canCash()) f.push(["encaisser", "À encaisser"]);
+  f.push(["fin", "Terminées"], ["all", "Toutes"]);
+  return f;
+}
+function filtered() {
+  const f = S.filter || "cours";
+  return S.cmds.filter(c => f === "all" ? true : f === "cours" ? ["Reçue","En préparation","Prête","En livraison"].includes(c.statut)
+    : f === "encaisser" ? (c.statut === "Livrée" && !c.paye) : ["Livrée","Annulée"].includes(c.statut));
+}
+function vCmd() {
+  const f = S.filter || "cours";
+  const today = new Date().toLocaleDateString("fr-FR", {timeZone: TZ});
+  const cours = S.cmds.filter(c => ["Reçue","En préparation","Prête","En livraison"].includes(c.statut)).length;
+  const aEnc = S.cmds.filter(c => c.statut === "Livrée" && !c.paye && c.paiement_mode !== "Crédit");
+  const livAuj = S.cmds.filter(c => c.statut === "Livrée" && c.date_livraison && new Date(c.date_livraison).toLocaleDateString("fr-FR", {timeZone: TZ}) === today).length;
+  const showMoney = has("directeur","exploitation","reception","comptable","commercial","livreur");
+  const k = `<div class="kpis"><div class="kpi"><small>${t("En cours")}</small><b>${cours}</b></div>
+    ${showMoney ? `<div class="kpi"><small>${t("À encaisser")}</small><b>${fc(aEnc.reduce((s, c) => s + Number(c.total), 0))}</b></div>` : ""}
+    <div class="kpi"><small>${t("Livrées aujourd'hui")}</small><b>${livAuj}</b></div></div>`;
+  const list = filtered();
+  return `<div class="h"><h2>${t("Commandes")}</h2><p>${S.cmds.length} ${t("au total")}</p></div>${k}
+    <div class="seg" role="group">${filters().map(x => `<button data-a="filt" data-k="${x[0]}" aria-pressed="${f === x[0]}">${t(x[1])}</button>`).join("")}</div>
+    <div class="list">${list.length ? list.map(ordCard).join("") : `<div class="empty">${t("Aucune commande ici.")}</div>`}</div>`;
+}
+function ordCard(c) {
+  const money = !(has("boucher") && !has("directeur","exploitation","reception","comptable","commercial","livreur"));
+  return `<button class="ord" data-a="open" data-id="${c.id}"><div class="row"><div><span class="cl">#${c.id} · ${e(c.client_nom)}</span></div>
+    <span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></div>
+    <div class="row"><span class="meta">${e(fmtD(c.created_at))}${c.adresse ? " · " + e(c.adresse) : ""}${c.livreur_nom ? " · 🛵 " + e(c.livreur_nom) : ""}</span>${money ? `<span class="tot num">${fc(c.total)}</span>` : ""}</div>
+    ${c.remarques ? `<div class="meta">📝 ${e(c.remarques.length > 70 ? c.remarques.slice(0, 70) + "…" : c.remarques)}</div>` : ""}
+    ${c.statut === "Livrée" ? `<div><span class="pill ${c.paye ? "p-ok" : c.paiement_mode === "Crédit" ? "p-prep" : "p-bad"}">${c.paye ? t("Payée") + " · " + e(c.paiement_mode) : c.paiement_mode === "Crédit" ? t("À crédit") : t("À encaisser")}</span></div>` : ""}</button>`;
+}
+function vStock() { return `<div class="h"><h2>${t("Stock")}</h2></div><div class="empty">${t("L'écran du stock arrive bientôt.")}</div>`; }
+
+/* ----- détail ----- */
+function waNum(tel) { let d = String(tel || "").replace(/\D/g, ""); if (d.startsWith("00")) d = d.slice(2); else if (d.startsWith("0")) d = "243" + d.slice(1); return d; }
+function vDetail() {
+  const c = S.cmds.find(x => x.id === S.detail);
+  if (!c) return `<button class="btn" data-a="back">← ${t("Retour")}</button><div class="empty">${t("Commande introuvable.")}</div>`;
+  const L = S.lignes[c.id];
+  const money = !(has("boucher") && !has("directeur","exploitation","reception","comptable","commercial","livreur"));
+  const mgr = has("directeur","exploitation","reception");
+  const open = !["Livrée","Annulée"].includes(c.statut);
+  let acts = "";
+  const btns = [];
+  if (mgr && open) {
+    if (c.statut === "Reçue") btns.push(`<button class="btn pri" data-a="st" data-s="En préparation">${t("Mettre en préparation")}</button>`);
+    if (c.statut === "En préparation") btns.push(`<button class="btn pri" data-a="st" data-s="Prête">${t("Marquer prête")}</button>`);
+    if (c.statut === "Prête") btns.push(`<div class="field" style="min-width:200px;flex:1"><label for="lv">${t("Livreur")}</label><select id="lv" data-m="pickLiv"><option value="">${t("— Choisir —")}</option>${S.livreurs.map(l => `<option value="${l.id}" ${S.pickLiv === l.id ? "selected" : ""}>${e(l.nom)}</option>`).join("")}</select></div><button class="btn pri" data-a="st" data-s="En livraison">${t("Confier au livreur")}</button>`);
+    if (c.statut === "En livraison") btns.push(`<button class="btn good" data-a="st" data-s="Livrée">${t("Marquer livrée")}</button>`);
+  } else {
+    if (has("boucher") && c.statut === "Reçue") btns.push(`<button class="btn pri" data-a="st" data-s="En préparation">${t("Commencer la préparation")}</button>`);
+    if (has("boucher") && c.statut === "En préparation") btns.push(`<button class="btn pri" data-a="st" data-s="Prête">${t("Marquer prête")}</button>`);
+    if (has("livreur") && c.statut === "En livraison" && c.livreur_id === S.prof.id) btns.push(`<button class="btn good" data-a="st" data-s="Livrée">${t("Marquer livrée")}</button>`);
+  }
+  if (mgr && open) btns.push(S.cancelAsk ? `<button class="btn bad" data-a="st" data-s="Annulée">${t("Confirmer l'annulation")}</button>` : `<button class="btn" data-a="cancelask">${t("Annuler la commande")}</button>`);
+  if (btns.length) acts += `<div class="card"><div class="acts" style="align-items:end">${btns.join("")}</div></div>`;
+  if (mgr && open && c.frais_livraison == null) acts += `<div class="card"><div class="msg warn">${t("Frais de livraison à confirmer (poids hors barème).")}</div><div class="field"><label for="fr">${t("Frais de livraison (FC)")}</label><input id="fr" inputmode="numeric" data-m="fraisIn" value="${e(S.fraisIn)}"></div><button class="btn pri" data-a="frais">${t("Enregistrer les frais")}</button></div>`;
+  let enc = "";
+  if (c.statut === "Livrée" && !c.paye && (has("directeur","exploitation","comptable") || (has("livreur") && c.livreur_id === S.prof.id))) {
+    enc = `<div class="card"><b>${t("Encaissement")} · ${fc(c.total)}</b>${c.paiement_prevu ? `<small style="color:var(--muted)">${t("Paiement prévu")} : ${e(c.paiement_prevu)}</small>` : ""}${c.paiement_mode === "Crédit" ? `<div class="msg">${t("Enregistrée à crédit : en attente du règlement.")}</div>` : ""}
+      <div class="acts">${["Cash","Mobile Money","Banque"].map(m => `<button class="btn good" data-a="enc" data-m="${m}">${m}</button>`).join("")}${c.paiement_mode === "Crédit" ? "" : `<button class="btn" data-a="enc" data-m="Crédit">${t("À crédit")}</button>`}</div></div>`;
+  }
+  const tel = c.client_tel;
+  const lignes = L ? L.map(l => `<div class="ln"><div><b>${e(l.produit_nom)}</b><small>${Number(l.quantite).toLocaleString("fr-FR")} ${e(l.unite)}${money ? " × " + fc(l.prix_unitaire) : ""}</small></div>${money ? `<span class="num">${fc(l.montant)}</span>` : ""}</div>`).join("") : `<div class="meta">…</div>`;
+  const canPrint = has("directeur","exploitation","reception","comptable","commercial","livreur");
+  return `<div class="acts"><button class="btn" data-a="back">← ${t("Retour")}</button>${canPrint ? `<button class="btn" data-a="print">🖨 ${t("Ticket 58 mm")}</button>` : ""}</div>
+  <div class="detail">
+    <div class="h"><h2>#${c.id} · ${e(c.client_nom)}</h2><span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></div>
+    <div class="card"><div class="dl">
+      <div><span>${t("Reçue le")}</span><span>${e(fmtD(c.created_at))}</span></div>
+      ${c.adresse ? `<div><span>${t("Adresse")}</span><span>${e(c.adresse)}</span></div>` : ""}
+      ${tel ? `<div><span>${t("Téléphone")}</span><span><a href="tel:${e(tel)}">${e(tel)}</a> · <a href="https://wa.me/${waNum(tel)}" target="_blank" rel="noopener">WhatsApp</a></span></div>` : ""}
+      ${c.livreur_nom ? `<div><span>${t("Livreur")}</span><span>${e(c.livreur_nom)}</span></div>` : ""}
+      ${c.paiement_prevu && money ? `<div><span>${t("Paiement prévu")}</span><span>${e(c.paiement_prevu)}</span></div>` : ""}
+      ${c.date_livraison ? `<div><span>${t("Livrée le")}</span><span>${e(fmtD(c.date_livraison))}</span></div>` : ""}
+      ${c.paye ? `<div><span>${t("Payée")}</span><span>${e(c.paiement_mode)} · ${e(fmtD(c.date_paiement))}</span></div>` : ""}
+    </div>${c.remarques ? `<div class="note"><b>${t("Note")} :</b> ${e(c.remarques)}</div>` : ""}</div>
+    <div class="card"><b>${t("Produits")}</b>${lignes}
+      ${money ? `<div class="sum"><div><span>${t("Produits")}</span><span class="num">${fc(c.montant_produits)}</span></div><div><span>${t("Livraison")}${c.poids_kg > 0 ? " (" + Number(c.poids_kg).toLocaleString("fr-FR") + " kg)" : ""}</span><span class="num">${c.frais_livraison == null ? t("à confirmer") : fc(c.frais_livraison)}</span></div><div class="t"><span>${t("Total")}</span><span class="num">${fc(c.total)}</span></div></div>` : ""}
+    </div>
+    ${acts}${enc}
+  </div>`;
+}
+async function openDetail(id) {
+  S.detail = id; S.pickLiv = ""; S.fraisIn = ""; S.cancelAsk = false; render(); window.scrollTo(0, 0);
+  try { S.lignes[id] = await rest("v_lignes?commande_id=eq." + id + "&select=*"); } catch (_) { S.lignes[id] = S.lignes[id] || []; }
+  if (S.detail === id) render();
+}
+
+/* ----- ticket 58 mm ----- */
+function printTicket() {
+  const c = S.cmds.find(x => x.id === S.detail), L = S.lignes[S.detail] || [];
+  if (!c) return;
+  const P = S.params;
+  const nom = P.entreprise_nom || "Charcuterie de l'Ituri SARL";
+  const sous = P.entreprise_adresse || "Bunia, Ituri · RDC";
+  const tel = P.entreprise_tel || "";
+  const l1 = L.map(l => `<div>${e(l.produit_nom)}</div><div class="r"><span>${Number(l.quantite).toLocaleString("fr-FR")} ${e(l.unite)} x ${Math.round(l.prix_unitaire).toLocaleString("fr-FR")}</span><span>${Math.round(l.montant).toLocaleString("fr-FR")}</span></div>`).join("");
+  $("#ticket").innerHTML = `<img src="logo.webp" alt=""><div class="c b">${e(nom)}</div><div class="c">${e(sous)}</div>${tel ? `<div class="c">${e(tel)}</div>` : ""}<hr>
+    <div class="r"><span>Facture n°</span><span class="b">${c.id}</span></div><div>${e(fmtD(c.date_livraison || c.created_at))}</div><div>Client : ${e(c.client_nom)}</div>${c.adresse ? `<div>${e(c.adresse)}</div>` : ""}<hr>
+    ${l1}<hr>
+    <div class="r"><span>Produits</span><span>${Math.round(c.montant_produits).toLocaleString("fr-FR")}</span></div>
+    <div class="r"><span>Livraison</span><span>${c.frais_livraison == null ? "à confirmer" : Math.round(c.frais_livraison).toLocaleString("fr-FR")}</span></div>
+    <div class="r big"><span>TOTAL</span><span>${Math.round(c.total).toLocaleString("fr-FR")} FC</span></div><hr>
+    <div>${c.paye ? "PAYÉ (" + e(c.paiement_mode) + ")" : c.paiement_mode === "Crédit" ? "À CRÉDIT" : "À PAYER" + (c.paiement_prevu ? " (" + e(c.paiement_prevu) + ")" : "")}</div>
+    ${c.livreur_nom ? `<div>Livreur : ${e(c.livreur_nom)}</div>` : ""}<hr><div class="c">Merci de votre confiance !</div><div class="c">charituri.com</div>`;
+  const im = $("#ticket img");
+  const go = () => setTimeout(() => window.print(), 100);
+  if (im.complete) go(); else { im.onload = go; im.onerror = go; }
+}
+
+/* ----- nouvelle commande ----- */
+function newNC() { return {clientId: null, clientNom: "", adresse: "", paiement: "Cash", remarques: "", lines: [{pid: "", qty: "", prix: ""}]}; }
+function fraisFor(poids) { if (poids <= 0) return null; const r = S.tarifs.find(x => Number(x.poids_max) >= poids); return r ? Number(r.frais) : null; }
+function ncTotals() {
+  const nc = S.nc; let prod = 0, poids = 0;
+  nc.lines.forEach(l => { const p = S.produits.find(x => String(x.id) === String(l.pid)); if (!p) return; const q = num(l.qty), pr = l.prix === "" ? Number(p.prix_min || 0) : num(l.prix); prod += q * pr; if (p.unite === "kg") poids += q; });
+  return {prod, poids, frais: fraisFor(poids)};
+}
+function totalsHTML() {
+  const T = ncTotals();
+  return `<div><span>${t("Produits")}</span><span class="num">${fc(T.prod)}</span></div>
+  <div><span>${t("Livraison")}${T.poids > 0 ? " (" + T.poids.toLocaleString("fr-FR") + " kg)" : ""}</span><span class="num">${T.frais == null ? t("à confirmer") : fc(T.frais)}</span></div>
+  <div class="t"><span>${t("Total")}</span><span class="num">${fc(T.prod + (T.frais || 0))}</span></div>`;
+}
+function prodOptions(sel) {
+  const g = {}; S.produits.forEach(p => (g[p.categorie || "Autres"] = g[p.categorie || "Autres"] || []).push(p));
+  return `<option value="">${t("— Produit —")}</option>` + Object.keys(g).map(k => `<optgroup label="${e(k)}">${g[k].map(p => `<option value="${p.id}" ${String(sel) === String(p.id) ? "selected" : ""}>${e(p.nom)} (${e(p.unite)}) — ${p.prix_min == null ? "?" : Math.round(p.prix_min).toLocaleString("fr-FR")}${p.prix_max && p.prix_max !== p.prix_min ? "–" + Math.round(p.prix_max).toLocaleString("fr-FR") : ""}</option>`).join("")}</optgroup>`).join("");
+}
+function suggHTML() {
+  const q = S.nc.clientNom.trim().toLowerCase();
+  if (S.nc.clientId || q.length < 2) return "";
+  const m = S.clients.filter(c => c.nom.toLowerCase().includes(q) || (c.telephone || "").includes(q)).slice(0, 6);
+  return m.map(c => `<button type="button" data-a="pickc" data-id="${c.id}">${e(c.nom)}<small>${e([c.telephone, c.quartier].filter(Boolean).join(" · "))}</small></button>`).join("")
+    + (m.find(c => c.nom.toLowerCase() === q) ? "" : `<div class="msg">${t("Nouveau client : il sera créé avec cette commande.")}</div>`);
+}
+function vNew() {
+  if (!S.nc) S.nc = newNC();
+  const nc = S.nc;
+  return `<div class="h"><h2>${t("Nouvelle commande")}</h2><p>${t("Téléphone, WhatsApp ou comptoir")}</p></div>
+  <div class="card">
+    <div class="field"><label for="cn">${t("Client")}</label><input id="cn" data-m="nc.clientNom" autocomplete="off" value="${e(nc.clientNom)}" placeholder="${t("Nom ou téléphone")}"></div>
+    <div class="sugg" id="sugg">${suggHTML()}</div>
+    <div class="field"><label for="ad">${t("Adresse de livraison")}</label><input id="ad" data-m="nc.adresse" value="${e(nc.adresse)}"></div>
+  </div>
+  <div class="card"><b>${t("Produits")}</b><div class="lines">${nc.lines.map((l, i) => {
+    const p = S.produits.find(x => String(x.id) === String(l.pid));
+    return `<div class="line"><div class="field pn"><label>${t("Produit")}</label><select data-m="nc.lines.${i}.pid">${prodOptions(l.pid)}</select></div>
+      <div class="field"><label>${t("Quantité")}${p ? " (" + e(p.unite) + ")" : ""}</label><input inputmode="decimal" data-m="nc.lines.${i}.qty" value="${e(l.qty)}"></div>
+      <div class="field pp"><label>${t("Prix unitaire")}</label><input inputmode="numeric" data-m="nc.lines.${i}.prix" value="${e(l.prix)}" placeholder="${p && p.prix_min != null ? Math.round(p.prix_min) : ""}"></div>
+      <button type="button" class="btn sm" data-a="rmline" data-i="${i}" aria-label="${t("Retirer")}" ${nc.lines.length < 2 ? "disabled" : ""}>✕</button></div>`;
+  }).join("")}</div><button type="button" class="btn" data-a="addline">+ ${t("Ajouter un produit")}</button>
+  <div class="sum" id="tot">${totalsHTML()}</div></div>
+  <div class="card">
+    <div class="field"><label for="pp">${t("Paiement prévu")}</label><select id="pp" data-m="nc.paiement">${PAIEMENTS.map(p => `<option ${nc.paiement === p ? "selected" : ""}>${p}</option>`).join("")}</select></div>
+    <div class="field"><label for="rm">${t("Note pour la préparation / la livraison")}</label><textarea id="rm" data-m="nc.remarques" placeholder="${t("Ex. : pas d'os, livrer avant 14 h, appeler en arrivant…")}">${e(nc.remarques)}</textarea></div>
+    <button class="btn pri block" data-a="create" ${S.busy ? "disabled" : ""}>${t("Enregistrer la commande")}</button>
+  </div>`;
+}
+async function createOrder() {
+  const nc = S.nc;
+  if (!nc.clientNom.trim()) return toast(t("Indiquez le client."));
+  const lignes = nc.lines.filter(l => l.pid && num(l.qty) > 0).map(l => { const o = {produit_id: Number(l.pid), quantite: num(l.qty)}; if (l.prix !== "") o.prix = num(l.prix); return o; });
+  if (!lignes.length) return toast(t("Ajoutez au moins un produit avec sa quantité."));
+  S.busy = true; render();
+  try {
+    const id = await rpc("creer_commande", {p_client_id: nc.clientId, p_client_nom: nc.clientNom.trim(), p_adresse: nc.adresse, p_paiement_prevu: nc.paiement, p_remarques: nc.remarques, p_lignes: lignes});
+    S.nc = newNC(); S.busy = false;
+    await loadCmd(); rest("clients?select=id,nom,telephone,whatsapp,quartier,adresse&order=nom&limit=2000").then(r => S.clients = r).catch(() => {});
+    S.tab = "cmd"; toast(t("Commande") + " #" + id + " " + t("enregistrée")); await openDetail(id);
+  } catch (er) { S.busy = false; toast(er instanceof NetErr ? t("Pas de réseau : la commande n'a pas été enregistrée. Réessayez.") : er.message, 6000); render(); }
+}
+
+/* ----- équipe ----- */
+function teamEdit(p) { return S.te[p.id] || (S.te[p.id] = {role: p.role === "en_attente" ? "" : p.role, extra: (p.roles_extra || []).slice(), actif: p.actif}); }
+function vTeam() {
+  const pend = S.team.filter(p => p.role === "en_attente" && p.actif);
+  const act = S.team.filter(p => p.role !== "en_attente" && p.actif);
+  const off = S.team.filter(p => !p.actif);
+  const card = p => {
+    const x = teamEdit(p), me = p.id === S.prof.id, np = p.role === "en_attente";
+    return `<div class="card mem"><div><h3>${e(p.nom || "(sans nom)")}${me ? " · " + t("vous") : ""}</h3><small>${e(p.email || "")} · ${t("inscrit le")} ${e(fmtD(p.created_at))}</small></div>
+      <div class="field"><label>${t("Poste principal")}</label><select data-m="te.${p.id}.role" ${me ? "disabled" : ""}><option value="">${t("— Choisir le poste —")}</option>${ROLE_ORDER.map(r => `<option value="${r}" ${x.role === r ? "selected" : ""}>${ROLES[r]}</option>`).join("")}</select></div>
+      <div><small>${t("Postes supplémentaires (une personne peut cumuler)")}</small><div class="chips" style="margin-top:6px">${ROLE_ORDER.filter(r => r !== x.role).map(r => `<button type="button" data-a="tx" data-id="${p.id}" data-r="${r}" aria-pressed="${x.extra.includes(r)}" ${me ? "disabled" : ""}>${ROLES[r]}</button>`).join("")}</div></div>
+      <div class="acts">${np || !p.actif ? `<button class="btn good" data-a="tsave" data-id="${p.id}" data-on="1">${np ? t("Accepter et activer") : t("Réactiver")}</button>` : `<button class="btn pri" data-a="tsave" data-id="${p.id}">${t("Enregistrer")}</button>`}
+        ${me ? "" : `<button class="btn" data-a="treset" data-id="${p.id}">${t("Envoyer lien de réinitialisation")}</button>`}
+        ${me || !p.actif ? "" : `<button class="btn bad" data-a="toff" data-id="${p.id}">${S.offAsk === p.id ? t("Confirmer la désactivation") : np ? t("Refuser") : t("Désactiver le compte")}</button>`}</div></div>`;
+  };
+  return `<div class="h"><h2>${t("Équipe")}</h2><p>${S.team.length} ${t("comptes")}</p></div>
+  <div class="msg">${t("Un nouveau collaborateur crée son compte lui-même avec le code entreprise (voir l'onglet Compte). Il apparaît ici en attente : choisissez son poste puis activez-le.")}</div>
+  ${pend.length ? `<h3>${t("En attente d'activation")} (${pend.length})</h3>${pend.map(card).join("")}` : `<div class="empty">${t("Aucune demande en attente.")}</div>`}
+  <h3>${t("Comptes actifs")} (${act.length})</h3>${act.map(card).join("")}
+  ${off.length ? `<h3>${t("Comptes désactivés")} (${off.length})</h3>${off.map(card).join("")}` : ""}`;
+}
+async function teamSave(id, on) {
+  const x = S.te[id], p = S.team.find(q => q.id === id);
+  if (!x.role) return toast(t("Choisissez d'abord le poste principal."));
+  const body = {role: x.role, roles_extra: x.extra.filter(r => r !== x.role)};
+  if (on) body.actif = true;
+  try { await rest("profiles?id=eq." + id, {method: "PATCH", body, headers: {Prefer: "return=minimal"}}); delete S.te[id]; await loadTeam(); toast(t("Enregistré")); }
+  catch (er) { toast(er.message, 5000); }
+  render();
+}
+async function teamOff(id) {
+  if (S.offAsk !== id) { S.offAsk = id; return render(); }
+  S.offAsk = null;
+  try { await rest("profiles?id=eq." + id, {method: "PATCH", body: {actif: false}, headers: {Prefer: "return=minimal"}}); delete S.te[id]; await loadTeam(); toast(t("Compte désactivé")); }
+  catch (er) { toast(er.message, 5000); }
+  render();
+}
+async function sendReset(email) {
+  return raw("/auth/v1/recover?redirect_to=" + encodeURIComponent(location.origin + location.pathname), {method: "POST", token: null, body: {email}});
+}
+
+/* ----- compte ----- */
+function vMe() {
+  const p = S.prof, th = ls.get("chg_theme", "auto");
+  const dir = has("directeur");
+  return `<div class="h"><h2>${t("Mon compte")}</h2></div>
+  <div class="card"><div class="dl"><div><span>${t("Nom")}</span><span>${e(p.nom)}</span></div><div><span>${t("E-mail")}</span><span>${e(p.email)}</span></div><div><span>${t("Postes")}</span><span>${e(roles().map(r => ROLES[r]).join(", "))}</span></div></div></div>
+  ${dir ? `<div class="card"><b>${t("Code entreprise")}</b><small style="color:var(--muted)">${t("À donner aux nouveaux collaborateurs pour qu'ils créent leur compte.")}</small>
+    ${S.code == null ? `<button class="btn" data-a="showcode">${t("Afficher le code")}</button>` : `<div class="codebox">${e(S.code)}</div>
+    <div class="field"><label for="nc">${t("Nouveau code (6 caractères minimum)")}</label><input id="nc" data-m="newCode" autocapitalize="characters"></div><button class="btn pri" data-a="setcode">${t("Changer le code")}</button>`}</div>` : ""}
+  <div class="card"><b>${t("Changer mon mot de passe")}</b><div class="field"><label for="np">${t("Nouveau mot de passe")}</label><input id="np" type="password" autocomplete="new-password" data-m="newPw"></div><button class="btn" data-a="setpw">${t("Enregistrer")}</button></div>
+  <div class="card"><b>${t("Affichage")}</b><div class="seg">${[["auto", "Automatique"], ["light", "Clair"], ["dark", "Sombre"]].map(x => `<button data-a="theme" data-k="${x[0]}" aria-pressed="${th === x[0]}">${t(x[1])}</button>`).join("")}</div>
+    ${S.installEvt ? `<button class="btn" data-a="install">📲 ${t("Installer l'application")}</button>` : `<small style="color:var(--muted)">${t("Pour l'installer : menu du navigateur → « Ajouter à l'écran d'accueil » ou « Installer l'application ».")}</small>`}</div>
+  <button class="btn block" data-a="logout">${t("Se déconnecter")}</button>`;
+}
+function applyTheme() { const th = ls.get("chg_theme", "auto"); if (th === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", th); }
+
+/* ================= Événements ================= */
+function setPath(path, val) {
+  const k = path.split("."); let o = S, i = 0;
+  if (k[0] === "te") { const id = k[1]; const x = teamEdit(S.team.find(p => p.id === id)); x[k[2]] = val; if (k[2] === "role") x.extra = x.extra.filter(r => r !== val); return; }
+  for (; i < k.length - 1; i++) o = o[k[i]];
+  o[k[k.length - 1]] = val;
+}
+document.addEventListener("input", ev => {
+  const el = ev.target; if (!el.dataset || !el.dataset.m) return;
+  if (el.tagName === "SELECT") return;
+  setPath(el.dataset.m, el.value);
+  if (el.dataset.m === "nc.clientNom") { S.nc.clientId = null; $("#sugg").innerHTML = suggHTML(); }
+  if (/^nc\.lines\./.test(el.dataset.m)) $("#tot").innerHTML = totalsHTML();
+});
+document.addEventListener("change", ev => {
+  const el = ev.target; if (!el.dataset || !el.dataset.m || el.tagName !== "SELECT") return;
+  const m = el.dataset.m;
+  setPath(m, el.value);
+  const mm = m.match(/^nc\.lines\.(\d+)\.pid$/);
+  if (mm) { S.nc.lines[+mm[1]].prix = ""; render(); }
+  else if (/^te\./.test(m)) render();
+  else if (/^nc\.lines\./.test(m)) $("#tot").innerHTML = totalsHTML();
+});
+document.addEventListener("submit", async ev => {
+  const f = ev.target.dataset.f; if (!f) return;
+  ev.preventDefault();
+  const g = id => { const x = ev.target.querySelector("#" + id); return x ? x.value.trim() : ""; };
+  S.busy = true; S.authMsg = null;
+  try {
+    if (f === "login") { await signIn(g("em"), ev.target.querySelector("#pw").value); }
+    else if (f === "signup") {
+      const done = await signUp(g("nm"), g("em"), ev.target.querySelector("#pw").value, g("cd").toUpperCase());
+      if (!done) { S.authView = "login"; S.authMsg = {k: "ok", t: "Compte créé. Vous pouvez vous connecter."}; }
+    } else if (f === "forgot") { await sendReset(g("em")); S.authView = "login"; S.authMsg = {k: "ok", t: "Si cette adresse existe, un lien vient d'être envoyé. Vérifiez votre boîte e-mail (et les courriers indésirables)."}; }
+    else if (f === "recovery") {
+      const pw = ev.target.querySelector("#pw").value;
+      await raw("/auth/v1/user", {method: "PUT", token: S.recovery.access_token, body: {password: pw}});
+      setSess(S.recovery); S.recovery = null; history.replaceState(null, "", location.pathname); S.busy = false; await boot(); toast(t("Mot de passe changé")); return;
+    }
+  } catch (er) { S.authMsg = {k: "err", t: er instanceof NetErr ? "Pas de connexion internet." : er.message}; }
+  S.busy = false; render();
+});
+document.addEventListener("click", async ev => {
+  const b = ev.target.closest("[data-a]"); if (!b) return;
+  const a = b.dataset.a, d = b.dataset;
+  if (actx && actx.state === "suspended") actx.resume();
+  switch (a) {
+    case "auth": S.authView = d.v; S.authMsg = null; render(); break;
+    case "logout": signOut(); break;
+    case "recheck": try { await loadProfile(); if (isActive()) await loadAll(); } catch (er) { toast(er.message); } render(); break;
+    case "tab": S.tab = d.k; S.detail = null; S.cancelAsk = false; if (d.k === "team") loadTeam().then(softRender).catch(() => {}); render(); window.scrollTo(0, 0); break;
+    case "filt": S.filter = d.k; render(); break;
+    case "open": openDetail(+d.id); break;
+    case "back": S.detail = null; render(); break;
+    case "cancelask": S.cancelAsk = true; render(); break;
+    case "st": {
+      const id = S.detail; let liv = null;
+      if (d.s === "En livraison") { liv = S.pickLiv; if (!liv) return toast(t("Choisissez un livreur.")); }
+      const patch = {statut: d.s}; if (liv) { patch.livreur_id = liv; const l = S.livreurs.find(x => x.id === liv); patch.livreur_nom = l && l.nom; }
+      await act("changer_statut", {p_id: id, p_statut: d.s, p_livreur: liv}, id, patch); break;
+    }
+    case "enc": { const id = S.detail; await act("encaisser", {p_id: id, p_mode: d.m}, id, {paye: d.m !== "Crédit", paiement_mode: d.m}); break; }
+    case "frais": { const v = num(S.fraisIn); if (S.fraisIn === "" || v < 0) return toast(t("Indiquez un montant.")); try { await rpc("fixer_frais", {p_id: S.detail, p_frais: v}); await loadCmd(); S.fraisIn = ""; toast(t("Enregistré")); } catch (er) { toast(er.message, 5000); } render(); break; }
+    case "print": printTicket(); break;
+    case "addline": S.nc.lines.push({pid: "", qty: "", prix: ""}); render(); break;
+    case "rmline": S.nc.lines.splice(+d.i, 1); render(); break;
+    case "pickc": { const c = S.clients.find(x => x.id === +d.id); S.nc.clientId = c.id; S.nc.clientNom = c.nom; if (!S.nc.adresse) S.nc.adresse = c.adresse || c.quartier || ""; render(); break; }
+    case "create": createOrder(); break;
+    case "tx": { const x = S.te[d.id]; const i = x.extra.indexOf(d.r); if (i >= 0) x.extra.splice(i, 1); else x.extra.push(d.r); render(); break; }
+    case "tsave": teamSave(d.id, d.on === "1"); break;
+    case "toff": teamOff(d.id); break;
+    case "treset": { const p = S.team.find(q => q.id === d.id); try { await sendReset(p.email); toast(t("Lien envoyé à") + " " + p.email, 5000); } catch (er) { toast(er.message, 5000); } break; }
+    case "showcode": try { S.code = await rpc("voir_code_inscription"); } catch (er) { toast(er.message); } render(); break;
+    case "setcode": try { await rpc("changer_code_inscription", {p_code: S.newCode || ""}); S.code = await rpc("voir_code_inscription"); S.newCode = ""; toast(t("Code changé")); } catch (er) { toast(er.message, 5000); } render(); break;
+    case "setpw": try { if ((S.newPw || "").length < 6) return toast(t("6 caractères minimum.")); await api("/auth/v1/user", {method: "PUT", body: {password: S.newPw}}); S.newPw = ""; toast(t("Mot de passe changé")); render(); } catch (er) { toast(er.message, 5000); } break;
+    case "theme": ls.set("chg_theme", d.k); applyTheme(); render(); break;
+    case "install": if (S.installEvt) { S.installEvt.prompt(); S.installEvt = null; render(); } break;
+  }
+});
+
+/* ================= Démarrage ================= */
+window.addEventListener("online", () => { S.online = true; flushQueue(); softRender(); });
+window.addEventListener("offline", () => { S.online = false; softRender(); });
+window.addEventListener("beforeinstallprompt", ev => { ev.preventDefault(); S.installEvt = ev; });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
+async function poll() {
+  if (!S.sess || !isActive() && !(S.prof && S.prof.role === "en_attente")) return;
+  try {
+    await flushQueue();
+    if (S.prof && S.prof.role === "en_attente") { await loadProfile(); if (isActive()) { await loadAll(); } render(); return; }
+    if (canSeeCmd()) await loadCmd();
+    if (has("directeur")) await loadTeam();
+    softRender();
+  } catch (_) {}
+}
+setInterval(() => { if (!document.hidden) poll(); }, 20000);
+
+(async function init() {
+  applyTheme();
+  const h = location.hash.replace(/^#/, "");
+  if (h) {
+    const q = new URLSearchParams(h);
+    if (q.get("access_token") && q.get("type") === "recovery") {
+      S.recovery = {access_token: q.get("access_token"), refresh_token: q.get("refresh_token"), expires_in: +q.get("expires_in") || 3600};
+      render(); return;
+    }
+    if (q.get("error_description")) { S.authMsg = {k: "err", t: "Ce lien n'est plus valable. Demandez-en un nouveau (« Mot de passe oublié ? »)."}; history.replaceState(null, "", location.pathname); }
+  }
+  if (S.sess) {
+    try { await boot(); await flushQueue(); }
+    catch (er) {
+      if (er instanceof NetErr) { S.authMsg = {k: "err", t: "Pas de connexion. Réessayez quand le réseau revient."}; S.sess = S.sess; }
+      else { S.sess = null; ls.del("chg_sess"); }
+      render();
+    }
+  } else render();
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});
+})();
+</script>
+</body>
+</html>
