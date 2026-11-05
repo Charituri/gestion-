@@ -146,10 +146,26 @@ main{min-width:0;display:grid;gap:16px;align-content:start}
 @media (min-width:900px){.toast{bottom:24px}}
 .codebox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;font-weight:700;letter-spacing:.06em;background:var(--info-soft);border-radius:8px;padding:10px 12px;overflow-wrap:anywhere}
 /* ticket 58 mm */
-#ticket{display:none}
+#ticket,#pf{display:none}
+@page pf{size:A4;margin:14mm}
 @media print{
   @page{size:58mm auto;margin:0}
-  body>*:not(#ticket){display:none!important}
+  body>*:not(#ticket):not(#pf){display:none!important}
+  body.pfmode #ticket{display:none!important}
+  body:not(.pfmode) #pf{display:none!important}
+  #pf{page:pf;font:13px/1.4 'Source Sans 3',Arial,sans-serif;color:#000;background:#fff}
+  #pf .hd{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:3px solid #6B1A1F;padding-bottom:8px;margin-bottom:12px}
+  #pf .hd img{width:70px}
+  #pf h1{font-family:Georgia,serif;font-size:22px;color:#6B1A1F;margin:0 0 2px}
+  #pf table{width:100%;border-collapse:collapse;margin:12px 0}
+  #pf th{color:#6B1A1F;border-bottom:2px solid #6B1A1F;text-align:left;padding:6px 8px;font-size:12px}
+  #pf td{padding:6px 8px;border-bottom:1px solid #ccc}
+  #pf .r{text-align:right}
+  #pf .tt{margin-left:auto;width:60%}
+  #pf .tt div{display:flex;justify-content:space-between;padding:3px 8px}
+  #pf .tt .g{font-weight:700;font-size:16px;border-top:2px solid #6B1A1F}
+  #pf .nb{margin-top:18px;font-size:12px;color:#333}
+  #pf .sg{display:flex;justify-content:space-between;margin-top:40px}
   body::before{display:none}
   html,body{background:#fff!important;padding:0!important;margin:0!important;min-height:0}
   #ticket{display:block;width:54mm;margin:0 auto;padding:2mm 0 6mm;font:12px/1.3 "Courier New",monospace;color:#000;background:#fff}
@@ -166,6 +182,7 @@ main{min-width:0;display:grid;gap:16px;align-content:start}
 <div id="root"></div>
 <div id="toast" class="toast" hidden role="status"></div>
 <div id="ticket"></div>
+<div id="pf"></div>
 
 <script>
 "use strict";
@@ -530,7 +547,7 @@ function vDetail() {
   const tel = c.client_tel;
   const lignes = L ? L.map(l => `<div class="ln"><div><b>${e(l.produit_nom)}</b><small>${Number(l.quantite).toLocaleString("fr-FR")} ${e(l.unite)}${money ? " × " + fc(l.prix_unitaire) : ""}</small></div>${money ? `<span class="num">${fc(l.montant)}</span>` : ""}</div>`).join("") : `<div class="meta">…</div>`;
   const canPrint = has("directeur","exploitation","reception","comptable","commercial","livreur");
-  return `<div class="acts"><button class="btn" data-a="back">← ${t("Retour")}</button>${canPrint ? `<button class="btn" data-a="print">🖨 ${t("Ticket 58 mm")}</button>` : ""}</div>
+  return `<div class="acts"><button class="btn" data-a="back">← ${t("Retour")}</button>${canPrint ? `<button class="btn" data-a="print">🖨 ${t("Ticket 58 mm")}</button><button class="btn" data-a="pf">📄 ${t("Pro forma (PDF)")}</button>` : ""}</div>
   <div class="detail">
     <div class="h"><h2>#${c.id} · ${e(c.client_nom)}</h2><span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></div>
     <div class="card"><div class="dl">
@@ -561,7 +578,7 @@ function printTicket() {
   const P = S.params;
   const nom = P.entreprise_nom || "Charcuterie de l'Ituri SARL";
   const sous = P.entreprise_adresse || "Bunia, commune Mbunya, quartier Lumumba, Poste n° 12";
-  const tel = P.entreprise_tel || "";
+  const tel = P.entreprise_tel || "WhatsApp : +243 853 591 308";
   const l1 = L.map(l => `<div>${e(l.produit_nom)}</div><div class="r"><span>${Number(l.quantite).toLocaleString("fr-FR")} ${e(l.unite)} x ${Math.round(l.prix_unitaire).toLocaleString("fr-FR")}</span><span>${Math.round(l.montant).toLocaleString("fr-FR")}</span></div>`).join("");
   $("#ticket").innerHTML = `<img src="logo.webp" alt=""><div class="c b">${e(nom)}</div><div class="c">${e(sous)}</div>${tel ? `<div class="c">${e(tel)}</div>` : ""}<hr>
     <div class="r"><span>Facture n°</span><span class="b">${c.id}</span></div><div>${e(fmtD(c.date_livraison || c.created_at))}</div><div>Client : ${e(c.client_nom)}</div>${c.adresse ? `<div>${e(c.adresse)}</div>` : ""}<hr>
@@ -573,6 +590,30 @@ function printTicket() {
     ${c.livreur_nom ? `<div>Livreur : ${e(c.livreur_nom)}</div>` : ""}<hr><div class="c">Merci de votre confiance !</div><div class="c">charituri.com</div>`;
   const im = $("#ticket img");
   const go = () => setTimeout(() => window.print(), 100);
+  if (im.complete) go(); else { im.onload = go; im.onerror = go; }
+}
+
+
+function printPF() {
+  const c = S.cmds.find(x => x.id === S.detail), L = S.lignes[S.detail] || [];
+  if (!c) return;
+  const P = S.params, f = n => Math.round(n).toLocaleString("fr-FR");
+  const nom = P.entreprise_nom || "Charcuterie de l'Ituri SARL";
+  const adr = P.entreprise_adresse || "Bunia, commune Mbunya, quartier Lumumba, Poste n° 12";
+  const tel = P.entreprise_tel || "WhatsApp : +243 853 591 308";
+  const d = new Date(), val = new Date(Date.now() + 7 * 864e5), df = x => x.toLocaleDateString("fr-FR", {timeZone: TZ, day: "numeric", month: "long", year: "numeric"});
+  $("#pf").innerHTML = `<div class="hd"><div><h1>${e(nom)}</h1><div>${e(adr)}</div><div>${e(tel)} · charituri.com</div></div><img src="logo.webp" alt=""></div>
+  <div style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap"><div><b style="font-size:17px">FACTURE PRO FORMA N° PF-${String(c.id).padStart(4, "0")}</b><div>Date : ${df(d)}</div><div>Valable jusqu'au : ${df(val)}</div></div>
+  <div><b>Client</b><div>${e(c.client_nom)}</div>${c.adresse ? `<div>${e(c.adresse)}</div>` : ""}${c.client_tel ? `<div>${e(c.client_tel)}</div>` : ""}</div></div>
+  <table><tr><th>Désignation</th><th class="r">Quantité</th><th>Unité</th><th class="r">Prix unitaire</th><th class="r">Montant</th></tr>
+  ${L.map(l => `<tr><td>${e(l.produit_nom)}</td><td class="r">${Number(l.quantite).toLocaleString("fr-FR")}</td><td>${e(l.unite)}</td><td class="r">${f(l.prix_unitaire)} FC</td><td class="r">${f(l.montant)} FC</td></tr>`).join("")}</table>
+  <div class="tt"><div><span>Total produits</span><span>${f(c.montant_produits)} FC</span></div><div><span>Frais de livraison</span><span>${c.frais_livraison == null ? "à confirmer" : f(c.frais_livraison) + " FC"}</span></div><div class="g"><span>TOTAL À PAYER</span><span>${f(c.total)} FC</span></div></div>
+  ${c.paiement_prevu ? `<div class="nb">Mode de paiement prévu : ${e(c.paiement_prevu)}</div>` : ""}
+  <div class="nb">Ce document est une facture pro forma : il ne constitue pas une facture définitive et n'a pas valeur de reçu de paiement.</div>
+  <div class="sg"><div>Le client<br><br>________________</div><div>Pour ${e(nom)}<br><br>________________</div></div>`;
+  document.body.classList.add("pfmode");
+  const im = $("#pf img"), go = () => setTimeout(() => { window.print(); }, 150);
+  window.addEventListener("afterprint", () => document.body.classList.remove("pfmode"), {once: true});
   if (im.complete) go(); else { im.onload = go; im.onerror = go; }
 }
 
@@ -758,7 +799,8 @@ document.addEventListener("click", async ev => {
     }
     case "enc": { const id = S.detail; await act("encaisser", {p_id: id, p_mode: d.m}, id, {paye: d.m !== "Crédit", paiement_mode: d.m}); break; }
     case "frais": { const v = num(S.fraisIn); if (S.fraisIn === "" || v < 0) return toast(t("Indiquez un montant.")); try { await rpc("fixer_frais", {p_id: S.detail, p_frais: v}); await loadCmd(); S.fraisIn = ""; toast(t("Enregistré")); } catch (er) { toast(er.message, 5000); } render(); break; }
-    case "print": printTicket(); break;
+    case "print": document.body.classList.remove("pfmode"); printTicket(); break;
+    case "pf": printPF(); break;
     case "addline": S.nc.lines.push({pid: "", qty: "", prix: ""}); render(); break;
     case "rmline": S.nc.lines.splice(+d.i, 1); render(); break;
     case "pickc": { const c = S.clients.find(x => x.id === +d.id); S.nc.clientId = c.id; S.nc.clientNom = c.nom; if (!S.nc.adresse) S.nc.adresse = c.adresse || c.quartier || ""; render(); break; }
