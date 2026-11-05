@@ -1,7 +1,7 @@
 /* Charituri Gestion : garde l'application en mémoire pour qu'elle s'ouvre même sans réseau.
    Les données (Supabase) ne sont jamais mises en cache ici. */
 var V = 'charituri-gestion-v1';
-var SHELL = ['./', './index.html', './manifest.webmanifest', './logo.webp', './icon-192.png', './icon-512.png'];
+var SHELL = ['./', './index.html', './manifest.webmanifest', './logo.webp', './logo-ticket.png', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(V).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));
 });

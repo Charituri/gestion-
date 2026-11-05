@@ -168,13 +168,14 @@ main{min-width:0;display:grid;gap:16px;align-content:start}
   #pf .sg{display:flex;justify-content:space-between;margin-top:40px}
   body::before{display:none}
   html,body{background:#fff!important;padding:0!important;margin:0!important;min-height:0}
-  #ticket{display:block;width:54mm;margin:0 auto;padding:2mm 0 6mm;font:12px/1.3 "Courier New",monospace;color:#000;background:#fff}
-  #ticket img{display:block;margin:0 auto 2mm;width:16mm;filter:grayscale(1) contrast(1.4)}
+  #ticket{display:block;width:54mm;margin:0 auto;padding:1mm 0 0;font:700 11.5px/1.2 "Courier New",monospace;color:#000;background:#fff;overflow:hidden;break-inside:avoid}
+  html,body{height:auto!important;overflow:hidden!important}
+  #ticket img{display:block;margin:0 auto 1mm;width:24mm;image-rendering:pixelated}
   #ticket .c{text-align:center}
   #ticket .b{font-weight:700}
-  #ticket hr{border:0;border-top:1px dashed #000;margin:2mm 0}
+  #ticket hr{border:0;border-top:1px dashed #000;margin:1.2mm 0}
   #ticket .r{display:flex;justify-content:space-between;gap:4px}
-  #ticket .big{font-size:15px;font-weight:700}
+  #ticket .big{font-size:15px;font-weight:900}
 }
 </style>
 </head>
@@ -577,17 +578,17 @@ function printTicket() {
   if (!c) return;
   const P = S.params;
   const nom = P.entreprise_nom || "Charcuterie de l'Ituri SARL";
-  const sous = P.entreprise_adresse || "Bunia, commune Mbunya, quartier Lumumba, Poste n° 12";
+  const sous = P.entreprise_adresse || "Bunia, commune Mbunya<br>quartier Lumumba, Poste n°\u00a012";
   const tel = P.entreprise_tel || "WhatsApp : +243 853 591 308";
   const l1 = L.map(l => `<div>${e(l.produit_nom)}</div><div class="r"><span>${Number(l.quantite).toLocaleString("fr-FR")} ${e(l.unite)} x ${Math.round(l.prix_unitaire).toLocaleString("fr-FR")}</span><span>${Math.round(l.montant).toLocaleString("fr-FR")}</span></div>`).join("");
-  $("#ticket").innerHTML = `<img src="logo.webp" alt=""><div class="c b">${e(nom)}</div><div class="c">${e(sous)}</div>${tel ? `<div class="c">${e(tel)}</div>` : ""}<hr>
+  $("#ticket").innerHTML = `<img src="logo-ticket.png" alt=""><div class="c b">${e(nom)}</div><div class="c">${P.entreprise_adresse ? e(sous) : sous}</div>${tel ? `<div class="c">${e(tel)}</div>` : ""}<hr>
     <div class="r"><span>Facture n°</span><span class="b">${c.id}</span></div><div>${e(fmtD(c.date_livraison || c.created_at))}</div><div>Client : ${e(c.client_nom)}</div>${c.adresse ? `<div>${e(c.adresse)}</div>` : ""}<hr>
     ${l1}<hr>
     <div class="r"><span>Produits</span><span>${Math.round(c.montant_produits).toLocaleString("fr-FR")}</span></div>
     <div class="r"><span>Livraison</span><span>${c.frais_livraison == null ? "à confirmer" : Math.round(c.frais_livraison).toLocaleString("fr-FR")}</span></div>
     <div class="r big"><span>TOTAL</span><span>${Math.round(c.total).toLocaleString("fr-FR")} FC</span></div><hr>
     <div>${c.paye ? "PAYÉ (" + e(c.paiement_mode) + ")" : c.paiement_mode === "Crédit" ? "À CRÉDIT" : "À PAYER" + (c.paiement_prevu ? " (" + e(c.paiement_prevu) + ")" : "")}</div>
-    ${c.livreur_nom ? `<div>Livreur : ${e(c.livreur_nom)}</div>` : ""}<hr><div class="c">Merci de votre confiance !</div><div class="c">charituri.com</div>`;
+    ${c.livreur_nom ? `<div>Livreur : ${e(c.livreur_nom)}</div>` : ""}<hr><div class="c">Merci de votre confiance !</div><div class="c">charituri.com</div><div style="height:6mm"></div>`;
   const im = $("#ticket img");
   const go = () => setTimeout(() => window.print(), 100);
   if (im.complete) go(); else { im.onload = go; im.onerror = go; }
