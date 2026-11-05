@@ -68,7 +68,7 @@ a{color:var(--wine)}
 .chip.off{background:var(--gold);color:#2B1C1D;border-color:var(--gold)}
 .layout{display:grid;grid-template-columns:1fr;gap:20px;padding-block:18px 96px}
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));gap:4px}
-.nav button{position:relative;flex:1;min-width:0;background:none;border:0;border-radius:10px;padding:8px 4px;display:grid;gap:2px;justify-items:center;font-size:11.5px;color:var(--muted);cursor:pointer;font-weight:600}
+.nav button{position:relative;flex:1;min-width:0;background:none;border:0;border-radius:10px;padding:8px 2px;display:grid;gap:2px;justify-items:center;font-size:10.5px;color:var(--muted);cursor:pointer;font-weight:600}
 .nav button .i{font-size:19px;line-height:1}
 .nav button[aria-current="page"]{color:var(--wine);background:var(--gold-soft)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .nav button[aria-current="page"]{color:var(--gold)}}
@@ -145,6 +145,20 @@ main{min-width:0;display:grid;gap:16px;align-content:start}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:40;font-weight:600;max-width:90vw;text-align:center}
 @media (min-width:900px){.toast{bottom:24px}}
 .codebox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;font-weight:700;letter-spacing:.06em;background:var(--info-soft);border-radius:8px;padding:10px 12px;overflow-wrap:anywhere}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.line2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 40px 40px;gap:8px;align-items:end}
+.card.off{opacity:.65}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.bars{display:flex;align-items:flex-end;gap:5px;height:170px;padding-top:8px}
+.bars .c{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;height:100%}
+.bars .b{width:100%;background:var(--wine);border-radius:5px 5px 0 0;min-height:3px}
+.bars small{color:var(--muted);font-size:11px}.bars .v{font-size:10.5px;color:var(--muted)}
+.alarm{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 60px);z-index:35;background:var(--gold);color:#2B1C1D;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px max(16px,env(safe-area-inset-left,0px));font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:pulse 1s infinite alternate}
+.alarm .btn{background:#2B1C1D;color:#fff;border-color:#2B1C1D}
+@keyframes pulse{from{filter:brightness(1)}to{filter:brightness(1.18)}}
+@media (prefers-reduced-motion:reduce){.alarm{animation:none}}
+.nav{overflow-x:auto}.nav button{flex:1 0 62px}
+@media (min-width:900px){.nav{overflow:visible}.nav button{flex:none}}
 /* ticket 58 mm */
 #ticket,#pf{display:none}
 @page pf{size:A4;margin:14mm}
@@ -153,7 +167,7 @@ main{min-width:0;display:grid;gap:16px;align-content:start}
   body>*:not(#ticket):not(#pf){display:none!important}
   body.pfmode #ticket{display:none!important}
   body:not(.pfmode) #pf{display:none!important}
-  #pf{page:pf;font:13px/1.4 'Source Sans 3',Arial,sans-serif;color:#000;background:#fff}
+  #pf{display:block;page:pf;font:13px/1.4 'Source Sans 3',Arial,sans-serif;color:#000;background:#fff}
   #pf .hd{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:3px solid #6B1A1F;padding-bottom:8px;margin-bottom:12px}
   #pf .hd img{width:70px}
   #pf h1{font-family:Georgia,serif;font-size:22px;color:#6B1A1F;margin:0 0 2px}
@@ -161,6 +175,13 @@ main{min-width:0;display:grid;gap:16px;align-content:start}
   #pf th{color:#6B1A1F;border-bottom:2px solid #6B1A1F;text-align:left;padding:6px 8px;font-size:12px}
   #pf td{padding:6px 8px;border-bottom:1px solid #ccc}
   #pf .r{text-align:right}
+  #pf *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #pf h2{font:700 15px Georgia,serif;color:#6B1A1F;margin:14px 0 2px}
+  #pf .kp{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  #pf .kp div{border:1px solid #6B1A1F;border-radius:4px;padding:4px 10px;min-width:110px}
+  #pf .kp small{display:block;color:#555;font-size:10px}
+  #pf .kp b{font-size:14px}
+  #pf tr{break-inside:avoid}
   #pf .tt{margin-left:auto;width:60%}
   #pf .tt div{display:flex;justify-content:space-between;padding:3px 8px}
   #pf .tt .g{font-weight:700;font-size:16px;border-top:2px solid #6B1A1F}
@@ -169,7 +190,7 @@ main{min-width:0;display:grid;gap:16px;align-content:start}
   body::before{display:none}
   html,body{background:#fff!important;padding:0!important;margin:0!important;min-height:0}
   #ticket{display:block;width:54mm;margin:0 auto;padding:1mm 0 0;font:700 11.5px/1.2 "Courier New",monospace;color:#000;background:#fff;overflow:hidden;break-inside:avoid}
-  html,body{height:auto!important;overflow:hidden!important}
+  body:not(.pfmode){height:auto!important;overflow:hidden!important}
   #ticket img{display:block;margin:0 auto 1mm;width:24mm;image-rendering:pixelated}
   #ticket .c{text-align:center}
   #ticket .b{font-weight:700}
@@ -193,9 +214,1111 @@ const SB_KEY = "sb_publishable_MS08MJL3xpwxJRKduDY9Zg_oIyzddGt";
 const TZ = "Africa/Lubumbashi";
 const ROLES = {directeur:"Directeur", exploitation:"Responsable d'exploitation", reception:"Réception", stock:"Stock", boucher:"Boucher", livreur:"Livreur", comptable:"Comptable", commercial:"Commercial"};
 const ROLE_ORDER = Object.keys(ROLES);
+const rl = r => t(ROLES[r] || r);
 const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
 /* Traductions : clé = texte français. Lingala (ln), Swahili du Congo (sb) à ajouter plus tard. */
-const LANG = {ln:{}, sb:{}};
+/*LANGBEGIN*/const LANG = {en: {
+"1 dollar (USD) vaut combien de francs ? Servira pour tous les calculs en dollars.": "How many francs is 1 US dollar worth? Used for all dollar calculations.",
+"30 derniers jours": "Last 30 days",
+"6 caractères minimum.": "At least 6 characters.",
+"7 derniers jours": "Last 7 days",
+"Accepter et activer": "Accept and activate",
+"Adresse": "Address",
+"Adresse de livraison": "Delivery address",
+"Adresse e-mail": "E-mail address",
+"Affichage": "Display",
+"Afficher le code": "Show the code",
+"Ajouter": "Add",
+"Ajouter (+) ou retirer (−)": "Add (+) or remove (−)",
+"Ajouter / retirer des colis": "Add / remove parcels",
+"Ajouter le produit": "Add the product",
+"Ajouter un produit": "Add a product",
+"Ajoutez au moins un produit avec sa quantité.": "Add at least one product with its quantity.",
+"Ajouté": "Added",
+"Annuler": "Cancel",
+"Annuler la commande": "Cancel the order",
+"Arrêter la sonnerie": "Stop the ringing",
+"Au-delà de la dernière tranche, les frais sont à confirmer.": "Beyond the last bracket, fees are to be confirmed.",
+"Aucun colis enregistré.": "No parcels recorded.",
+"Aucun encaissement.": "No payments received.",
+"Aucun fournisseur enregistré.": "No suppliers recorded.",
+"Aucun impayé.": "No unpaid amounts.",
+"Aucun lot enregistré. Utilisez le calculateur.": "No batch recorded. Use the calculator.",
+"Aucun mouvement.": "No movements.",
+"Aucune alerte": "No alerts",
+"Aucune commande ici.": "No orders here.",
+"Aucune demande en attente.": "No pending requests.",
+"Aucune dépense.": "No expenses.",
+"Aucune vente livrée sur cette période.": "No delivered sales in this period.",
+"Aucune vente livrée.": "No delivered sales.",
+"Aujourd'hui": "Today",
+"Autre mouvement de caisse": "Other cash movement",
+"Calculateur d'achat": "Purchase calculator",
+"Catégorie": "Category",
+"Ce mois-ci": "This month",
+"Ces prix s'affichent sur le site charituri.com et dans les commandes.": "These prices appear on charituri.com and in orders.",
+"Cet élément existe déjà.": "This item already exists.",
+"Changer le code": "Change the code",
+"Changer mon mot de passe": "Change my password",
+"Choisissez d'abord le poste principal.": "First choose the main role.",
+"Choisissez un livreur.": "Choose a delivery person.",
+"Client": "Customer",
+"Clients concernés": "Customers concerned",
+"Code changé": "Code changed",
+"Code entreprise": "Company code",
+"Colis en chambre froide": "Parcels in the cold room",
+"Commande": "Order",
+"Commande introuvable.": "Order not found.",
+"Commandes": "Orders",
+"Commandes en cours": "Orders in progress",
+"Commandes reçues": "Orders received",
+"Commencer la préparation": "Start preparing",
+"Compte": "Account",
+"Compte désactivé": "Account deactivated",
+"Comptes actifs": "Active accounts",
+"Comptes désactivés": "Deactivated accounts",
+"Confier au livreur": "Hand over to the delivery person",
+"Confirmer ?": "Confirm?",
+"Confirmer l'annulation": "Confirm cancellation",
+"Confirmer la désactivation": "Confirm deactivation",
+"Confirmer la suppression": "Confirm deletion",
+"Coût d'achat par produit (FC par unité)": "Purchase cost per product (FC per unit)",
+"Coût du produit mis à jour": "Product cost updated",
+"Coût par kg": "Cost per kg",
+"Coût total": "Total cost",
+"Créer mon compte": "Create my account",
+"Créer mon compte (code entreprise requis)": "Create my account (company code required)",
+"Derniers mouvements": "Latest movements",
+"Dernières dépenses": "Latest expenses",
+"Désactiver le compte": "Deactivate the account",
+"En attente d'activation": "Awaiting activation",
+"En cours": "In progress",
+"Encaissement": "Payment collection",
+"Encaissements par mode": "Payments by method",
+"Encaissé": "Collected",
+"Enregistrer": "Save",
+"Enregistrer ce lot": "Save this batch",
+"Enregistrer la commande": "Save the order",
+"Enregistrer le règlement": "Save the payment",
+"Enregistrer le taux": "Save the rate",
+"Enregistrer les frais": "Save the fees",
+"Enregistrer un règlement": "Record a payment",
+"Enregistré": "Saved",
+"Enregistrée à crédit : en attente du règlement.": "Saved on credit: awaiting payment.",
+"Entrez votre e-mail : vous recevrez un lien pour choisir un nouveau mot de passe.": "Enter your e-mail: you will receive a link to choose a new password.",
+"Envoi en cours": "Sending",
+"Envoyer le lien": "Send the link",
+"Envoyer lien de réinitialisation": "Send reset link",
+"Essayer la sonnerie": "Try the ringtone",
+"Ex. : pas d'os, livrer avant 14 h, appeler en arrivant…": "E.g.: no bones, deliver before 2 pm, call on arrival…",
+"Exemple : une chèvre achetée 100 USD qui donne 25 kg de viande, vendue 12 000 FC le kilo.": "Example: a goat bought for 100 USD that gives 25 kg of meat, sold at 12,000 FC per kilo.",
+"Fermer": "Close",
+"Fichier Excel créé": "Excel file created",
+"Fournisseur": "Supplier",
+"Fournisseurs": "Suppliers",
+"Frais (FC)": "Fees (FC)",
+"Frais de livraison (FC)": "Delivery fees (FC)",
+"Frais de livraison selon le poids total": "Delivery fees by total weight",
+"Frais de livraison à confirmer (poids hors barème).": "Delivery fee to be confirmed (weight outside the scale).",
+"Garder l'écran allumé": "Keep the screen on",
+"Hors ligne": "Offline",
+"Imprimer / PDF": "Print / PDF",
+"Indiquez ce que vous avez acheté.": "Say what you bought.",
+"Indiquez le client.": "Enter the customer.",
+"Indiquez le coût et le poids.": "Enter the cost and the weight.",
+"Indiquez le coût.": "Enter the cost.",
+"Indiquez le montant.": "Enter the amount.",
+"Indiquez le motif et le montant.": "Enter the reason and the amount.",
+"Indiquez le nom du produit.": "Enter the product name.",
+"Indiquez le nom.": "Enter the name.",
+"Indiquez le poids et le nombre de colis.": "Enter the weight and the number of parcels.",
+"Indiquez le poids et les frais.": "Enter the weight and the fees.",
+"Indiquez un montant.": "Enter an amount.",
+"Indiquez un prix de vente": "Enter a selling price",
+"Installer l'application": "Install the app",
+"J'ai déjà un compte": "I already have an account",
+"Jour": "Day",
+"Journal du jour": "Daily journal",
+"Jusqu'à (kg)": "Up to (kg)",
+"Kilos de viande obtenus": "Kilos of meat obtained",
+"L'écran du stock arrive bientôt.": "The stock screen is coming soon.",
+"La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.": "The ringtone works while the app is open. At the reception desk, leave it open with the screen on.",
+"Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.": "The code is given by the director. After signing up, the director must activate your account and assign you a role.",
+"Le stock ne peut pas être négatif.": "Stock cannot be negative.",
+"Les prix de référence sont tenus dans le Google Sheet (onglet Tarification). Une modification faite ici peut être remplacée à la prochaine synchronisation du Sheet : pour un changement durable, modifiez-le dans le Sheet.": "Reference prices are kept in the Google Sheet (Tarification tab). A change made here may be replaced at the next Sheet synchronisation: for a lasting change, edit it in the Sheet.",
+"Les ventes encaissées, règlements et dépenses sont déjà comptés automatiquement.": "Collected sales, payments and expenses are already counted automatically.",
+"Lien envoyé à": "Link sent to",
+"Livraison": "Delivery",
+"Livreur": "Delivery person",
+"Livrée le": "Delivered on",
+"Livrées": "Delivered",
+"Livrées aujourd'hui": "Delivered today",
+"Lot enregistré": "Batch saved",
+"Marge au prix mini": "Margin at minimum price",
+"Marge connue": "Known margin",
+"Marge en %": "Margin in %",
+"Marge par kg": "Margin per kg",
+"Marge souhaitée (%)": "Desired margin (%)",
+"Marge totale": "Total margin",
+"Marges et achats": "Margins and purchases",
+"Marquer livrée": "Mark as delivered",
+"Marquer prête": "Mark as ready",
+"Masquer du site et des commandes": "Hide from the site and orders",
+"Masqué": "Hidden",
+"Meilleurs clients": "Best customers",
+"Mettre en préparation": "Start preparation",
+"Modifier": "Edit",
+"Mon compte": "My account",
+"Monnaie d'achat": "Purchase currency",
+"Montant (FC)": "Amount (FC)",
+"Montant reçu (FC)": "Amount received (FC)",
+"Mot de passe": "Password",
+"Mot de passe (6 caractères minimum)": "Password (at least 6 characters)",
+"Mot de passe changé": "Password changed",
+"Mot de passe oublié ?": "Forgot your password?",
+"Motif": "Reason",
+"Nom": "Name",
+"Nom complet": "Full name",
+"Nom du produit": "Product name",
+"Nom ou téléphone": "Name or phone",
+"Nombre de colis (+ ou −)": "Number of parcels (+ or −)",
+"Note (facultatif)": "Note (optional)",
+"Note pour la préparation / la livraison": "Note for preparation / delivery",
+"Nouveau client : il sera créé avec cette commande.": "New customer: they will be created with this order.",
+"Nouveau code (6 caractères minimum)": "New code (at least 6 characters)",
+"Nouveau fournisseur": "New supplier",
+"Nouveau mot de passe": "New password",
+"Nouveau mot de passe (6 caractères minimum)": "New password (at least 6 characters)",
+"Nouveau produit": "New product",
+"Nouvelle commande": "New order",
+"Nouvelle tranche : jusqu'à (kg)": "New bracket: up to (kg)",
+"PERTE": "LOSS",
+"Paiement prévu": "Planned payment",
+"Pas de réseau : action non enregistrée.": "No network: action not saved.",
+"Pas de réseau : la commande n'a pas été enregistrée. Réessayez.": "No network: the order was not saved. Try again.",
+"Pas encore de vente livrée.": "No delivered sale yet.",
+"Payé en": "Paid by",
+"Payée": "Paid",
+"Poids du colis (kg)": "Parcel weight (kg)",
+"Poids invalide.": "Invalid weight.",
+"Poste principal": "Main role",
+"Postes": "Roles",
+"Postes supplémentaires (une personne peut cumuler)": "Additional roles (one person can hold several)",
+"Pour l'installer : menu du navigateur → « Ajouter à l'écran d'accueil » ou « Installer l'application ».": "To install: browser menu → “Add to home screen” or “Install app”.",
+"Prix conseillé pour": "Recommended price for",
+"Prix de vente par kg (FC)": "Selling price per kg (FC)",
+"Prix maximum (FC)": "Maximum price (FC)",
+"Prix minimum (FC)": "Minimum price (FC)",
+"Prix minimum pour ne pas perdre": "Minimum price to avoid a loss",
+"Prix unitaire": "Unit price",
+"Produit": "Product",
+"Produit ajouté": "Product added",
+"Produit concerné (pour enregistrer le coût)": "Product concerned (to save the cost)",
+"Produits": "Products",
+"Produits : ventes et marges": "Products: sales and margins",
+"Produits et prix": "Products and prices",
+"Produits fournis": "Products supplied",
+"Qu'avez-vous acheté ? (ex. Chèvre)": "What did you buy? (e.g. Goat)",
+"Quantité": "Quantity",
+"Quantité en stock": "Quantity in stock",
+"Quartier": "Neighbourhood",
+"Refuser": "Decline",
+"Remettre en vente": "Put back on sale",
+"Retirer": "Remove",
+"Retour": "Back",
+"Retour à la connexion": "Back to sign in",
+"Reçu en": "Received by",
+"Reçue le": "Received on",
+"Rien ce jour.": "Nothing this day.",
+"Règlement enregistré": "Payment saved",
+"Réactiver": "Reactivate",
+"Répéter jusqu'à ce que je touche l'écran": "Repeat until I touch the screen",
+"Saisissez le coût d'achat et le poids obtenu pour voir le résultat.": "Enter the purchase cost and the weight obtained to see the result.",
+"Se connecter": "Sign in",
+"Se déconnecter": "Sign out",
+"Sens": "Direction",
+"Seuil d'alerte": "Alert threshold",
+"Sonnerie des nouvelles commandes": "Ringtone for new orders",
+"Stock bas": "Low stock",
+"Supprimer": "Delete",
+"Supprimé": "Deleted",
+"Tableau de bord": "Dashboard",
+"Taux du jour": "Today's rate",
+"Taux enregistré": "Rate saved",
+"Taux invalide.": "Invalid rate.",
+"Taux utilisé": "Rate used",
+"Ticket 58 mm": "58 mm receipt",
+"Total des colis": "Total of parcels",
+"Total des impayés": "Total unpaid",
+"Téléphone": "Phone",
+"Téléphone, WhatsApp ou comptoir": "Phone, WhatsApp or counter",
+"Un nouveau collaborateur crée son compte lui-même avec le code entreprise (voir l'onglet Compte). Il apparaît ici en attente : choisissez son poste puis activez-le.": "A new colleague creates their own account with the company code (see the Account tab). They appear here as pending: choose their role, then activate them.",
+"Unité (kg, pièce, plateau…)": "Unit (kg, piece, tray…)",
+"Utiliser le coût par kg pour ce produit": "Use the cost per kg for this product",
+"Vente totale prévue": "Expected total sales",
+"Ventes": "Sales",
+"Ventes livrées": "Delivered sales",
+"Ventes livrées sur la période choisie.": "Delivered sales over the chosen period.",
+"Ventes par jour": "Sales per day",
+"Ventes par semaine": "Sales per week",
+"Vert : gain · Rouge : perte · Gris : coût d'achat à renseigner (onglet Marges).": "Green: gain · Red: loss · Grey: purchase cost to enter (Margins tab).",
+"Visible seulement par le directeur et le comptable.": "Visible only to the director and the accountant.",
+"Vos opérations de la journée, à imprimer et classer.": "Your day's operations, to print and file.",
+"Vérifier maintenant": "Check now",
+"au total": "in total",
+"commande(s)": "order(s)",
+"comptes": "accounts",
+"coût": "cost",
+"de marge": "margin",
+"depuis": "since",
+"enregistrée": "saved",
+"inscrit le": "signed up on",
+"jours": "days",
+"prix à confirmer": "price to be confirmed",
+"produit(s) sans coût d'achat : indiquez-le ci-dessous pour voir la marge.": "product(s) without purchase cost: enter it below to see the margin.",
+"produit(s) à réapprovisionner": "product(s) to restock",
+"seuil": "threshold",
+"vente dès": "on sale from",
+"vous": "you",
+"À crédit": "On credit",
+"À donner aux nouveaux collaborateurs pour qu'ils créent leur compte.": "To give to new colleagues so they can create their account.",
+"À encaisser": "To collect",
+"Équipe": "Team",
+"à confirmer": "to be confirmed",
+"— Choisir le poste —": "— Choose the role —",
+"— Choisir —": "— Choose —",
+"— Produit —": "— Product —",
+"Reçue": "Received",
+"En préparation": "In preparation",
+"Prête": "Ready",
+"En livraison": "Out for delivery",
+"Livrée": "Delivered",
+"Annulée": "Cancelled",
+"Nouvelle": "New",
+"Achats": "Purchases",
+"Marges": "Margins",
+"Tableau": "Dashboard",
+"Directeur": "Director",
+"Responsable d'exploitation": "Operations manager",
+"Réception": "Reception",
+"Boucher": "Butcher",
+"Comptable": "Accountant",
+"Commercial": "Sales",
+"Terminées": "Completed",
+"Toutes": "All",
+"Caisse": "Cash desk",
+"Dépenses": "Expenses",
+"Impayés": "Unpaid",
+"Automatique": "Automatic",
+"Clair": "Light",
+"Sombre": "Dark",
+"Cloche": "Bell",
+"Sirène": "Siren",
+"Klaxon": "Horn",
+"Entrée": "In",
+"Sortie": "Out",
+"Calculateur": "Calculator",
+"Lots achetés": "Purchased batches",
+"Commandes reçues ce jour": "Orders received this day",
+"Mes commandes saisies": "My entered orders",
+"Livraisons du jour": "Deliveries of the day",
+"Encaissements du jour": "Payments collected today",
+"Règlements de clients (impayés payés)": "Customer payments (debts paid)",
+"Autres mouvements de caisse": "Other cash movements",
+"Dépenses du jour": "Expenses of the day",
+"Achats du jour": "Purchases of the day",
+"Activité de l'équipe": "Team activity",
+"Mes actions du jour": "My actions today",
+"File de préparation (état actuel)": "Preparation queue (current state)",
+"État du stock (au moment de l'impression)": "Stock status (at time of printing)",
+"Commandes saisies": "Orders entered",
+"Encaissé (FC)": "Collected (FC)",
+"Règlements reçus (FC)": "Payments received (FC)",
+"Dépenses (FC)": "Expenses (FC)",
+"Actions de l'équipe": "Team actions",
+"Mes actions": "My actions",
+"À préparer / prêtes": "To prepare / ready",
+"Langue": "Language",
+"Bientôt disponible": "Coming soon",
+"Mes traductions sont à vérifier par un locuteur natif.": "Translations to be checked by a native speaker.",
+"Carburant": "Fuel",
+"Salaires": "Salaries",
+"Loyer": "Rent",
+"Électricité / Eau": "Electricity / Water",
+"Entretien": "Maintenance",
+"Emballages": "Packaging",
+"Autres": "Other",
+"Achat de marchandises": "Purchase of goods",
+"Nouvelle livraison": "New delivery",
+"Nouvelle commande du site": "New order from the site",
+"Nouvel achat": "New purchase",
+"Nouvelle dépense": "New expense",
+"N°": "No.",
+"Heure": "Time",
+"Statut": "Status",
+"Personne": "Person",
+"Unité": "Unit",
+"Alerte": "Alert",
+"Nombre": "Number",
+"Coût (FC)": "Cost (FC)",
+"Marge (FC)": "Margin (FC)",
+"Ventes (FC)": "Sales (FC)",
+"Semaine": "Week",
+"Mode": "Method",
+"Édité le": "Issued on",
+"Établi par": "Prepared by",
+"Visa": "Signature",
+"Imprimé le": "Printed on",
+"Encaissée": "Collected",
+"STOCK BAS": "LOW STOCK",
+"(aucune donnée)": "(no data)",
+"Marge connue (FC)": "Known margin (FC)",
+"Ventes livrées (FC)": "Delivered sales (FC)",
+"À encaisser (FC)": "To collect (FC)",
+"À crédit (FC)": "On credit (FC)",
+"Commandes livrées": "Orders delivered",
+"Résumé": "Summary",
+"« — » : coût d'achat non renseigné pour ce produit.": "“—”: purchase cost not entered for this product.",
+"Chaque changement de statut est enregistré avec la personne et l'heure.": "Every status change is recorded with the person and the time.",
+"État au moment de l'impression.": "State at the time of printing.",
+"pièce": "piece",
+"Aperçu": "Preview",
+"Taux (laisser vide = taux du jour : ": "Rate (leave empty = today's rate:"
+},
+  sw: {
+"1 dollar (USD) vaut combien de francs ? Servira pour tous les calculs en dollars.": "Dola 1 (USD) ni sawa na faranga ngapi? Itatumika katika hesabu zote za dola.",
+"30 derniers jours": "Siku 30 zilizopita",
+"6 caractères minimum.": "Angalau herufi 6.",
+"7 derniers jours": "Siku 7 zilizopita",
+"Accepter et activer": "Kubali na uwashe",
+"Adresse": "Anwani",
+"Adresse de livraison": "Anwani ya kuwasilisha",
+"Adresse e-mail": "Barua pepe",
+"Affichage": "Mwonekano",
+"Afficher le code": "Onyesha msimbo",
+"Ajouter": "Ongeza",
+"Ajouter (+) ou retirer (−)": "Ongeza (+) au ondoa (−)",
+"Ajouter / retirer des colis": "Ongeza / ondoa vifurushi",
+"Ajouter le produit": "Ongeza bidhaa",
+"Ajouter un produit": "Ongeza bidhaa",
+"Ajoutez au moins un produit avec sa quantité.": "Ongeza angalau bidhaa moja na kiasi chake.",
+"Ajouté": "Imeongezwa",
+"Annuler": "Ghairi",
+"Annuler la commande": "Ghairi agizo",
+"Arrêter la sonnerie": "Zima mlio",
+"Au-delà de la dernière tranche, les frais sont à confirmer.": "Zaidi ya kiwango cha mwisho, gharama zitathibitishwa.",
+"Aucun colis enregistré.": "Hakuna kifurushi kilichorekodiwa.",
+"Aucun encaissement.": "Hakuna malipo yaliyopokelewa.",
+"Aucun fournisseur enregistré.": "Hakuna muuzaji aliyerekodiwa.",
+"Aucun impayé.": "Hakuna deni.",
+"Aucun lot enregistré. Utilisez le calculateur.": "Hakuna kundi lililorekodiwa. Tumia kikokotoo.",
+"Aucun mouvement.": "Hakuna miamala.",
+"Aucune alerte": "Hakuna tahadhari",
+"Aucune commande ici.": "Hakuna maagizo hapa.",
+"Aucune demande en attente.": "Hakuna maombi yanayosubiri.",
+"Aucune dépense.": "Hakuna matumizi.",
+"Aucune vente livrée sur cette période.": "Hakuna mauzo yaliyowasilishwa katika kipindi hiki.",
+"Aucune vente livrée.": "Hakuna mauzo yaliyowasilishwa.",
+"Aujourd'hui": "Leo",
+"Autre mouvement de caisse": "Mwendo mwingine wa fedha",
+"Calculateur d'achat": "Kikokotoo cha ununuzi",
+"Catégorie": "Kategoria",
+"Ce mois-ci": "Mwezi huu",
+"Ces prix s'affichent sur le site charituri.com et dans les commandes.": "Bei hizi zinaonekana kwenye tovuti charituri.com na kwenye maagizo.",
+"Cet élément existe déjà.": "Kipengele hiki tayari kipo.",
+"Changer le code": "Badilisha msimbo",
+"Changer mon mot de passe": "Badilisha nenosiri langu",
+"Choisissez d'abord le poste principal.": "Chagua kwanza nafasi kuu.",
+"Choisissez un livreur.": "Chagua msafirishaji.",
+"Client": "Mteja",
+"Clients concernés": "Wateja husika",
+"Code changé": "Msimbo umebadilishwa",
+"Code entreprise": "Msimbo wa kampuni",
+"Colis en chambre froide": "Vifurushi kwenye chumba baridi",
+"Commande": "Agizo",
+"Commande introuvable.": "Agizo halijapatikana.",
+"Commandes": "Maagizo",
+"Commandes en cours": "Maagizo yanayoendelea",
+"Commandes reçues": "Maagizo yaliyopokelewa",
+"Commencer la préparation": "Anza maandalizi",
+"Compte": "Akaunti",
+"Compte désactivé": "Akaunti imezimwa",
+"Comptes actifs": "Akaunti zinazotumika",
+"Comptes désactivés": "Akaunti zilizozimwa",
+"Confier au livreur": "Mkabidhi msafirishaji",
+"Confirmer ?": "Thibitisha?",
+"Confirmer l'annulation": "Thibitisha kughairi",
+"Confirmer la désactivation": "Thibitisha kuzima",
+"Confirmer la suppression": "Thibitisha kufuta",
+"Coût d'achat par produit (FC par unité)": "Gharama ya ununuzi kwa bidhaa (FC kwa kipimo)",
+"Coût du produit mis à jour": "Gharama ya bidhaa imesasishwa",
+"Coût par kg": "Gharama kwa kilo",
+"Coût total": "Gharama jumla",
+"Créer mon compte": "Fungua akaunti yangu",
+"Créer mon compte (code entreprise requis)": "Fungua akaunti yangu (msimbo wa kampuni unahitajika)",
+"Date": "Tarehe",
+"Derniers mouvements": "Miamala ya hivi karibuni",
+"Dernières dépenses": "Matumizi ya hivi karibuni",
+"Description": "Maelezo",
+"Désactiver le compte": "Zima akaunti",
+"E-mail": "Barua pepe",
+"En attente d'activation": "Inasubiri kuwashwa",
+"En cours": "Inaendelea",
+"Encaissement": "Ukusanyaji wa malipo",
+"Encaissements par mode": "Malipo kwa njia",
+"Encaissé": "Imekusanywa",
+"Enregistrer": "Hifadhi",
+"Enregistrer ce lot": "Hifadhi kundi hili",
+"Enregistrer la commande": "Hifadhi agizo",
+"Enregistrer le règlement": "Hifadhi malipo",
+"Enregistrer le taux": "Hifadhi kiwango",
+"Enregistrer les frais": "Hifadhi gharama",
+"Enregistrer un règlement": "Rekodi malipo",
+"Enregistré": "Imehifadhiwa",
+"Enregistrée à crédit : en attente du règlement.": "Imehifadhiwa kwa mkopo: inasubiri malipo.",
+"Entrez votre e-mail : vous recevrez un lien pour choisir un nouveau mot de passe.": "Weka barua pepe yako: utapokea kiungo cha kuchagua nenosiri jipya.",
+"Envoi en cours": "Inatuma",
+"Envoyer le lien": "Tuma kiungo",
+"Envoyer lien de réinitialisation": "Tuma kiungo cha kuweka upya",
+"Essayer la sonnerie": "Jaribu mlio",
+"Ex. : pas d'os, livrer avant 14 h, appeler en arrivant…": "Mf.: bila mifupa, wasilisha kabla ya saa 8 mchana, piga simu ukifika…",
+"Exemple : une chèvre achetée 100 USD qui donne 25 kg de viande, vendue 12 000 FC le kilo.": "Mfano: mbuzi aliyenunuliwa kwa USD 100 anayetoa kilo 25 za nyama, anauzwa FC 12,000 kwa kilo.",
+"Fermer": "Funga",
+"Fichier Excel créé": "Faili ya Excel imeundwa",
+"Fournisseur": "Muuzaji",
+"Fournisseurs": "Wauzaji",
+"Frais (FC)": "Gharama (FC)",
+"Frais de livraison (FC)": "Gharama ya uwasilishaji (FC)",
+"Frais de livraison selon le poids total": "Gharama ya uwasilishaji kulingana na uzito jumla",
+"Frais de livraison à confirmer (poids hors barème).": "Gharama ya uwasilishaji itathibitishwa (uzito nje ya viwango).",
+"GAIN": "FAIDA",
+"Garder l'écran allumé": "Weka skrini iwake",
+"Hors ligne": "Nje ya mtandao",
+"Imprimer / PDF": "Chapisha / PDF",
+"Indiquez ce que vous avez acheté.": "Eleza ulichonunua.",
+"Indiquez le client.": "Weka mteja.",
+"Indiquez le coût et le poids.": "Weka gharama na uzito.",
+"Indiquez le coût.": "Weka gharama.",
+"Indiquez le montant.": "Weka kiasi.",
+"Indiquez le motif et le montant.": "Weka sababu na kiasi.",
+"Indiquez le nom du produit.": "Weka jina la bidhaa.",
+"Indiquez le nom.": "Weka jina.",
+"Indiquez le poids et le nombre de colis.": "Weka uzito na idadi ya vifurushi.",
+"Indiquez le poids et les frais.": "Weka uzito na gharama.",
+"Indiquez un montant.": "Weka kiasi.",
+"Indiquez un prix de vente": "Weka bei ya kuuza",
+"Installer l'application": "Sakinisha programu",
+"J'ai déjà un compte": "Nina akaunti tayari",
+"Jour": "Siku",
+"Journal du jour": "Shajara ya siku",
+"Jusqu'à (kg)": "Hadi (kg)",
+"Kilos de viande obtenus": "Kilo za nyama zilizopatikana",
+"L'écran du stock arrive bientôt.": "Skrini ya hifadhi inakuja hivi karibuni.",
+"La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.": "Mlio unafanya kazi programu ikiwa wazi. Kwenye dawati la mapokezi, iache wazi na skrini iwake.",
+"Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.": "Msimbo unatolewa na mkurugenzi. Baada ya kujisajili, mkurugenzi anapaswa kuwasha akaunti yako na kukupa nafasi.",
+"Le stock ne peut pas être négatif.": "Hifadhi haiwezi kuwa hasi.",
+"Les prix de référence sont tenus dans le Google Sheet (onglet Tarification). Une modification faite ici peut être remplacée à la prochaine synchronisation du Sheet : pour un changement durable, modifiez-le dans le Sheet.": "Bei za marejeo zinatunzwa kwenye Google Sheet (kichupo cha Tarification). Mabadiliko yaliyofanywa hapa yanaweza kubadilishwa wakati wa usawazishaji unaofuata: kwa mabadiliko ya kudumu, yafanye kwenye Sheet.",
+"Les ventes encaissées, règlements et dépenses sont déjà comptés automatiquement.": "Mauzo yaliyokusanywa, malipo na matumizi tayari yanahesabiwa kiotomatiki.",
+"Lien envoyé à": "Kiungo kimetumwa kwa",
+"Livraison": "Uwasilishaji",
+"Livreur": "Msafirishaji",
+"Livrée le": "Imewasilishwa tarehe",
+"Livrées": "Zimewasilishwa",
+"Livrées aujourd'hui": "Zilizowasilishwa leo",
+"Lot enregistré": "Kundi limehifadhiwa",
+"Marge au prix mini": "Faida kwa bei ya chini",
+"Marge connue": "Faida inayojulikana",
+"Marge en %": "Faida kwa %",
+"Marge par kg": "Faida kwa kilo",
+"Marge souhaitée (%)": "Faida inayotakiwa (%)",
+"Marge totale": "Faida jumla",
+"Marges et achats": "Faida na ununuzi",
+"Marquer livrée": "Weka kama imewasilishwa",
+"Marquer prête": "Weka kama iko tayari",
+"Masquer du site et des commandes": "Ficha kwenye tovuti na maagizo",
+"Masqué": "Imefichwa",
+"Meilleurs clients": "Wateja bora",
+"Mettre en préparation": "Anza maandalizi",
+"Modifier": "Hariri",
+"Mon compte": "Akaunti yangu",
+"Monnaie d'achat": "Sarafu ya ununuzi",
+"Montant (FC)": "Kiasi (FC)",
+"Montant reçu (FC)": "Kiasi kilichopokelewa (FC)",
+"Mot de passe": "Nenosiri",
+"Mot de passe (6 caractères minimum)": "Nenosiri (angalau herufi 6)",
+"Mot de passe changé": "Nenosiri limebadilishwa",
+"Mot de passe oublié ?": "Umesahau nenosiri?",
+"Motif": "Sababu",
+"Nom": "Jina",
+"Nom complet": "Jina kamili",
+"Nom du produit": "Jina la bidhaa",
+"Nom ou téléphone": "Jina au simu",
+"Nombre de colis (+ ou −)": "Idadi ya vifurushi (+ au −)",
+"Note": "Dokezo",
+"Note (facultatif)": "Dokezo (si lazima)",
+"Note pour la préparation / la livraison": "Dokezo kwa maandalizi / uwasilishaji",
+"Nouveau client : il sera créé avec cette commande.": "Mteja mpya: ataundwa pamoja na agizo hili.",
+"Nouveau code (6 caractères minimum)": "Msimbo mpya (angalau herufi 6)",
+"Nouveau fournisseur": "Muuzaji mpya",
+"Nouveau mot de passe": "Nenosiri jipya",
+"Nouveau mot de passe (6 caractères minimum)": "Nenosiri jipya (angalau herufi 6)",
+"Nouveau produit": "Bidhaa mpya",
+"Nouvelle commande": "Agizo jipya",
+"Nouvelle tranche : jusqu'à (kg)": "Kiwango kipya: hadi (kg)",
+"PERTE": "HASARA",
+"Paiement prévu": "Malipo yaliyopangwa",
+"Pas de réseau : action non enregistrée.": "Hakuna mtandao: kitendo hakijahifadhiwa.",
+"Pas de réseau : la commande n'a pas été enregistrée. Réessayez.": "Hakuna mtandao: agizo halijahifadhiwa. Jaribu tena.",
+"Pas encore de vente livrée.": "Hakuna mauzo yaliyowasilishwa bado.",
+"Payé en": "Imelipwa kwa",
+"Payée": "Imelipwa",
+"Poids du colis (kg)": "Uzito wa kifurushi (kg)",
+"Poids invalide.": "Uzito si sahihi.",
+"Poste principal": "Nafasi kuu",
+"Postes": "Nafasi",
+"Postes supplémentaires (une personne peut cumuler)": "Nafasi za ziada (mtu mmoja anaweza kuwa na nyingi)",
+"Pour l'installer : menu du navigateur → « Ajouter à l'écran d'accueil » ou « Installer l'application ».": "Kusakinisha: menyu ya kivinjari → “Ongeza kwenye skrini ya kwanza” au “Sakinisha programu”.",
+"Prix conseillé pour": "Bei inayopendekezwa kwa",
+"Prix de vente par kg (FC)": "Bei ya kuuza kwa kilo (FC)",
+"Prix maximum (FC)": "Bei ya juu (FC)",
+"Prix minimum (FC)": "Bei ya chini (FC)",
+"Prix minimum pour ne pas perdre": "Bei ya chini ili kuepuka hasara",
+"Prix unitaire": "Bei ya kipimo",
+"Pro forma (PDF)": "Ankara ya awali (PDF)",
+"Produit": "Bidhaa",
+"Produit ajouté": "Bidhaa imeongezwa",
+"Produit concerné (pour enregistrer le coût)": "Bidhaa husika (kuhifadhi gharama)",
+"Produits": "Bidhaa",
+"Produits : ventes et marges": "Bidhaa: mauzo na faida",
+"Produits et prix": "Bidhaa na bei",
+"Produits fournis": "Bidhaa zinazotolewa",
+"Qu'avez-vous acheté ? (ex. Chèvre)": "Ulinunua nini? (mf. Mbuzi)",
+"Quantité": "Kiasi",
+"Quantité en stock": "Kiasi kilichopo",
+"Quartier": "Mtaa",
+"Refuser": "Kataa",
+"Remettre en vente": "Rudisha kwenye mauzo",
+"Retirer": "Ondoa",
+"Retour": "Rudi",
+"Retour à la connexion": "Rudi kwenye kuingia",
+"Reçu en": "Imepokelewa kwa",
+"Reçue le": "Imepokelewa tarehe",
+"Rien ce jour.": "Hakuna kitu siku hii.",
+"Règlement enregistré": "Malipo yamehifadhiwa",
+"Réactiver": "Washa tena",
+"Répéter jusqu'à ce que je touche l'écran": "Rudia hadi nitakapogusa skrini",
+"Saisissez le coût d'achat et le poids obtenu pour voir le résultat.": "Weka gharama ya ununuzi na uzito uliopatikana ili kuona matokeo.",
+"Se connecter": "Ingia",
+"Se déconnecter": "Toka",
+"Sens": "Mwelekeo",
+"Seuil d'alerte": "Kiwango cha tahadhari",
+"Sonnerie des nouvelles commandes": "Mlio wa maagizo mapya",
+"Stock": "Hifadhi",
+"Stock bas": "Hifadhi ndogo",
+"Supprimer": "Futa",
+"Supprimé": "Imefutwa",
+"Tableau de bord": "Dashibodi",
+"Taux du jour": "Kiwango cha leo",
+"Taux enregistré": "Kiwango kimehifadhiwa",
+"Taux invalide.": "Kiwango si sahihi.",
+"Taux utilisé": "Kiwango kilichotumika",
+"Ticket 58 mm": "Risiti ya mm 58",
+"Total": "Jumla",
+"Total des colis": "Jumla ya vifurushi",
+"Total des impayés": "Jumla ya madeni",
+"Téléphone": "Simu",
+"Téléphone, WhatsApp ou comptoir": "Simu, WhatsApp au kaunta",
+"Un nouveau collaborateur crée son compte lui-même avec le code entreprise (voir l'onglet Compte). Il apparaît ici en attente : choisissez son poste puis activez-le.": "Mfanyakazi mpya hujifungulia akaunti yake kwa msimbo wa kampuni (angalia kichupo cha Akaunti). Anaonekana hapa akisubiri: chagua nafasi yake kisha mwashe.",
+"Unité (kg, pièce, plateau…)": "Kipimo (kg, kipande, trei…)",
+"Utiliser le coût par kg pour ce produit": "Tumia gharama kwa kilo kwa bidhaa hii",
+"Vente totale prévue": "Mauzo jumla yanayotarajiwa",
+"Ventes": "Mauzo",
+"Ventes livrées": "Mauzo yaliyowasilishwa",
+"Ventes livrées sur la période choisie.": "Mauzo yaliyowasilishwa katika kipindi kilichochaguliwa.",
+"Ventes par jour": "Mauzo kwa siku",
+"Ventes par semaine": "Mauzo kwa wiki",
+"Vert : gain · Rouge : perte · Gris : coût d'achat à renseigner (onglet Marges).": "Kijani: faida · Nyekundu: hasara · Kijivu: gharama ya ununuzi ya kujaza (kichupo cha Faida).",
+"Visible seulement par le directeur et le comptable.": "Inaonekana kwa mkurugenzi na mhasibu pekee.",
+"Vos opérations de la journée, à imprimer et classer.": "Shughuli zako za siku, za kuchapisha na kuhifadhi.",
+"Vérifier maintenant": "Angalia sasa",
+"au total": "kwa jumla",
+"commande(s)": "agizo/maagizo",
+"comptes": "akaunti",
+"coût": "gharama",
+"de marge": "ya faida",
+"depuis": "tangu",
+"enregistrée": "imehifadhiwa",
+"inscrit le": "alijisajili tarehe",
+"jours": "siku",
+"prix à confirmer": "bei itathibitishwa",
+"produit(s) sans coût d'achat : indiquez-le ci-dessous pour voir la marge.": "bidhaa zisizo na gharama ya ununuzi: iweke hapa chini kuona faida.",
+"produit(s) à réapprovisionner": "bidhaa za kujazwa upya",
+"seuil": "kiwango",
+"vente dès": "inauzwa kuanzia",
+"vous": "wewe",
+"À crédit": "Kwa mkopo",
+"À donner aux nouveaux collaborateurs pour qu'ils créent leur compte.": "Wapewe wafanyakazi wapya ili wafungue akaunti zao.",
+"À encaisser": "Za kukusanya",
+"Équipe": "Timu",
+"à confirmer": "itathibitishwa",
+"— Choisir le poste —": "— Chagua nafasi —",
+"— Choisir —": "— Chagua —",
+"— Produit —": "— Bidhaa —",
+"Reçue": "Imepokelewa",
+"En préparation": "Inaandaliwa",
+"Prête": "Iko tayari",
+"En livraison": "Inasafirishwa",
+"Livrée": "Imewasilishwa",
+"Annulée": "Imeghairiwa",
+"Nouvelle": "Mpya",
+"Finances": "Fedha",
+"Achats": "Ununuzi",
+"Marges": "Faida",
+"Tableau": "Dashibodi",
+"Journal": "Shajara",
+"Directeur": "Mkurugenzi",
+"Responsable d'exploitation": "Msimamizi wa uendeshaji",
+"Réception": "Mapokezi",
+"Boucher": "Mchinjaji",
+"Comptable": "Mhasibu",
+"Commercial": "Mauzo (muuzaji)",
+"Terminées": "Zilizokamilika",
+"Toutes": "Zote",
+"Caisse": "Sanduku la fedha",
+"Dépenses": "Matumizi",
+"Impayés": "Madeni",
+"Automatique": "Kiotomatiki",
+"Clair": "Nyepesi",
+"Sombre": "Giza",
+"Cloche": "Kengele",
+"Sirène": "Ving'ora",
+"Klaxon": "Honi",
+"Entrée": "Ingizo",
+"Sortie": "Toleo",
+"Calculateur": "Kikokotoo",
+"Lots achetés": "Makundi yaliyonunuliwa",
+"Commandes reçues ce jour": "Maagizo yaliyopokelewa siku hii",
+"Mes commandes saisies": "Maagizo niliyoingiza",
+"Livraisons du jour": "Uwasilishaji wa siku",
+"Encaissements du jour": "Malipo ya siku",
+"Règlements de clients (impayés payés)": "Malipo ya wateja (madeni yaliyolipwa)",
+"Autres mouvements de caisse": "Miamala mingine ya fedha",
+"Dépenses du jour": "Matumizi ya siku",
+"Achats du jour": "Ununuzi wa siku",
+"Activité de l'équipe": "Shughuli za timu",
+"Mes actions du jour": "Vitendo vyangu vya leo",
+"File de préparation (état actuel)": "Foleni ya maandalizi (hali ya sasa)",
+"État du stock (au moment de l'impression)": "Hali ya hifadhi (wakati wa kuchapisha)",
+"Commandes saisies": "Maagizo yaliyoingizwa",
+"Encaissé (FC)": "Imekusanywa (FC)",
+"Règlements reçus (FC)": "Malipo yaliyopokelewa (FC)",
+"Dépenses (FC)": "Matumizi (FC)",
+"Actions de l'équipe": "Vitendo vya timu",
+"Mes actions": "Vitendo vyangu",
+"À préparer / prêtes": "Za kuandaa / ziko tayari",
+"Langue": "Lugha",
+"Bientôt disponible": "Inakuja hivi karibuni",
+"Mes traductions sont à vérifier par un locuteur natif.": "Tafsiri zinapaswa kukaguliwa na mzungumzaji asilia.",
+"Carburant": "Mafuta",
+"Salaires": "Mishahara",
+"Loyer": "Kodi",
+"Transport": "Usafiri",
+"Électricité / Eau": "Umeme / Maji",
+"Communication": "Mawasiliano",
+"Entretien": "Matengenezo",
+"Emballages": "Vifungashio",
+"Autres": "Nyingine",
+"Achat de marchandises": "Ununuzi wa bidhaa",
+"Nouvelle livraison": "Uwasilishaji mpya",
+"Nouvelle commande du site": "Agizo jipya kutoka tovuti",
+"Nouvel achat": "Ununuzi mpya",
+"Nouvelle dépense": "Matumizi mapya",
+"N°": "Na.",
+"Heure": "Saa",
+"Statut": "Hali",
+"Personne": "Mtu",
+"Action": "Kitendo",
+"Unité": "Kipimo",
+"Alerte": "Tahadhari",
+"Nombre": "Idadi",
+"Coût (FC)": "Gharama (FC)",
+"Marge (FC)": "Faida (FC)",
+"Ventes (FC)": "Mauzo (FC)",
+"Semaine": "Wiki",
+"Mode": "Njia",
+"Édité le": "Imetolewa tarehe",
+"Établi par": "Imeandaliwa na",
+"Visa": "Sahihi",
+"Imprimé le": "Imechapishwa tarehe",
+"Encaissée": "Imekusanywa",
+"STOCK BAS": "HIFADHI NDOGO",
+"(aucune donnée)": "(hakuna data)",
+"Marge connue (FC)": "Faida inayojulikana (FC)",
+"Ventes livrées (FC)": "Mauzo yaliyowasilishwa (FC)",
+"À encaisser (FC)": "Za kukusanya (FC)",
+"À crédit (FC)": "Kwa mkopo (FC)",
+"Commandes livrées": "Maagizo yaliyowasilishwa",
+"Résumé": "Muhtasari",
+"« — » : coût d'achat non renseigné pour ce produit.": "“—”: gharama ya ununuzi haijajazwa kwa bidhaa hii.",
+"Chaque changement de statut est enregistré avec la personne et l'heure.": "Kila mabadiliko ya hali yanarekodiwa na mtu na saa.",
+"État au moment de l'impression.": "Hali wakati wa kuchapisha.",
+"pièce": "kipande",
+"sachet": "kifuko",
+"Aperçu": "Hakiki",
+"Taux (laisser vide = taux du jour : ": "Kiwango (acha wazi = kiwango cha leo:"
+},
+  ln: {
+"1 dollar (USD) vaut combien de francs ? Servira pour tous les calculs en dollars.": "Dolare 1 (USD) ezali ndambo boni ya ba franc? Ekosalela mibale nyonso ya dolare.",
+"30 derniers jours": "Mikolo 30 eleki",
+"6 caractères minimum.": "Ba lettre 6 na moke.",
+"7 derniers jours": "Mikolo 7 eleki",
+"Accepter et activer": "Endima mpe pesa makasi",
+"Adresse": "Adresi",
+"Adresse de livraison": "Adresi ya kopesa",
+"Adresse e-mail": "Adresi ya e-mail",
+"Affichage": "Lolenge ya komona",
+"Afficher le code": "Lakisa code",
+"Ajouter": "Bakisa",
+"Ajouter (+) ou retirer (−)": "Bakisa (+) to longola (−)",
+"Ajouter / retirer des colis": "Bakisa / longola ba colis",
+"Ajouter le produit": "Bakisa produit",
+"Ajouter un produit": "Bakisa produit",
+"Ajoutez au moins un produit avec sa quantité.": "Bakisa produit moko na moke elongo na motango na yango.",
+"Ajouté": "Ebakisami",
+"Annuler": "Pekisa",
+"Annuler la commande": "Pekisa commande",
+"Arrêter la sonnerie": "Kanga lokito",
+"Au-delà de la dernière tranche, les frais sont à confirmer.": "Na nsima ya tranche ya suka, mbongo ya kopesa ekosilisama.",
+"Aucun colis enregistré.": "Colis moko ekomami te.",
+"Aucun encaissement.": "Mbongo moko ezwami te.",
+"Aucun fournisseur enregistré.": "Mopesi moko ekomami te.",
+"Aucun impayé.": "Nyongo moko te.",
+"Aucun lot enregistré. Utilisez le calculateur.": "Lot moko ekomami te. Salela calculatrice.",
+"Aucun mouvement.": "Mouvement moko te.",
+"Aucune alerte": "Elikya moko te",
+"Aucune commande ici.": "Commande moko awa te.",
+"Aucune demande en attente.": "Ebongisi moko ezali kozela te.",
+"Aucune dépense.": "Depense moko te.",
+"Aucune vente livrée sur cette période.": "Mombongo moko epesami te na ntango oyo.",
+"Aucune vente livrée.": "Mombongo moko epesami te.",
+"Aujourd'hui": "Lelo",
+"Autre mouvement de caisse": "Mouvement mosusu ya caisse",
+"Calculateur d'achat": "Calculatrice ya kosomba",
+"Ce mois-ci": "Sanza oyo",
+"Ces prix s'affichent sur le site charituri.com et dans les commandes.": "Ntalo oyo emonani na site charituri.com mpe na ba commande.",
+"Cet élément existe déjà.": "Eloko oyo ezali already.",
+"Changer le code": "Bongola code",
+"Changer mon mot de passe": "Bongola mot de passe na ngai",
+"Choisissez d'abord le poste principal.": "Pona liboso poste monene.",
+"Choisissez un livreur.": "Pona mopesi ya biloko.",
+"Client": "Kliya",
+"Clients concernés": "Ba kliya",
+"Code changé": "Code ebongwani",
+"Code entreprise": "Code ya société",
+"Colis en chambre froide": "Ba colis na chambre froide",
+"Commande introuvable.": "Commande emonani te.",
+"Commandes": "Ba commande",
+"Commandes en cours": "Ba commande ezali kokende",
+"Commandes reçues": "Ba commande ezwami",
+"Commencer la préparation": "Banda komibongisa",
+"Compte désactivé": "Compte ekufisami",
+"Comptes actifs": "Ba compte ezali na makasi",
+"Comptes désactivés": "Ba compte ekufisami",
+"Confier au livreur": "Pesa na mopesi ya biloko",
+"Confirmer ?": "Endimisa?",
+"Confirmer l'annulation": "Endimisa kopekisa",
+"Confirmer la désactivation": "Endimisa kokufisa",
+"Confirmer la suppression": "Endimisa kolongola",
+"Coût d'achat par produit (FC par unité)": "Ntalo ya kosomba mpo na produit (FC na unité)",
+"Coût du produit mis à jour": "Ntalo ya produit ebongisami",
+"Coût par kg": "Ntalo na kilo",
+"Coût total": "Ntalo nyonso",
+"Créer mon compte": "Salela compte na ngai",
+"Créer mon compte (code entreprise requis)": "Salela compte na ngai (code ya société esengami)",
+"Date": "Mokolo",
+"Derniers mouvements": "Mouvement ya suka",
+"Dernières dépenses": "Depense ya suka",
+"Description": "Ndimbola",
+"Désactiver le compte": "Kufisa compte",
+"En attente d'activation": "Ezali kozela activation",
+"En cours": "Ezali kokende",
+"Encaissement": "Kozwa mbongo",
+"Encaissements par mode": "Mbongo ezwami na lolenge",
+"Encaissé": "Ezwami",
+"Enregistrer": "Bomba",
+"Enregistrer ce lot": "Bomba lot oyo",
+"Enregistrer la commande": "Bomba commande",
+"Enregistrer le règlement": "Bomba reglement",
+"Enregistrer le taux": "Bomba taux",
+"Enregistrer les frais": "Bomba ba frais",
+"Enregistrer un règlement": "Koma reglement",
+"Enregistré": "Ebombami",
+"Enregistrée à crédit : en attente du règlement.": "Ekomami na nyongo: ezali kozela kofuta.",
+"Entrez votre e-mail : vous recevrez un lien pour choisir un nouveau mot de passe.": "Koma e-mail na yo: okozwa lien mpo na kopona mot de passe ya sika.",
+"Envoi en cours": "Ezali kotinda",
+"Envoyer le lien": "Tinda lien",
+"Envoyer lien de réinitialisation": "Tinda lien ya kobanda lisusu",
+"Essayer la sonnerie": "Meka lokito",
+"Ex. : pas d'os, livrer avant 14 h, appeler en arrivant…": "Ex. : mikuwa te, pesa liboso ya ngonga 14, benga ntango ozali koya…",
+"Exemple : une chèvre achetée 100 USD qui donne 25 kg de viande, vendue 12 000 FC le kilo.": "Ndakisa: mbuli esombami na USD 100 oyo epesi kilo 25 ya misuni, ebongisami FC 12 000 na kilo.",
+"Fermer": "Kanga",
+"Fichier Excel créé": "Fichier Excel esalami",
+"Fournisseur": "Mopesi",
+"Fournisseurs": "Ba mopesi",
+"Frais (FC)": "Ba frais (FC)",
+"Frais de livraison (FC)": "Mbongo ya kopesa (FC)",
+"Frais de livraison selon le poids total": "Mbongo ya kopesa engebene na kilo nyonso",
+"Frais de livraison à confirmer (poids hors barème).": "Mbongo ya kopesa ekosilisama (kilo ekei libanda ya tarif).",
+"GAIN": "BENEFICE",
+"Garder l'écran allumé": "Beba ecran na pole",
+"Hors ligne": "Libanda ya réseau",
+"Imprimer / PDF": "Kobimisa / PDF",
+"Indiquez ce que vous avez acheté.": "Loba oyo osombi.",
+"Indiquez le client.": "Koma kliya.",
+"Indiquez le coût et le poids.": "Koma ntalo mpe kilo.",
+"Indiquez le coût.": "Koma ntalo.",
+"Indiquez le montant.": "Koma motango ya mbongo.",
+"Indiquez le motif et le montant.": "Koma ntina mpe motango ya mbongo.",
+"Indiquez le nom du produit.": "Koma nkombo ya produit.",
+"Indiquez le nom.": "Koma nkombo.",
+"Indiquez le poids et le nombre de colis.": "Koma kilo mpe motango ya ba colis.",
+"Indiquez le poids et les frais.": "Koma kilo mpe ba frais.",
+"Indiquez un montant.": "Koma motango ya mbongo.",
+"Indiquez un prix de vente": "Koma ntalo ya kobongisa",
+"Installer l'application": "Kotia application",
+"J'ai déjà un compte": "Nazali na compte déjà",
+"Jour": "Mokolo",
+"Journal du jour": "Journal ya mokolo",
+"Jusqu'à (kg)": "Tii (kg)",
+"Kilos de viande obtenus": "Ba kilo ya misuni ezwami",
+"L'écran du stock arrive bientôt.": "Ecran ya stock ezali koya noki.",
+"La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.": "Lokito esalaka tango application ezali ofungwami. Na poste ya réception, tika yango efungwami na ecran ezali pole.",
+"Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.": "Code epesami na directeur. Nsima ya komikoma, directeur asengeli kopesa compte na yo makasi mpe kopesa yo poste.",
+"Le stock ne peut pas être négatif.": "Stock ekoki kozala na moins te.",
+"Les prix de référence sont tenus dans le Google Sheet (onglet Tarification). Une modification faite ici peut être remplacée à la prochaine synchronisation du Sheet : pour un changement durable, modifiez-le dans le Sheet.": "Ba ntalo ya molongo ebombami na Google Sheet (onglet Tarification). Bobongoli osali awa ekoki kobongolama na synchronisation oyo ekoya: mpo na bobongoli ya seko, bongola yango na Sheet.",
+"Les ventes encaissées, règlements et dépenses sont déjà comptés automatiquement.": "Mombongo ezwami, ba reglement mpe ba depense etangami déjà automatiquement.",
+"Lien envoyé à": "Lien etindami na",
+"Livraison": "Kopesa",
+"Livreur": "Mopesi ya biloko",
+"Livrée le": "Epesami mokolo",
+"Livrées": "Epesami",
+"Livrées aujourd'hui": "Epesami lelo",
+"Lot enregistré": "Lot ebombami",
+"Marge au prix mini": "Benefice na ntalo ya moke",
+"Marge connue": "Benefice eyebani",
+"Marge en %": "Benefice na %",
+"Marge par kg": "Benefice na kilo",
+"Marge souhaitée (%)": "Benefice olingi (%)",
+"Marge totale": "Benefice nyonso",
+"Marges et achats": "Benefice mpe kosomba",
+"Marquer livrée": "Zala ete epesami",
+"Marquer prête": "Zala ete ebongisami",
+"Masquer du site et des commandes": "Bombela na site mpe na ba commande",
+"Masqué": "Ebombami",
+"Meilleurs clients": "Ba kliya malamu",
+"Mettre en préparation": "Kotia na komibongisa",
+"Modifier": "Bongola",
+"Mon compte": "Compte na ngai",
+"Monnaie d'achat": "Mbongo ya kosomba",
+"Montant (FC)": "Motango (FC)",
+"Montant reçu (FC)": "Mbongo ezwami (FC)",
+"Mot de passe (6 caractères minimum)": "Mot de passe (ba lettre 6 na moke)",
+"Mot de passe changé": "Mot de passe ebongwani",
+"Mot de passe oublié ?": "Obosani mot de passe?",
+"Motif": "Ntina",
+"Nom": "Nkombo",
+"Nom complet": "Nkombo mobimba",
+"Nom du produit": "Nkombo ya produit",
+"Nom ou téléphone": "Nkombo to téléphone",
+"Nombre de colis (+ ou −)": "Motango ya ba colis (+ to −)",
+"Note (facultatif)": "Note (esengami te)",
+"Note pour la préparation / la livraison": "Note mpo na komibongisa / kopesa",
+"Nouveau client : il sera créé avec cette commande.": "Kliya ya sika: akosalama elongo na commande oyo.",
+"Nouveau code (6 caractères minimum)": "Code ya sika (ba lettre 6 na moke)",
+"Nouveau fournisseur": "Mopesi ya sika",
+"Nouveau mot de passe": "Mot de passe ya sika",
+"Nouveau mot de passe (6 caractères minimum)": "Mot de passe ya sika (ba lettre 6 na moke)",
+"Nouveau produit": "Produit ya sika",
+"Nouvelle commande": "Commande ya sika",
+"Nouvelle tranche : jusqu'à (kg)": "Tranche ya sika: tii (kg)",
+"Paiement prévu": "Kofuta ekanisami",
+"Pas de réseau : action non enregistrée.": "Réseau ezali te: likambo ebombami te.",
+"Pas de réseau : la commande n'a pas été enregistrée. Réessayez.": "Réseau ezali te: commande ebombami te. Meka lisusu.",
+"Pas encore de vente livrée.": "Mombongo epesami naino te.",
+"Payé en": "Efutami na",
+"Payée": "Efutami",
+"Poids du colis (kg)": "Kilo ya colis (kg)",
+"Poids invalide.": "Kilo ezali malamu te.",
+"Poste principal": "Poste monene",
+"Postes": "Ba poste",
+"Postes supplémentaires (une personne peut cumuler)": "Ba poste mosusu (moto moko akoki kozala na mingi)",
+"Pour l'installer : menu du navigateur → « Ajouter à l'écran d'accueil » ou « Installer l'application ».": "Mpo na kotia yango: menu ya navigateur → « Bakisa na ecran ya liboso » to « Kotia application ».",
+"Prix conseillé pour": "Ntalo oyo ebongi mpo na",
+"Prix de vente par kg (FC)": "Ntalo ya kobongisa na kilo (FC)",
+"Prix maximum (FC)": "Ntalo monene (FC)",
+"Prix minimum (FC)": "Ntalo moke (FC)",
+"Prix minimum pour ne pas perdre": "Ntalo moke mpo na kobungisa te",
+"Prix unitaire": "Ntalo ya moko",
+"Pro forma (PDF)": "Facture pro forma (PDF)",
+"Produit ajouté": "Produit ebakisami",
+"Produit concerné (pour enregistrer le coût)": "Produit oyo etali (mpo na kobomba ntalo)",
+"Produits": "Ba produit",
+"Produits : ventes et marges": "Ba produit: mombongo mpe benefice",
+"Produits et prix": "Ba produit mpe ntalo",
+"Produits fournis": "Ba produit epesami",
+"Qu'avez-vous acheté ? (ex. Chèvre)": "Osombi nini? (ex. Mbuli)",
+"Quantité": "Motango",
+"Quantité en stock": "Motango na stock",
+"Refuser": "Aluka",
+"Remettre en vente": "Zongisa na mombongo",
+"Retirer": "Longola",
+"Retour": "Zonga",
+"Retour à la connexion": "Zonga na kokota",
+"Reçu en": "Ezwami na",
+"Reçue le": "Ezwami mokolo",
+"Rien ce jour.": "Eloko moko te mokolo oyo.",
+"Règlement enregistré": "Reglement ebombami",
+"Réactiver": "Pesa makasi lisusu",
+"Répéter jusqu'à ce que je touche l'écran": "Zongela tii nakosimba ecran",
+"Saisissez le coût d'achat et le poids obtenu pour voir le résultat.": "Koma ntalo ya kosomba mpe kilo ezwami mpo na komona libanda.",
+"Se connecter": "Kokota",
+"Se déconnecter": "Kobima",
+"Sens": "Nzela",
+"Seuil d'alerte": "Seuil ya elikya",
+"Sonnerie des nouvelles commandes": "Lokito ya ba commande ya sika",
+"Stock bas": "Stock ezali moke",
+"Supprimer": "Longola",
+"Supprimé": "Elongolami",
+"Taux du jour": "Taux ya lelo",
+"Taux enregistré": "Taux ebombami",
+"Taux invalide.": "Taux ezali malamu te.",
+"Taux utilisé": "Taux esalelami",
+"Ticket 58 mm": "Ticket ya mm 58",
+"Total": "Nyonso",
+"Total des colis": "Nyonso ya ba colis",
+"Total des impayés": "Nyonso ya nyongo",
+"Téléphone, WhatsApp ou comptoir": "Téléphone, WhatsApp to comptoir",
+"Un nouveau collaborateur crée son compte lui-même avec le code entreprise (voir l'onglet Compte). Il apparaît ici en attente : choisissez son poste puis activez-le.": "Mosali ya sika amikomeli compte na ye na code ya société (tala onglet Compte). Amonani awa azali kozela: pona poste na ye mpe pesa ye makasi.",
+"Utiliser le coût par kg pour ce produit": "Salela ntalo na kilo mpo na produit oyo",
+"Vente totale prévue": "Mombongo nyonso ekanisami",
+"Ventes": "Mombongo",
+"Ventes livrées": "Mombongo epesami",
+"Ventes livrées sur la période choisie.": "Mombongo epesami na ntango oyo opesi.",
+"Ventes par jour": "Mombongo na mokolo",
+"Ventes par semaine": "Mombongo na poso",
+"Vert : gain · Rouge : perte · Gris : coût d'achat à renseigner (onglet Marges).": "Vert: benefice · Rouge: perte · Gris: ntalo ya kosomba ekomama (onglet Marges).",
+"Visible seulement par le directeur et le comptable.": "Emonani kaka na directeur mpe comptable.",
+"Vos opérations de la journée, à imprimer et classer.": "Mosala na yo ya mokolo, mpo na kobimisa mpe kobomba.",
+"Vérifier maintenant": "Tala sikoyo",
+"au total": "nyonso",
+"commande(s)": "commande",
+"comptes": "ba compte",
+"coût": "ntalo",
+"de marge": "ya benefice",
+"depuis": "uta",
+"enregistrée": "ebombami",
+"inscrit le": "amikomaki mokolo",
+"jours": "mikolo",
+"prix à confirmer": "ntalo ekosilisama",
+"produit(s) sans coût d'achat : indiquez-le ci-dessous pour voir la marge.": "ba produit na ntalo ya kosomba te: koma yango na nse mpo na komona benefice.",
+"produit(s) à réapprovisionner": "ba produit ya kobakisa",
+"vente dès": "mombongo uta",
+"vous": "yo",
+"À crédit": "Na nyongo",
+"À donner aux nouveaux collaborateurs pour qu'ils créent leur compte.": "Pesa na basali ya sika mpo na kosala ba compte na bango.",
+"À encaisser": "Ya kozwa",
+"à confirmer": "ekosilisama",
+"— Choisir le poste —": "— Pona poste —",
+"— Choisir —": "— Pona —",
+"Reçue": "Ezwami",
+"En préparation": "Ezali kobongisama",
+"Prête": "Ebongisami",
+"En livraison": "Ezali kokende",
+"Livrée": "Epesami",
+"Annulée": "Epekisami",
+"Nouvelle": "Ya sika",
+"Finances": "Mbongo",
+"Achats": "Kosomba",
+"Marges": "Benefice",
+"Responsable d'exploitation": "Mokambi ya misala",
+"Terminées": "Esili",
+"Toutes": "Nyonso",
+"Dépenses": "Ba depense",
+"Impayés": "Nyongo",
+"Clair": "Pole",
+"Sombre": "Molili",
+"Cloche": "Lingenga",
+"Sirène": "Siréne",
+"Entrée": "Kokota",
+"Sortie": "Kobima",
+"Calculateur": "Calculatrice",
+"Lots achetés": "Ba lot esombami",
+"Commandes reçues ce jour": "Ba commande ezwami mokolo oyo",
+"Mes commandes saisies": "Ba commande nakomi",
+"Livraisons du jour": "Kopesa ya mokolo",
+"Encaissements du jour": "Mbongo ezwami lelo",
+"Règlements de clients (impayés payés)": "Reglement ya ba kliya (nyongo efutami)",
+"Autres mouvements de caisse": "Ba mouvement mosusu ya caisse",
+"Dépenses du jour": "Ba depense ya mokolo",
+"Achats du jour": "Kosomba ya mokolo",
+"Activité de l'équipe": "Misala ya équipe",
+"Mes actions du jour": "Misala na ngai ya lelo",
+"File de préparation (état actuel)": "Molongo ya komibongisa (lolenge ya sikoyo)",
+"État du stock (au moment de l'impression)": "Lolenge ya stock (ntango ya kobimisa)",
+"Commandes saisies": "Ba commande ekomami",
+"Encaissé (FC)": "Ezwami (FC)",
+"Règlements reçus (FC)": "Ba reglement ezwami (FC)",
+"Dépenses (FC)": "Ba depense (FC)",
+"Actions de l'équipe": "Misala ya équipe",
+"Mes actions": "Misala na ngai",
+"À préparer / prêtes": "Ya komibongisa / ebongisami",
+"Langue": "Monoko",
+"Bientôt disponible": "Ekoya noki",
+"Mes traductions sont à vérifier par un locuteur natif.": "Ba traduction esengeli kotalama na moto oyo ayebi monoko malamu.",
+"Carburant": "Mazut",
+"Salaires": "Ba salaire",
+"Électricité / Eau": "Mwinda / Mai",
+"Entretien": "Bobateli",
+"Emballages": "Ba emballage",
+"Autres": "Mosusu",
+"Achat de marchandises": "Kosomba ba biloko",
+"Nouvelle livraison": "Kopesa ya sika",
+"Nouvelle commande du site": "Commande ya sika ya site",
+"Nouvel achat": "Kosomba ya sika",
+"Nouvelle dépense": "Depense ya sika",
+"Heure": "Ngonga",
+"Statut": "Lolenge",
+"Personne": "Moto",
+"Action": "Likambo",
+"Alerte": "Elikya",
+"Nombre": "Motango",
+"Coût (FC)": "Ntalo (FC)",
+"Marge (FC)": "Benefice (FC)",
+"Ventes (FC)": "Mombongo (FC)",
+"Semaine": "Poso",
+"Mode": "Lolenge",
+"Édité le": "Ebimisami mokolo",
+"Établi par": "Esalami na",
+"Visa": "Signature",
+"Imprimé le": "Ebimisami mokolo",
+"Encaissée": "Ezwami",
+"STOCK BAS": "STOCK EZALI MOKE",
+"(aucune donnée)": "(eloko te)",
+"Marge connue (FC)": "Benefice eyebani (FC)",
+"Ventes livrées (FC)": "Mombongo epesami (FC)",
+"À encaisser (FC)": "Ya kozwa (FC)",
+"À crédit (FC)": "Na nyongo (FC)",
+"Commandes livrées": "Ba commande epesami",
+"Résumé": "Ndimbola mokuse",
+"« — » : coût d'achat non renseigné pour ce produit.": "« — » : ntalo ya kosomba ekomami te mpo na produit oyo.",
+"Chaque changement de statut est enregistré avec la personne et l'heure.": "Bobongoli nyonso ya lolenge ekomami elongo na moto mpe ngonga.",
+"État au moment de l'impression.": "Lolenge na ntango ya kobimisa.",
+"Aperçu": "Komona liboso",
+"Taux (laisser vide = taux du jour : ": "Taux (tika pamba = taux ya lelo:"
+},
+  sb: {}};/*LANGEND*/
+const LANGS = [["fr", "Français"], ["en", "English"], ["sw", "Kiswahili"], ["ln", "Lingála"], ["sb", "Swahili du Congo"]];
+const LOC = {fr: "fr-FR", en: "en-GB", sw: "sw", ln: "fr-FR", sb: "sw"};
 const t = s => ((LANG[S.lang] || {})[s]) || s;
 
 /* ================= Utilitaires ================= */
@@ -203,7 +1326,7 @@ const $ = s => document.querySelector(s);
 const e = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fc = n => Math.round(Number(n) || 0).toLocaleString("fr-FR") + " FC";
 const num = v => { const x = parseFloat(String(v).replace(",", ".")); return isFinite(x) ? x : 0; };
-const fmtD = iso => iso ? new Date(iso).toLocaleString("fr-FR", {timeZone: TZ, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}) : "";
+const fmtD = iso => iso ? new Date(iso).toLocaleString(LOC[S.lang] || "fr-FR", {timeZone: TZ, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}) : "";
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (_) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
@@ -215,8 +1338,10 @@ function toast(m, ms) { const el = $("#toast"); el.textContent = m; el.hidden = 
 const S = {
   lang: ls.get("chg_lang", "fr"), sess: ls.get("chg_sess", null), prof: null, tab: "cmd", detail: null, authView: "login", authMsg: null,
   cmds: [], seen: null, filter: null, lignes: {}, livreurs: [], produits: [], clients: [], tarifs: [], team: [], te: {},
-  nc: null, queue: ls.get("chg_q", []), recovery: null, af: {nm:"",em:"",pw:"",cd:""}, code: null, busy: false, online: navigator.onLine, pickLiv: "", fraisIn: "", cancelAsk: false, installEvt: null, params: {}
+  nc: null, queue: ls.get("chg_q", []), recovery: null, af: {nm:"",em:"",pw:"",cd:""}, code: null, busy: false, online: navigator.onLine, pickLiv: "", fraisIn: "", cancelAsk: false, installEvt: null, params: {}, prodAll: [], pOpen: null, pe: {}, pNew: false, pn: {}, tre: {}, trn: {poids_max: "", frais: ""}, delAsk: null, stockP: [], stockR: [], fourn: [], sOpen: null, se: {}, fo: {nom: "", telephone: "", quartier: "", produits: ""},
+  dper: 30, jday: new Date().toLocaleDateString("sv-SE", {timeZone: "Africa/Lubumbashi"}), jfin: {deps: [], mvts: [], rgs: []}, msub: "calc", mjours: 30, mar: [], lots: [], couts: {}, ce: {}, calc: {libelle: "", cout: "", devise: "USD", taux: "", poids: "", pv: "", cible: "30", pid: ""}, taux_in: "", colisR: [], cn: {}, fsub: null, fin: {}, mv: {compte: "Cash", sens: "Entrée", motif: "", montant: ""}, dp: null, rg: null
 };
+S.dp = null;
 const roles = () => S.prof ? [S.prof.role].concat(S.prof.roles_extra || []) : [];
 const has = (...r) => roles().some(x => r.indexOf(x) >= 0);
 const isActive = () => S.prof && S.prof.actif && S.prof.role !== "en_attente";
@@ -307,6 +1432,10 @@ async function loadAll() {
   }
   jobs.push(rest("parametres?select=*").then(r => { S.params = {}; (r || []).forEach(p => S.params[p.cle] = p.valeur); }).catch(() => {}));
   if (has("directeur")) jobs.push(loadTeam());
+  if (has("directeur", "exploitation", "stock", "comptable")) jobs.push(loadStock().catch(() => {}));
+  if (canProd()) jobs.push(loadProd().catch(() => {}));
+  if (has("directeur","comptable")) jobs.push(loadMar().catch(() => {}));
+  if (has("directeur", "comptable", "stock")) { S.fsub = finSubs()[0][0]; S.dp = newDp(); jobs.push(loadFin().catch(() => {})); }
   await Promise.all(jobs);
 }
 async function loadCmd() {
@@ -338,9 +1467,8 @@ function detectNew(list) {
     const watchRecv = has("directeur","exploitation","reception","boucher");
     const a = nw.filter(c => (c.statut === "Reçue" && watchRecv) || (c.statut === "En livraison" && has("livreur")));
     if (a.length || ch.length) {
-      beep();
       const x = a[0] || ch[0];
-      toast((x.statut === "En livraison" ? "Nouvelle livraison" : "Nouvelle commande") + " #" + x.id + " · " + x.client_nom + (a.length + ch.length > 1 ? " (+" + (a.length + ch.length - 1) + ")" : ""), 6000);
+      startAlarm(t(x.statut === "En livraison" ? "Nouvelle livraison" : (x.remarques || "").startsWith("🌐") ? "Nouvelle commande du site" : "Nouvelle commande") + " #" + x.id + " · " + x.client_nom + (a.length + ch.length > 1 ? " (+" + (a.length + ch.length - 1) + ")" : ""));
     }
   }
   S.seen = ids;
@@ -424,8 +1552,12 @@ function vAuth() {
     </form>`;
   return `<div class="login">${brandHead()}${m}${body}${langPick()}</div>`;
 }
+const sbReady = () => Object.keys(LANG.sb).length >= 30;
+function langSeg() {
+  return `<div class="seg" role="group" aria-label="${t("Langue")}">${LANGS.map(x => { const off = x[0] === "sb" && !sbReady(); return `<button type="button" data-a="lang" data-k="${x[0]}" aria-pressed="${S.lang === x[0]}" ${off ? "disabled" : ""}>${x[1]}${off ? " · " + t("Bientôt disponible") : ""}</button>`; }).join("")}</div>`;
+}
 function langPick() {
-  return ""; /* Sélecteur de langue : à activer quand le Lingala et le Swahili seront traduits */
+  return `<div class="card" style="margin-top:12px"><b>${t("Langue")}</b>${langSeg()}</div>`;
 }
 function vWait(titre, txt) {
   return `<div class="login">${brandHead()}<div class="card"><h2>${t(titre)}</h2><p style="margin:0">${t(txt)}</p>
@@ -444,7 +1576,12 @@ function navItems() {
   const n = [];
   if (canSeeCmd()) n.push(["cmd", "📋", "Commandes"]);
   if (has("directeur","exploitation","reception")) n.push(["new", "➕", "Nouvelle"]);
-  if (has("stock") && !canSeeCmd()) n.push(["cmd", "📦", "Stock"]);
+  if (has("directeur","exploitation","stock","comptable")) n.push(["stock", "📦", "Stock"]);
+  if (has("directeur","comptable","stock")) n.push(["fin", "💰", has("directeur","comptable") ? "Finances" : "Achats"]);
+  if (canProd()) n.push(["prod", "🏷️", "Produits"]);
+  if (has("directeur","comptable")) n.push(["mar", "📈", "Marges"]);
+  if (has("directeur","exploitation","comptable")) n.push(["dash", "📊", "Tableau"]);
+  n.push(["jour", "📒", "Journal"]);
   if (has("directeur")) n.push(["team", "👥", "Équipe"]);
   n.push(["me", "👤", "Compte"]);
   return n;
@@ -460,11 +1597,17 @@ function vShell() {
   const nav = navItems();
   if (!nav.some(x => x[0] === S.tab)) S.tab = nav[0][0];
   const off = !S.online || S.queue.length;
-  const top = `<header class="top"><img src="logo.webp" alt=""><div class="t"><b>Charituri</b><span>${e(S.prof.nom)} · ${e(roles().map(r => ROLES[r]).join(", "))}</span></div>
+  const top = `<header class="top"><img src="logo.webp" alt=""><div class="t"><b>Charituri</b><span>${e(S.prof.nom)} · ${e(roles().map(r => rl(r)).join(", "))}</span></div>
     ${off ? `<span class="chip off">${!S.online ? t("Hors ligne") : t("Envoi en cours")}${S.queue.length ? " · " + S.queue.length : ""}</span>` : ""}</header>`;
   const nv = `<nav class="nav" aria-label="Menu">${nav.map(x => `<button data-a="tab" data-k="${x[0]}" ${S.tab === x[0] && !(S.detail && x[0] === "cmd") ? 'aria-current="page"' : S.tab === x[0] ? 'aria-current="page"' : ""}><span class="i">${x[1]}</span>${t(x[2])}${badgeFor(x[0])}</button>`).join("")}</nav>`;
   let main = "";
   if (S.tab === "cmd") main = S.detail ? vDetail() : (canSeeCmd() ? vCmd() : vStock());
+  else if (S.tab === "stock") main = vStockScreen();
+  else if (S.tab === "fin") main = vFin();
+  else if (S.tab === "prod") main = vProd();
+  else if (S.tab === "mar") main = vMar();
+  else if (S.tab === "dash") main = vDash();
+  else if (S.tab === "jour") main = vJour();
   else if (S.tab === "new") main = vNew();
   else if (S.tab === "team") main = vTeam();
   else main = vMe();
@@ -509,7 +1652,7 @@ function vCmd() {
 function ordCard(c) {
   const money = !(has("boucher") && !has("directeur","exploitation","reception","comptable","commercial","livreur"));
   return `<button class="ord" data-a="open" data-id="${c.id}"><div class="row"><div><span class="cl">#${c.id} · ${e(c.client_nom)}</span></div>
-    <span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></div>
+    <span>${(c.remarques || "").startsWith("🌐") ? '<span class="pill p-liv">🌐 Site</span> ' : ""}<span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></span></div>
     <div class="row"><span class="meta">${e(fmtD(c.created_at))}${c.adresse ? " · " + e(c.adresse) : ""}${c.livreur_nom ? " · 🛵 " + e(c.livreur_nom) : ""}</span>${money ? `<span class="tot num">${fc(c.total)}</span>` : ""}</div>
     ${c.remarques ? `<div class="meta">📝 ${e(c.remarques.length > 70 ? c.remarques.slice(0, 70) + "…" : c.remarques)}</div>` : ""}
     ${c.statut === "Livrée" ? `<div><span class="pill ${c.paye ? "p-ok" : c.paiement_mode === "Crédit" ? "p-prep" : "p-bad"}">${c.paye ? t("Payée") + " · " + e(c.paiement_mode) : c.paiement_mode === "Crédit" ? t("À crédit") : t("À encaisser")}</span></div>` : ""}</button>`;
@@ -574,6 +1717,7 @@ async function openDetail(id) {
 
 /* ----- ticket 58 mm ----- */
 function printTicket() {
+  document.body.classList.remove("pfmode");
   const c = S.cmds.find(x => x.id === S.detail), L = S.lignes[S.detail] || [];
   if (!c) return;
   const P = S.params;
@@ -602,7 +1746,7 @@ function printPF() {
   const nom = P.entreprise_nom || "Charcuterie de l'Ituri SARL";
   const adr = P.entreprise_adresse || "Bunia, commune Mbunya, quartier Lumumba, Poste n° 12";
   const tel = P.entreprise_tel || "WhatsApp : +243 853 591 308";
-  const d = new Date(), val = new Date(Date.now() + 7 * 864e5), df = x => x.toLocaleDateString("fr-FR", {timeZone: TZ, day: "numeric", month: "long", year: "numeric"});
+  const d = new Date(), val = new Date(Date.now() + 7 * 864e5), df = x => x.toLocaleDateString(LOC[S.lang] || "fr-FR", {timeZone: TZ, day: "numeric", month: "long", year: "numeric"});
   $("#pf").innerHTML = `<div class="hd"><div><h1>${e(nom)}</h1><div>${e(adr)}</div><div>${e(tel)} · charituri.com</div></div><img src="logo.webp" alt=""></div>
   <div style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap"><div><b style="font-size:17px">FACTURE PRO FORMA N° PF-${String(c.id).padStart(4, "0")}</b><div>Date : ${df(d)}</div><div>Valable jusqu'au : ${df(val)}</div></div>
   <div><b>Client</b><div>${e(c.client_nom)}</div>${c.adresse ? `<div>${e(c.adresse)}</div>` : ""}${c.client_tel ? `<div>${e(c.client_tel)}</div>` : ""}</div></div>
@@ -614,7 +1758,6 @@ function printPF() {
   <div class="sg"><div>Le client<br><br>________________</div><div>Pour ${e(nom)}<br><br>________________</div></div>`;
   document.body.classList.add("pfmode");
   const im = $("#pf img"), go = () => setTimeout(() => { window.print(); }, 150);
-  window.addEventListener("afterprint", () => document.body.classList.remove("pfmode"), {once: true});
   if (im.complete) go(); else { im.onload = go; im.onerror = go; }
 }
 
@@ -689,8 +1832,8 @@ function vTeam() {
   const card = p => {
     const x = teamEdit(p), me = p.id === S.prof.id, np = p.role === "en_attente";
     return `<div class="card mem"><div><h3>${e(p.nom || "(sans nom)")}${me ? " · " + t("vous") : ""}</h3><small>${e(p.email || "")} · ${t("inscrit le")} ${e(fmtD(p.created_at))}</small></div>
-      <div class="field"><label>${t("Poste principal")}</label><select data-m="te.${p.id}.role" ${me ? "disabled" : ""}><option value="">${t("— Choisir le poste —")}</option>${ROLE_ORDER.map(r => `<option value="${r}" ${x.role === r ? "selected" : ""}>${ROLES[r]}</option>`).join("")}</select></div>
-      <div><small>${t("Postes supplémentaires (une personne peut cumuler)")}</small><div class="chips" style="margin-top:6px">${ROLE_ORDER.filter(r => r !== x.role).map(r => `<button type="button" data-a="tx" data-id="${p.id}" data-r="${r}" aria-pressed="${x.extra.includes(r)}" ${me ? "disabled" : ""}>${ROLES[r]}</button>`).join("")}</div></div>
+      <div class="field"><label>${t("Poste principal")}</label><select data-m="te.${p.id}.role" ${me ? "disabled" : ""}><option value="">${t("— Choisir le poste —")}</option>${ROLE_ORDER.map(r => `<option value="${r}" ${x.role === r ? "selected" : ""}>${rl(r)}</option>`).join("")}</select></div>
+      <div><small>${t("Postes supplémentaires (une personne peut cumuler)")}</small><div class="chips" style="margin-top:6px">${ROLE_ORDER.filter(r => r !== x.role).map(r => `<button type="button" data-a="tx" data-id="${p.id}" data-r="${r}" aria-pressed="${x.extra.includes(r)}" ${me ? "disabled" : ""}>${rl(r)}</button>`).join("")}</div></div>
       <div class="acts">${np || !p.actif ? `<button class="btn good" data-a="tsave" data-id="${p.id}" data-on="1">${np ? t("Accepter et activer") : t("Réactiver")}</button>` : `<button class="btn pri" data-a="tsave" data-id="${p.id}">${t("Enregistrer")}</button>`}
         ${me ? "" : `<button class="btn" data-a="treset" data-id="${p.id}">${t("Envoyer lien de réinitialisation")}</button>`}
         ${me || !p.actif ? "" : `<button class="btn bad" data-a="toff" data-id="${p.id}">${S.offAsk === p.id ? t("Confirmer la désactivation") : np ? t("Refuser") : t("Désactiver le compte")}</button>`}</div></div>`;
@@ -726,22 +1869,466 @@ function vMe() {
   const p = S.prof, th = ls.get("chg_theme", "auto");
   const dir = has("directeur");
   return `<div class="h"><h2>${t("Mon compte")}</h2></div>
-  <div class="card"><div class="dl"><div><span>${t("Nom")}</span><span>${e(p.nom)}</span></div><div><span>${t("E-mail")}</span><span>${e(p.email)}</span></div><div><span>${t("Postes")}</span><span>${e(roles().map(r => ROLES[r]).join(", "))}</span></div></div></div>
+  <div class="card"><div class="dl"><div><span>${t("Nom")}</span><span>${e(p.nom)}</span></div><div><span>${t("E-mail")}</span><span>${e(p.email)}</span></div><div><span>${t("Postes")}</span><span>${e(roles().map(r => rl(r)).join(", "))}</span></div></div></div>
   ${dir ? `<div class="card"><b>${t("Code entreprise")}</b><small style="color:var(--muted)">${t("À donner aux nouveaux collaborateurs pour qu'ils créent leur compte.")}</small>
     ${S.code == null ? `<button class="btn" data-a="showcode">${t("Afficher le code")}</button>` : `<div class="codebox">${e(S.code)}</div>
     <div class="field"><label for="nc">${t("Nouveau code (6 caractères minimum)")}</label><input id="nc" data-m="newCode" autocapitalize="characters"></div><button class="btn pri" data-a="setcode">${t("Changer le code")}</button>`}</div>` : ""}
   <div class="card"><b>${t("Changer mon mot de passe")}</b><div class="field"><label for="np">${t("Nouveau mot de passe")}</label><input id="np" type="password" autocomplete="new-password" data-m="newPw"></div><button class="btn" data-a="setpw">${t("Enregistrer")}</button></div>
+  <div class="card"><b>${t("Sonnerie des nouvelles commandes")}</b>
+    <div class="seg">${Object.keys(TONES).map(k => `<button data-a="snd" data-k="${k}" aria-pressed="${(ls.get("chg_sound", {}).tone || "cloche") === k}">${t(TONES[k])}</button>`).join("")}</div>
+    <div class="seg"><button data-a="rep" aria-pressed="${ls.get("chg_sound", {}).repeat !== false}">${t("Répéter jusqu'à ce que je touche l'écran")}</button><button data-a="wake" aria-pressed="${ls.get("chg_wake", false)}">${t("Garder l'écran allumé")}</button></div>
+    <button class="btn" data-a="try">🔔 ${t("Essayer la sonnerie")}</button>
+    <small style="color:var(--muted)">${t("La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.")}</small></div>
+  <div class="card"><b>${t("Langue")}</b>${langSeg()}<small style="color:var(--muted)">${t("Mes traductions sont à vérifier par un locuteur natif.")}</small></div>
   <div class="card"><b>${t("Affichage")}</b><div class="seg">${[["auto", "Automatique"], ["light", "Clair"], ["dark", "Sombre"]].map(x => `<button data-a="theme" data-k="${x[0]}" aria-pressed="${th === x[0]}">${t(x[1])}</button>`).join("")}</div>
     ${S.installEvt ? `<button class="btn" data-a="install">📲 ${t("Installer l'application")}</button>` : `<small style="color:var(--muted)">${t("Pour l'installer : menu du navigateur → « Ajouter à l'écran d'accueil » ou « Installer l'application ».")}</small>`}</div>
   <button class="btn block" data-a="logout">${t("Se déconnecter")}</button>`;
 }
 function applyTheme() { const th = ls.get("chg_theme", "auto"); if (th === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", th); }
 
+/* ================= Formulaires génériques ================= */
+const today = () => new Date().toLocaleDateString("en-CA", {timeZone: TZ});
+const fld = (label, model, val, o) => { o = o || {}; return `<div class="field"><label>${t(label)}</label><input ${o.type ? 'type="' + o.type + '"' : ""} ${o.im ? 'inputmode="' + o.im + '"' : ""} data-m="${model}" value="${e(val == null ? "" : val)}" ${o.ph ? 'placeholder="' + e(o.ph) + '"' : ""}></div>`; };
+const sel = (label, model, val, opts) => `<div class="field"><label>${t(label)}</label><select data-m="${model}">${opts.map(x => { const v = Array.isArray(x) ? x[0] : x, l = Array.isArray(x) ? x[1] : x; return `<option value="${e(v)}" ${String(val) === String(v) ? "selected" : ""}>${e(t(l))}</option>`; }).join("")}</select></div>`;
+const numOrNull = v => (v === "" || v == null) ? null : num(v);
+const dbErr = er => /23505|duplicate|unique/i.test((er.data && (er.data.code + er.data.message)) || er.message) ? t("Cet élément existe déjà.") : er.message;
+async function guard(fn) { try { await fn(); } catch (er) { toast(er instanceof NetErr ? t("Pas de réseau : action non enregistrée.") : dbErr(er), 5000); } }
+
+/* ================= Produits et prix ================= */
+const canProd = () => has("directeur", "commercial");
+async function loadProd() {
+  S.prodAll = await rest("produits?select=*&order=ordre,id");
+  S.tarifs = await rest("livraison_tarifs?select=*&order=poids_max");
+}
+function vProd() {
+  const g = {}; (S.prodAll || []).forEach(p => (g[p.categorie || "Autres"] = g[p.categorie || "Autres"] || []).push(p));
+  const cats = Object.keys(g);
+  const rng = p => p.prix_min == null ? t("prix à confirmer") : (p.prix_max != null && p.prix_max !== p.prix_min ? Math.round(p.prix_min).toLocaleString("fr-FR") + " – " + Math.round(p.prix_max).toLocaleString("fr-FR") : Math.round(p.prix_min).toLocaleString("fr-FR")) + " FC";
+  const form = (m, v) => `${fld("Nom du produit", m + ".nom", v.nom)}
+    <div class="two">${fld("Unité (kg, pièce, plateau…)", m + ".unite", v.unite)}${fld("Catégorie", m + ".categorie", v.categorie)}</div>
+    <div class="two">${fld("Prix minimum (FC)", m + ".prix_min", v.prix_min, {im: "numeric"})}${fld("Prix maximum (FC)", m + ".prix_max", v.prix_max, {im: "numeric"})}</div>
+    ${fld("Note (facultatif)", m + ".note", v.note)}`;
+  const nw = S.pNew ? `<div class="card">${form("pn", S.pn)}<div class="acts"><button class="btn pri" data-a="padd">${t("Ajouter le produit")}</button><button class="btn" data-a="pnewtoggle">${t("Annuler")}</button></div></div>` : "";
+  return `<div class="h"><h2>${t("Produits et prix")}</h2><p>${t("Ces prix s'affichent sur le site charituri.com et dans les commandes.")}</p></div>
+  <div class="card mem" style="border-left:4px solid var(--gold)"><small>ℹ️ ${t("Les prix de référence sont tenus dans le Google Sheet (onglet Tarification). Une modification faite ici peut être remplacée à la prochaine synchronisation du Sheet : pour un changement durable, modifiez-le dans le Sheet.")}</small></div>
+  <div class="acts"><button class="btn pri" data-a="pnewtoggle">+ ${t("Nouveau produit")}</button></div>${nw}
+  ${cats.map(c => `<h3>${e(c)}</h3><div class="list">${g[c].map(p => {
+    const open = S.pOpen === p.id, x = S.pe[p.id];
+    return `<div class="card mem ${p.actif ? "" : "off"}"><div class="row"><div><b>${e(p.nom)}</b> <small>· ${e(p.unite)}</small><br><span>${rng(p)}</span>${p.actif ? "" : ` <span class="pill p-bad">${t("Masqué")}</span>`}</div><button class="btn sm" data-a="popen" data-id="${p.id}">${open ? t("Fermer") : t("Modifier")}</button></div>
+    ${open && x ? form("pe." + p.id, x) + `<div class="acts"><button class="btn pri" data-a="psave" data-id="${p.id}">${t("Enregistrer")}</button><button class="btn" data-a="ptog" data-id="${p.id}">${p.actif ? t("Masquer du site et des commandes") : t("Remettre en vente")}</button></div>` : ""}</div>`;
+  }).join("")}</div>`).join("")}
+  <h3>${t("Frais de livraison selon le poids total")}</h3>
+  <div class="card mem">${S.tarifs.map(r => { const k = String(r.poids_max).replace(".", "_"); const x = S.tre[k] || (S.tre[k] = {poids_max: r.poids_max, frais: r.frais });
+    return `<div class="line2"><div class="field"><label>${t("Jusqu'à (kg)")}</label><input inputmode="decimal" data-m="tre.${k}.poids_max" value="${e(x.poids_max)}"></div><div class="field"><label>${t("Frais (FC)")}</label><input inputmode="numeric" data-m="tre.${k}.frais" value="${e(x.frais)}"></div><button class="btn sm" data-a="trsave" data-id="${r.poids_max}">✓</button><button class="btn sm bad" data-a="trdel" data-id="${r.poids_max}">${S.delAsk === "t" + r.poids_max ? "?" : "✕"}</button></div>`; }).join("")}
+    <div class="line2"><div class="field"><label>${t("Nouvelle tranche : jusqu'à (kg)")}</label><input inputmode="decimal" data-m="trn.poids_max" value="${e(S.trn.poids_max)}"></div><div class="field"><label>${t("Frais (FC)")}</label><input inputmode="numeric" data-m="trn.frais" value="${e(S.trn.frais)}"></div><button class="btn sm pri" data-a="tradd">+</button><span></span></div>
+    <small>${t("Au-delà de la dernière tranche, les frais sont à confirmer.")}</small></div>`;
+}
+const pBody = x => ({nom: String(x.nom || "").trim(), unite: String(x.unite || "").trim() || "unité", categorie: String(x.categorie || "").trim() || null, prix_min: numOrNull(x.prix_min), prix_max: numOrNull(x.prix_max), note: String(x.note || "").trim() || null});
+function fixRange(b) { if (b.prix_min != null && b.prix_max == null) b.prix_max = b.prix_min; if (b.prix_min != null && b.prix_max < b.prix_min) { const z = b.prix_min; b.prix_min = b.prix_max; b.prix_max = z; } return b; }
+
+/* ================= Stock ================= */
+const canStockW = () => has("directeur", "exploitation", "stock");
+async function loadStock() {
+  const [p, s, f] = await Promise.all([rest("produits?select=id,nom,unite,categorie,actif&order=ordre,id"), rest("stock?select=*"), has("directeur", "exploitation", "stock", "comptable") ? rest("fournisseurs?select=*&order=nom") : Promise.resolve([])]);
+  S.prodAll = S.prodAll && S.prodAll.length ? S.prodAll : p; S.stockP = p; S.stockR = s; S.fourn = f;
+  try { S.colisR = await rest("stock_colis?select=*&order=poids"); } catch (_) { S.colisR = []; }
+}
+function vStockScreen() {
+  const bySt = {}; (S.stockR || []).forEach(r => bySt[r.produit_id] = r);
+  const items = (S.stockP || []).filter(p => p.actif);
+  const low = items.filter(p => { const r = bySt[p.id]; return r && Number(r.seuil) > 0 && Number(r.quantite) <= Number(r.seuil); });
+  const g = {}; items.forEach(p => (g[p.categorie || "Autres"] = g[p.categorie || "Autres"] || []).push(p));
+  const W = canStockW();
+  return `<div class="h"><h2>${t("Stock")}</h2><p>${low.length ? "⚠ " + low.length + " " + t("produit(s) à réapprovisionner") : t("Aucune alerte")}</p></div>
+  ${Object.keys(g).map(c => `<h3>${e(c)}</h3><div class="list">${g[c].map(p => {
+    const r = bySt[p.id], q = r ? Number(r.quantite) : 0, sz = r ? Number(r.seuil) : 0, lowp = r && sz > 0 && q <= sz, open = S.sOpen === p.id, x = S.se[p.id];
+    return `<div class="card mem"><div class="row"><div><b>${e(p.nom)}</b> <small>· ${e(p.unite)}</small><br><span class="num">${q.toLocaleString("fr-FR")}</span> ${lowp ? `<span class="pill p-bad">${t("Stock bas")}</span>` : ""}${sz ? ` <small>(${t("seuil")} ${sz.toLocaleString("fr-FR")})</small>` : ""}</div>${W ? `<button class="btn sm" data-a="sopen" data-id="${p.id}">${open ? t("Fermer") : t("Modifier")}</button>` : ""}</div>
+    ${open && x ? `<div class="two">${fld("Quantité en stock", "se." + p.id + ".quantite", x.quantite, {im: "decimal"})}${fld("Seuil d'alerte", "se." + p.id + ".seuil", x.seuil, {im: "decimal"})}</div>
+    <div class="two">${fld("Ajouter (+) ou retirer (−)", "se." + p.id + ".delta", x.delta, {im: "decimal", ph: "+10 ou -2"})}<span></span></div>
+    <div class="acts"><button class="btn pri" data-a="ssave" data-id="${p.id}">${t("Enregistrer")}</button></div>
+    ${colisHTML(p)}` : ""}</div>`; }).join("")}</div>`).join("")}
+  ${has("directeur", "stock", "exploitation", "comptable") ? `<h3>${t("Fournisseurs")}</h3><div class="list">${(S.fourn || []).map(f => `<div class="card mem"><b>${e(f.nom)}</b><small>${e([f.type, f.telephone, f.quartier].filter(Boolean).join(" · "))}</small>${f.produits ? `<small>${e(f.produits)}</small>` : ""}</div>`).join("") || `<div class="empty">${t("Aucun fournisseur enregistré.")}</div>`}</div>
+  ${has("directeur", "stock") ? `<div class="card mem"><b>${t("Nouveau fournisseur")}</b>${fld("Nom", "fo.nom", S.fo.nom)}<div class="two">${fld("Téléphone", "fo.telephone", S.fo.telephone, {im: "tel"})}${fld("Quartier", "fo.quartier", S.fo.quartier)}</div>${fld("Produits fournis", "fo.produits", S.fo.produits)}<button class="btn pri" data-a="foadd">${t("Ajouter")}</button></div>` : ""}` : ""}`;
+}
+
+
+/* ================= Stock par colis ================= */
+function colisHTML(p) {
+  if (!canStockW()) return "";
+  const rows = (S.colisR || []).filter(c => c.produit_id === p.id);
+  const tot = rows.reduce((s, c) => s + Number(c.poids) * c.nombre, 0), cn = S.cn[p.id] || (S.cn[p.id] = {poids: "", nb: ""});
+  return `<h3>${t("Colis en chambre froide")}</h3><small>${t("Total des colis")} : <b>${tot.toLocaleString("fr-FR")}</b> ${e(p.unite)}</small>
+  <div class="list">${rows.map(c => `<div class="card mem"><div class="row"><div><b>${Number(c.poids).toLocaleString("fr-FR")} ${e(p.unite)}</b> × <span class="num">${c.nombre}</span></div>
+  <div class="acts"><button class="btn" data-a="colis" data-id="${p.id}" data-w="${c.poids}" data-n="-1">−1</button><button class="btn" data-a="colis" data-id="${p.id}" data-w="${c.poids}" data-n="1">+1</button></div></div></div>`).join("") || `<small>${t("Aucun colis enregistré.")}</small>`}</div>
+  <div class="two">${fld("Poids du colis (kg)", "cn." + p.id + ".poids", cn.poids, {im: "decimal", ph: "1, 2, 5…"})}${fld("Nombre de colis (+ ou −)", "cn." + p.id + ".nb", cn.nb, {im: "numeric", ph: "10 ou -2"})}</div>
+  <div class="acts"><button class="btn" data-a="coliswr" data-id="${p.id}">${t("Ajouter / retirer des colis")}</button></div>`;
+}
+
+/* ================= Marges, taux, calculateur ================= */
+const tauxUSD = () => num(S.params.taux_usd) || 2800;
+async function loadMar() {
+  const [c, l, m] = await Promise.all([rest("couts_produits?select=*"), rest("lots_achat?select=*&order=id.desc&limit=40"), rpc("marges_produits", {p_jours: S.mjours})]);
+  S.couts = {}; (c || []).forEach(x => S.couts[x.produit_id] = Number(x.cout_fc)); S.lots = l || []; S.mar = m || [];
+  if (!S.prodAll || !S.prodAll.length) S.prodAll = await rest("produits?select=*&order=ordre,id");
+}
+const gl = v => v >= 0 ? "var(--good)" : "var(--bad)";
+function calcCalc() {
+  const c = S.calc, tx = c.devise === "USD" ? (num(c.taux) || tauxUSD()) : 1, cost = num(c.cout) * tx, kg = num(c.poids), pv = num(c.pv), cible = Math.min(95, Math.max(0, num(c.cible)));
+  if (cost <= 0 || kg <= 0) return null;
+  const cpk = cost / kg, mk = pv - cpk, tot = mk * kg;
+  return {tx, cost, kg, pv, cpk, mk, tot, pct: pv > 0 ? mk / pv * 100 : null, ca: pv * kg, conseille: cpk / (1 - cible / 100), cible};
+}
+function calcRes() {
+  const r = calcCalc();
+  if (!r) return `<small>${t("Saisissez le coût d'achat et le poids obtenu pour voir le résultat.")}</small>`;
+  const f = n => Math.round(n).toLocaleString("fr-FR");
+  const verdict = r.pv <= 0 ? `<span class="pill p-bad">${t("Indiquez un prix de vente")}</span>` : r.tot >= 0 ? `<span class="pill p-ok">✔ ${t("GAIN")}</span>` : `<span class="pill p-bad">✖ ${t("PERTE")}</span>`;
+  return `<div class="kpis">
+    <div class="kpi"><small>${t("Coût total")}</small><b>${f(r.cost)} FC</b></div>
+    <div class="kpi"><small>${t("Coût par kg")}</small><b>${f(r.cpk)} FC</b></div>
+    <div class="kpi"><small>${t("Vente totale prévue")}</small><b>${f(r.ca)} FC</b></div>
+    <div class="kpi"><small>${t("Marge par kg")}</small><b style="color:${gl(r.mk)}">${r.mk >= 0 ? "+" : "−"}${f(Math.abs(r.mk))} FC</b></div>
+    <div class="kpi"><small>${t("Marge totale")}</small><b style="color:${gl(r.tot)}">${r.tot >= 0 ? "+" : "−"}${f(Math.abs(r.tot))} FC</b></div>
+    <div class="kpi"><small>${t("Marge en %")}</small><b style="color:${gl(r.mk)}">${r.pct == null ? "—" : r.pct.toFixed(1) + " %"}</b></div></div>
+  <p>${verdict}</p>
+  <small>${t("Prix minimum pour ne pas perdre")} : <b>${f(r.cpk)} FC/kg</b><br>${t("Prix conseillé pour")} ${r.cible} % ${t("de marge")} : <b>${f(r.conseille)} FC/kg</b>${r.tx !== 1 ? `<br>${t("Taux utilisé")} : 1 USD = ${f(r.tx)} FC` : ""}</small>`;
+}
+function vMar() {
+  const subs = [["calc", "Calculateur"], ["marges", "Marges"], ["lots", "Lots achetés"]], c = S.calc, usd = c.devise === "USD";
+  const seg = `<div class="seg" role="group">${subs.map(x => `<button data-a="msub" data-k="${x[0]}" aria-pressed="${S.msub === x[0]}">${t(x[1])}</button>`).join("")}</div>`;
+  const taux = `<div class="card mem"><b>${t("Taux du jour")}</b><small>${t("1 dollar (USD) vaut combien de francs ? Servira pour tous les calculs en dollars.")}</small>
+    <div class="two">${fld("1 USD = … FC", "taux_in", S.taux_in === "" ? S.params.taux_usd || "" : S.taux_in, {im: "decimal"})}<div class="acts" style="align-items:end"><button class="btn pri" data-a="tauxsave">${t("Enregistrer le taux")}</button></div></div></div>`;
+  let b = "";
+  if (S.msub === "calc") {
+    const prods = [["", "— Aucun —"]].concat((S.prodAll || []).filter(p => p.actif).map(p => [p.id, p.nom + " (" + p.unite + ")"]));
+    b = `<div class="card mem"><b>${t("Calculateur d'achat")}</b><small>${t("Exemple : une chèvre achetée 100 USD qui donne 25 kg de viande, vendue 12 000 FC le kilo.")}</small>
+    ${fld("Qu'avez-vous acheté ? (ex. Chèvre)", "calc.libelle", c.libelle)}
+    <div class="two">${sel("Monnaie d'achat", "calc.devise", c.devise, [["USD", "Dollars (USD)"], ["FC", "Francs (FC)"]])}${fld(usd ? "Coût total (USD)" : "Coût total (FC)", "calc.cout", c.cout, {im: "decimal"})}</div>
+    ${usd ? fld(t("Taux (laisser vide = taux du jour : ") + tauxUSD().toLocaleString("fr-FR") + ")", "calc.taux", c.taux, {im: "decimal"}) : ""}
+    <div class="two">${fld("Kilos de viande obtenus", "calc.poids", c.poids, {im: "decimal"})}${fld("Prix de vente par kg (FC)", "calc.pv", c.pv, {im: "decimal"})}</div>
+    ${fld("Marge souhaitée (%)", "calc.cible", c.cible, {im: "decimal"})}
+    <div id="calcres" class="tot-box" style="margin-top:8px">${calcRes()}</div>
+    ${sel("Produit concerné (pour enregistrer le coût)", "calc.pid", c.pid, prods)}
+    <div class="acts"><button class="btn pri" data-a="calcsave">${t("Enregistrer ce lot")}</button>${c.pid ? `<button class="btn" data-a="calcapply">${t("Utiliser le coût par kg pour ce produit")}</button>` : ""}</div></div>`;
+  } else if (S.msub === "marges") {
+    const M = S.mar || [], ca = M.reduce((s, x) => s + Number(x.chiffre_affaires), 0), mg = M.reduce((s, x) => s + (x.marge == null ? 0 : Number(x.marge)), 0), sans = M.filter(x => x.marge == null).length;
+    b = `<div class="seg" role="group">${[7, 30, 90].map(j => `<button data-a="mjours" data-k="${j}" aria-pressed="${S.mjours === j}">${j} ${t("jours")}</button>`).join("")}</div>
+    <div class="kpis"><div class="kpi"><small>${t("Ventes livrées")}</small><b>${fc(ca)}</b></div><div class="kpi"><small>${t("Marge connue")}</small><b style="color:${gl(mg)}">${mg >= 0 ? "+" : "−"}${fc(Math.abs(mg))}</b></div></div>
+    ${sans ? `<small>⚠ ${sans} ${t("produit(s) sans coût d'achat : indiquez-le ci-dessous pour voir la marge.")}</small>` : ""}
+    <div class="list">${M.map(x => `<div class="card mem"><div class="row"><div><b>${e(x.produit_nom)}</b> <small>· ${Number(x.qte_vendue).toLocaleString("fr-FR")} ${e(x.unite)}</small><br><small>${t("Ventes")} ${fc(x.chiffre_affaires)}${x.cout_unitaire != null ? " · " + t("coût") + " " + fc(x.cout_total) : ""}</small></div>
+      <b class="num" style="color:${x.marge == null ? "var(--muted)" : gl(x.marge)}">${x.marge == null ? "—" : (x.marge >= 0 ? "+" : "−") + fc(Math.abs(x.marge))}</b></div></div>`).join("") || `<small>${t("Aucune vente livrée sur cette période.")}</small>`}</div>
+    <h3>${t("Coût d'achat par produit (FC par unité)")}</h3><div class="list">${(S.prodAll || []).filter(p => p.actif).map(p => {
+      const ce = S.ce[p.id] !== undefined ? S.ce[p.id] : (S.couts[p.id] != null ? S.couts[p.id] : ""), pv = Number(p.prix_min || 0), has_ = S.couts[p.id] != null, mk = has_ ? pv - S.couts[p.id] : null;
+      return `<div class="card mem"><div class="row"><div><b>${e(p.nom)}</b> <small>· ${e(p.unite)}${pv ? " · " + t("vente dès") + " " + fc(pv) : ""}</small>${mk != null ? `<br><small style="color:${gl(mk)}">${t("Marge au prix mini")} : ${mk >= 0 ? "+" : "−"}${fc(Math.abs(mk))}</small>` : ""}</div>
+      <div class="acts"><input inputmode="decimal" style="width:110px" data-m="ce.${p.id}" value="${e(ce)}" placeholder="FC"><button class="btn" data-a="coutsave" data-id="${p.id}">OK</button></div></div></div>`; }).join("")}</div>`;
+  } else {
+    b = `<div class="list">${(S.lots || []).map(l => {
+      const tx = l.devise === "USD" ? Number(l.taux) : 1, cost = Number(l.cout_total) * tx, cpk = cost / Number(l.quantite), mk = Number(l.prix_vente) - cpk, tot = mk * Number(l.quantite);
+      return `<div class="card mem"><div class="row"><div><b>${e(l.libelle)}</b> <small>· ${e(l.date_achat)}</small><br><small>${Number(l.cout_total).toLocaleString("fr-FR")} ${e(l.devise)}${l.devise === "USD" ? " @ " + Math.round(tx).toLocaleString("fr-FR") : ""} · ${Number(l.quantite).toLocaleString("fr-FR")} kg · ${t("coût")} ${fc(cpk)}/kg</small></div>
+      <div style="text-align:right"><b class="num" style="color:${Number(l.prix_vente) ? gl(tot) : "var(--muted)"}">${Number(l.prix_vente) ? (tot >= 0 ? "+" : "−") + fc(Math.abs(tot)) : "—"}</b><br><button class="btn" data-a="lotdel" data-id="${l.id}">${S.delAsk === "l" + l.id ? t("Confirmer ?") : t("Supprimer")}</button></div></div></div>`; }).join("") || `<small>${t("Aucun lot enregistré. Utilisez le calculateur.")}</small>`}</div>`;
+  }
+  return `<div class="h"><h2>${t("Marges et achats")}</h2><p>${t("Visible seulement par le directeur et le comptable.")}</p></div>${taux}${seg}${b}`;
+}
+
+
+/* ================= Exports : PDF (impression) et Excel (.xlsx) ================= */
+const crcT = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = crcT[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zipStore(files) {
+  const enc = new TextEncoder(), parts = [], cd = []; let off = 0;
+  files.forEach(f => {
+    const nm = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data), sz = data.length;
+    const h = new DataView(new ArrayBuffer(30)); h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(12, 0x21, true); h.setUint32(14, crc, true); h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, nm.length, true);
+    parts.push(new Uint8Array(h.buffer), nm, data);
+    const c = new DataView(new ArrayBuffer(46)); c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(14, 0x21, true); c.setUint32(16, crc, true); c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, nm.length, true); c.setUint32(42, off, true);
+    cd.push(new Uint8Array(c.buffer), nm); off += 30 + nm.length + sz;
+  });
+  const cdSize = cd.reduce((s, x) => s + x.length, 0), z = new DataView(new ArrayBuffer(22));
+  z.setUint32(0, 0x06054b50, true); z.setUint16(8, files.length, true); z.setUint16(10, files.length, true); z.setUint32(12, cdSize, true); z.setUint32(16, off, true);
+  return new Blob(parts.concat(cd, [new Uint8Array(z.buffer)]), {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+const xe = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+function colL(i) { let s = ""; i++; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+function buildXlsx(sheets) {
+  const sh = sheets.map((s, si) => {
+    const rows = s.rows.map((r, ri) => `<row r="${ri + 1}">${r.map((v, ci) => {
+      const ref = colL(ci) + (ri + 1), st = ri === 0 && s.header !== false ? ' s="1"' : "";
+      if (typeof v === "number" && isFinite(v)) return `<c r="${ref}"${st}><v>${v}</v></c>`;
+      if (v == null || v === "") return "";
+      return `<c r="${ref}" t="inlineStr"${st}><is><t xml:space="preserve">${xe(v)}</t></is></c>`;
+    }).join("")}</row>`).join("");
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="${Math.max(1, ...s.rows.map(r => r.length))}" width="22" customWidth="1"/></cols><sheetData>${rows}</sheetData></worksheet>`;
+  });
+  const files = [
+    {name: "[Content_Types].xml", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}</Types>`},
+    {name: "_rels/.rels", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`},
+    {name: "xl/workbook.xml", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((s, i) => `<sheet name="${xe(s.name.replace(/[\[\]\*\?\/\\:]/g, " ").slice(0, 31))}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")}</sheets></workbook>`},
+    {name: "xl/_rels/workbook.xml.rels", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+    {name: "xl/styles.xml", text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`}
+  ].concat(sh.map((x, i) => ({name: `xl/worksheets/sheet${i + 1}.xml`, text: x})));
+  return zipStore(files);
+}
+function saveBlob(blob, name) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+}
+/* Un « rapport » = {titre, sous, kpis:[[libellé, valeur]], sections:[{titre, head:[], rows:[[]], right:[indices], note}], nom} */
+const tv = v => typeof v === "string" ? t(v) : v;
+function reportXlsx(rep) {
+  const sheets = [{name: t("Résumé"), header: false, rows: [[rep.titre], [rep.sous], [], ...rep.kpis.map(k => [t(k[0]), k[1]])]}];
+  rep.sections.forEach(s => sheets.push({name: t(s.titre), rows: [s.head.map(t)].concat(s.rows.length ? s.rows.map(r => r.map(tv)) : [[t("(aucune donnée)")]])}));
+  saveBlob(buildXlsx(sheets), (rep.nom || "rapport") + ".xlsx"); toast(t("Fichier Excel créé"));
+}
+function reportPrint(rep) {
+  const P = S.params, nom = P.entreprise_nom || "Charcuterie de l'Ituri SARL", f = v => typeof v === "number" ? Math.round(v * 100) / 100 : v;
+  const fm = v => typeof v === "number" ? v.toLocaleString("fr-FR") : e(v == null ? "" : v);
+  $("#pf").innerHTML = `<div class="hd"><div><h1>${e(nom)}</h1><div><b>${e(rep.titre)}</b></div><div>${e(rep.sous)}</div></div><img src="logo.webp" alt=""></div>
+  ${rep.kpis.length ? `<div class="kp">${rep.kpis.map(k => `<div><small>${e(t(k[0]))}</small><b>${fm(k[1])}</b></div>`).join("")}</div>` : ""}
+  ${rep.sections.map(s => `<h2>${e(t(s.titre))}</h2>${s.rows.length ? `<table><tr>${s.head.map((h, i) => `<th class="${(s.right || []).includes(i) ? "r" : ""}">${e(t(h))}</th>`).join("")}</tr>${s.rows.map(r => `<tr>${r.map((v, i) => `<td class="${(s.right || []).includes(i) ? "r" : ""}">${fm(f(tv(v)))}</td>`).join("")}</tr>`).join("")}</table>` : `<p>—</p>`}${s.note ? `<p class="nb">${e(t(s.note))}</p>` : ""}`).join("")}
+  <div class="sg"><div>${t("Établi par")} : ${e(S.prof.nom)}<br><br>${t("Visa")} : ________________</div><div>${t("Imprimé le")} ${e(new Date().toLocaleString(LOC[S.lang] || "fr-FR", {timeZone: TZ}))}</div></div>`;
+  document.body.classList.add("pfmode");
+  const im = $("#pf img"), go = () => setTimeout(() => window.print(), 150);
+  if (im.complete) go(); else { im.onload = go; im.onerror = go; }
+}
+const dayOf = iso => iso ? new Date(iso).toLocaleDateString("sv-SE", {timeZone: TZ}) : "";
+const hourOf = iso => iso ? new Date(iso).toLocaleTimeString("fr-FR", {timeZone: TZ, hour: "2-digit", minute: "2-digit"}) : "";
+const todayK = () => dayOf(new Date().toISOString());
+const fdate = k => k ? new Date(k + "T12:00:00").toLocaleDateString(LOC[S.lang] || "fr-FR", {weekday: "long", day: "numeric", month: "long", year: "numeric"}) : "";
+const hbar = (label, val, max, color, txt) => `<div style="margin:6px 0"><div class="row" style="flex-wrap:nowrap"><span style="min-width:0;overflow-wrap:anywhere">${e(label)}</span><b class="num" style="white-space:nowrap;${color ? "color:" + color : ""}">${txt}</b></div><div style="background:var(--line);border-radius:5px;height:8px"><div style="height:8px;border-radius:5px;background:${color || "var(--wine)"};width:${max > 0 ? Math.max(2, Math.min(100, Math.abs(val) / max * 100)) : 0}%"></div></div></div>`;
+
+/* ================= Tableau de bord ================= */
+function dashData() {
+  const per = S.dper, cutoff = Date.now() - per * 864e5, inP = iso => iso && new Date(iso).getTime() >= cutoff, cm = S.cmds || [];
+  const liv = cm.filter(c => c.statut === "Livrée" && inP(c.date_livraison)), rec = cm.filter(c => c.statut !== "Annulée" && inP(c.created_at));
+  const sum = a => a.reduce((s, c) => s + Number(c.total || 0), 0);
+  const ca = sum(liv), enc = sum(liv.filter(c => c.paye)), cred = sum(liv.filter(c => c.paiement_mode === "Crédit" && !c.paye)), nonenc = sum(liv.filter(c => !c.paye)) - cred;
+  const buckets = [], today = new Date(todayK() + "T12:00:00");
+  if (per <= 30) { for (let i = per - 1; i >= 0; i--) { const d = new Date(today.getTime() - i * 864e5), k = d.toLocaleDateString("sv-SE"); buckets.push({k, label: d.getDate() + "/" + (d.getMonth() + 1), v: 0}); } liv.forEach(c => { const b = buckets.find(x => x.k === dayOf(c.date_livraison)); if (b) b.v += Number(c.total || 0); }); }
+  else { for (let w = 12; w >= 0; w--) buckets.push({label: "S-" + w, v: 0, w}); liv.forEach(c => { const w = Math.floor((today.getTime() - new Date(dayOf(c.date_livraison) + "T12:00:00").getTime()) / 864e5 / 7); const b = buckets.find(x => x.w === w); if (b) b.v += Number(c.total || 0); }); }
+  const byPay = {}; liv.filter(c => c.paye).forEach(c => byPay[c.paiement_mode] = (byPay[c.paiement_mode] || 0) + Number(c.total || 0));
+  const byCli = {}; liv.forEach(c => byCli[c.client_nom] = (byCli[c.client_nom] || 0) + Number(c.total || 0));
+  const cli = Object.keys(byCli).map(k => [k, byCli[k]]).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const stat = ["Reçue", "En préparation", "Prête", "En livraison"].map(s => [s, cm.filter(c => c.statut === s).length]);
+  const bySt = {}; (S.stockR || []).forEach(r => bySt[r.produit_id] = r);
+  const bas = (S.stockP || []).filter(p => p.actif).filter(p => { const r = bySt[p.id]; return r && Number(r.seuil) > 0 && Number(r.quantite) <= Number(r.seuil); }).map(p => [p.nom, Number(bySt[p.id].quantite), p.unite]);
+  const prod = has("directeur", "comptable") ? (S.mar || []) : null;
+  return {per, liv, rec, ca, enc, cred, nonenc, buckets, byPay, cli, stat, bas, prod};
+}
+function dashReport() {
+  const D = dashData(), f = Math.round, rows = [];
+  const mg = D.prod ? D.prod.reduce((s, x) => s + (x.marge == null ? 0 : Number(x.marge)), 0) : null;
+  const rep = {nom: "Tableau_de_bord_" + todayK(), titre: t("Tableau de bord") + " — " + D.per + " " + t("jours"), sous: t("Édité le") + " " + fdate(todayK()),
+    kpis: [["Commandes reçues", D.rec.length], ["Commandes livrées", D.liv.length], ["Ventes livrées (FC)", f(D.ca)], ["Encaissé (FC)", f(D.enc)], ["À encaisser (FC)", f(D.nonenc)], ["À crédit (FC)", f(D.cred)]],
+    sections: [{titre: D.per <= 30 ? "Ventes par jour" : "Ventes par semaine", head: [D.per <= 30 ? "Jour" : "Semaine", "Ventes (FC)"], rows: D.buckets.map(b => [b.label, f(b.v)]), right: [1]},
+      {titre: "Encaissements par mode", head: ["Mode", "Montant (FC)"], rows: Object.keys(D.byPay).map(k => [k, f(D.byPay[k])]), right: [1]},
+      {titre: "Meilleurs clients", head: ["Client", "Ventes (FC)"], rows: D.cli.map(c => [c[0], f(c[1])]), right: [1]},
+      {titre: "Commandes en cours", head: ["Statut", "Nombre"], rows: D.stat, right: [1]},
+      {titre: "Stock bas", head: ["Produit", "Quantité", "Unité"], rows: D.bas, right: [1]}]};
+  if (D.prod) { rep.kpis.push(["Marge connue (FC)", f(mg)]); rep.sections.splice(2, 0, {titre: "Produits : ventes et marges", head: ["Produit", "Quantité", "Unité", "Ventes (FC)", "Coût (FC)", "Marge (FC)"], rows: D.prod.map(x => [x.produit_nom, Number(x.qte_vendue), x.unite, f(x.chiffre_affaires), x.cout_total == null ? "—" : f(x.cout_total), x.marge == null ? "—" : f(x.marge)]), right: [1, 3, 4, 5], note: "« — » : coût d'achat non renseigné pour ce produit."}); }
+  return rep;
+}
+function vDash() {
+  const D = dashData(), mx = Math.max(1, ...D.buckets.map(b => b.v)), f = n => Math.round(n).toLocaleString("fr-FR");
+  const mg = D.prod ? D.prod.reduce((s, x) => s + (x.marge == null ? 0 : Number(x.marge)), 0) : null;
+  const maxP = D.prod ? Math.max(1, ...D.prod.map(x => Number(x.chiffre_affaires))) : 1, maxPay = Math.max(1, ...Object.values(D.byPay)), maxC = Math.max(1, ...D.cli.map(c => c[1]));
+  return `<div class="h"><h2>${t("Tableau de bord")}</h2><p>${t("Ventes livrées sur la période choisie.")}</p></div>
+  <div class="seg" role="group">${[7, 30, 90].map(j => `<button data-a="dper" data-k="${j}" aria-pressed="${S.dper === j}">${j} ${t("jours")}</button>`).join("")}</div>
+  <div class="acts"><button class="btn" data-a="dpdf">📄 PDF</button><button class="btn" data-a="dxls">📊 Excel</button></div>
+  <div class="kpis"><div class="kpi"><small>${t("Commandes reçues")}</small><b>${D.rec.length}</b></div><div class="kpi"><small>${t("Livrées")}</small><b>${D.liv.length}</b></div>
+  <div class="kpi"><small>${t("Ventes livrées")}</small><b>${f(D.ca)} FC</b></div><div class="kpi"><small>${t("Encaissé")}</small><b style="color:var(--good)">${f(D.enc)} FC</b></div>
+  <div class="kpi"><small>${t("À encaisser")}</small><b style="color:${D.nonenc > 0 ? "var(--warn)" : "var(--ink)"}">${f(D.nonenc)} FC</b></div><div class="kpi"><small>${t("À crédit")}</small><b style="color:${D.cred > 0 ? "var(--bad)" : "var(--ink)"}">${f(D.cred)} FC</b></div>
+  ${mg != null ? `<div class="kpi"><small>${t("Marge connue")}</small><b style="color:${gl(mg)}">${mg >= 0 ? "+" : "−"}${f(Math.abs(mg))} FC</b></div>` : ""}</div>
+  <h3>${D.per <= 30 ? t("Ventes par jour") : t("Ventes par semaine")}</h3>
+  <div class="card mem"><div class="bars">${D.buckets.map(b => `<div class="c"><span class="v">${b.v ? (b.v >= 1e6 ? (b.v / 1e6).toFixed(1) + "M" : Math.round(b.v / 1000) + "k") : ""}</span><div class="b" style="height:${Math.max(b.v ? 3 : 0, b.v / mx * 100)}%"></div><small>${D.per === 30 && D.buckets.length > 14 ? "" : e(b.label)}</small></div>`).join("")}</div></div>
+  <h3>${t("Encaissements par mode")}</h3><div class="card mem">${Object.keys(D.byPay).map(k => hbar(k, D.byPay[k], maxPay, "", f(D.byPay[k]) + " FC")).join("") || `<small>${t("Aucun encaissement.")}</small>`}</div>
+  ${D.prod ? `<h3>${t("Produits : ventes et marges")}</h3><div class="card mem">${D.prod.map(x => hbar(x.produit_nom + " (" + Number(x.qte_vendue).toLocaleString("fr-FR") + " " + x.unite + ")", Number(x.chiffre_affaires), maxP, x.marge == null ? "var(--muted)" : gl(x.marge), f(x.chiffre_affaires) + " FC" + (x.marge == null ? "" : " · " + (x.marge >= 0 ? "+" : "−") + f(Math.abs(x.marge)))).replace("</b></div>", "</b></div>")).join("") || `<small>${t("Aucune vente livrée.")}</small>`}<small>${t("Vert : gain · Rouge : perte · Gris : coût d'achat à renseigner (onglet Marges).")}</small></div>` : ""}
+  <h3>${t("Meilleurs clients")}</h3><div class="card mem">${D.cli.map(c => hbar(c[0], c[1], maxC, "", f(c[1]) + " FC")).join("") || `<small>${t("Aucune vente livrée.")}</small>`}</div>
+  <h3>${t("Commandes en cours")}</h3><div class="kpis">${D.stat.map(s => `<div class="kpi"><small>${t(s[0])}</small><b>${s[1]}</b></div>`).join("")}</div>
+  ${D.bas.length ? `<h3>⚠ ${t("Stock bas")}</h3><div class="card mem">${D.bas.map(b => `<div class="row"><span>${e(b[0])}</span><b class="num" style="color:var(--bad)">${b[1].toLocaleString("fr-FR")} ${e(b[2])}</b></div>`).join("")}</div>` : ""}`;
+}
+
+/* ================= Journal du jour ================= */
+async function loadJour() {
+  const d = S.jday, J = S.jfin = {deps: [], mvts: [], rgs: [], hist: []};
+  const nx = new Date(new Date(d + "T12:00:00").getTime() + 864e5).toLocaleDateString("sv-SE");
+  try { J.hist = await rest("commande_historique?select=*&order=at&at=gte." + encodeURIComponent(d + "T00:00:00+02:00") + "&at=lt." + encodeURIComponent(nx + "T00:00:00+02:00")); } catch (_) { J.hist = []; }
+  if (has("directeur", "comptable", "stock")) {
+    const r = await Promise.all([rest("depenses?select=*&date_depense=eq." + d + "&order=id"), has("directeur", "comptable") ? rest("mouvements_caisse?select=*&date_mouvement=eq." + d + "&order=id") : [], has("directeur", "comptable") ? rest("reglements?select=*&date_reglement=eq." + d + "&order=id") : []]);
+    J.deps = r[0] || []; J.mvts = r[1] || []; J.rgs = r[2] || [];
+  }
+}
+const ta = a => String(a).replace(/^Encaissée/, m => t(m));
+function jourData() {
+  const d = S.jday, me = S.prof.id, cm = S.cmds || [], all = has("directeur", "exploitation", "comptable"), J = S.jfin || {deps: [], mvts: [], rgs: [], hist: []};
+  const cn = id => (cm.find(c => c.client_id === id) || {}).client_nom || "Client n°" + id;
+  const S_ = [], K = [];
+  const rowCmd = c => [c.id, hourOf(c.created_at), c.client_nom, c.statut, Math.round(c.total || 0)]; /* le statut est traduit à l'affichage */
+  const created = cm.filter(c => dayOf(c.created_at) === d && (all || has("reception", "commercial") ? (all || c.created_by === me) : false));
+  if (has("directeur", "exploitation", "comptable", "reception", "commercial")) {
+    S_.push({titre: all ? "Commandes reçues ce jour" : "Mes commandes saisies", head: ["N°", "Heure", "Client", "Statut", "Total (FC)"], rows: created.map(rowCmd), right: [4]});
+    K.push(["Commandes " + (all ? "reçues" : "saisies"), created.length]);
+  }
+  const done = cm.filter(c => c.statut === "Livrée" && dayOf(c.date_livraison) === d && (all || has("livreur")));
+  if (all || has("livreur")) { S_.push({titre: "Livraisons du jour", head: ["N°", "Heure", "Client", "Livreur", "Total (FC)"], rows: done.map(c => [c.id, hourOf(c.date_livraison), c.client_nom, c.livreur_nom || "", Math.round(c.total || 0)]), right: [4]}); K.push(["Livrées", done.length]); }
+  const enc = cm.filter(c => c.paye && dayOf(c.date_paiement) === d && (all || (has("livreur") && c.livreur_id === me)));
+  let tEnc = 0;
+  if (all || has("livreur")) { tEnc = enc.reduce((s, c) => s + Number(c.total || 0), 0); S_.push({titre: "Encaissements du jour", head: ["N°", "Client", "Mode", "Montant (FC)"], rows: enc.map(c => [c.id, c.client_nom, c.paiement_mode, Math.round(c.total || 0)]), right: [3]}); K.push(["Encaissé (FC)", Math.round(tEnc)]); }
+  if (has("directeur", "comptable")) {
+    const tr = J.rgs.reduce((s, x) => s + Number(x.montant), 0);
+    S_.push({titre: "Règlements de clients (impayés payés)", head: ["Client", "Compte", "Montant (FC)"], rows: J.rgs.map(x => [cn(x.client_id), x.compte, Math.round(x.montant)]), right: [2]}); K.push(["Règlements reçus (FC)", Math.round(tr)]);
+    S_.push({titre: "Autres mouvements de caisse", head: ["Motif", "Compte", "Sens", "Montant (FC)"], rows: J.mvts.map(x => [x.motif, x.compte, x.sens, Math.round(x.montant)]), right: [3]});
+  }
+  if (has("directeur", "comptable", "stock")) {
+    const td = J.deps.reduce((s, x) => s + Number(x.montant), 0);
+    S_.push({titre: has("directeur", "comptable") ? "Dépenses du jour" : "Achats du jour", head: ["Catégorie", "Description", "Mode", "Montant (FC)"], rows: J.deps.map(x => [x.categorie, x.description || "", x.mode, Math.round(x.montant)]), right: [3]}); K.push(["Dépenses (FC)", Math.round(td)]);
+  }
+  const H = (J.hist || []), cnm = id => (cm.find(c => c.id === id) || {}).client_nom || "";
+  if (all) {
+    S_.push({titre: "Activité de l'équipe", head: ["Heure", "Personne", "N°", "Client", "Action"], rows: H.map(h => [hourOf(h.at), h.par_nom || "—", h.commande_id, cnm(h.commande_id), ta(h.action)]), note: "Chaque changement de statut est enregistré avec la personne et l'heure."}); K.push(["Actions de l'équipe", H.length]);
+  } else {
+    const mine = H.filter(h => h.par === me);
+    S_.push({titre: "Mes actions du jour", head: ["Heure", "N°", "Client", "Action"], rows: mine.map(h => [hourOf(h.at), h.commande_id, cnm(h.commande_id), ta(h.action)])}); K.push(["Mes actions", mine.length]);
+  }
+  if (has("boucher")) {
+    const q = cm.filter(c => ["Reçue", "En préparation", "Prête"].includes(c.statut));
+    S_.push({titre: "File de préparation (état actuel)", head: ["N°", "Heure", "Client", "Statut", "Total (FC)"], rows: q.map(rowCmd), right: [4], note: "État au moment de l'impression."}); K.push(["À préparer / prêtes", q.length]);
+  }
+  if (has("stock", "directeur", "exploitation")) {
+    const bySt = {}; (S.stockR || []).forEach(r => bySt[r.produit_id] = r);
+    const rows = (S.stockP || []).filter(p => p.actif && bySt[p.id]).map(p => [p.nom, Number(bySt[p.id].quantite), p.unite, Number(bySt[p.id].seuil) > 0 && Number(bySt[p.id].quantite) <= Number(bySt[p.id].seuil) ? "STOCK BAS" : ""]);
+    S_.push({titre: "État du stock (au moment de l'impression)", head: ["Produit", "Quantité", "Unité", "Alerte"], rows, right: [1]});
+  }
+  return {titre: t("Journal du jour") + " — " + fdate(d), sous: S.prof.nom + " · " + roles().map(r => rl(r)).join(", "), kpis: K, sections: S_, nom: "Journal_" + d + "_" + S.prof.nom.replace(/\s+/g, "_")};
+}
+function vJour() {
+  const R = jourData(), f = v => typeof v === "number" ? v.toLocaleString("fr-FR") : e(t(v));
+  return `<div class="h"><h2>${t("Journal du jour")}</h2><p>${t("Vos opérations de la journée, à imprimer et classer.")}</p></div>
+  <div class="card mem">${fld("Jour", "jday", S.jday, {type: "date"})}<div class="acts"><button class="btn pri" data-a="jpdf">📄 ${t("Imprimer / PDF")}</button><button class="btn" data-a="jxls">📊 Excel</button><button class="btn" data-a="jtoday">${t("Aujourd'hui")}</button></div></div>
+  <div class="kpis">${R.kpis.map(k => `<div class="kpi"><small>${e(t(k[0]))}</small><b>${f(k[1])}</b></div>`).join("")}</div>
+  ${R.sections.map(s => `<h3>${t(s.titre)}</h3><div class="list">${s.rows.map(r => `<div class="card mem"><div class="row"><span style="min-width:0;overflow-wrap:anywhere">${r.slice(0, -1).map(f).join(" · ")}</span><b class="num">${f(r[r.length - 1])}</b></div></div>`).join("") || `<small>${t("Rien ce jour.")}</small>`}</div>`).join("")}`;
+}
+
+/* ================= Finances ================= */
+const DEP_CATS = ["Achat de marchandises", "Carburant", "Salaires", "Loyer", "Transport", "Électricité / Eau", "Communication", "Entretien", "Emballages", "Autres"];
+const COMPTES = ["Cash", "Mobile Money", "Banque"];
+const finSubs = () => has("directeur", "comptable") ? [["caisse", "Caisse"], ["dep", "Dépenses"], ["imp", "Impayés"], ["ventes", "Ventes"]] : [["dep", "Achats"]];
+async function loadFin() {
+  const sub = S.fsub, F = S.fin;
+  if (sub === "caisse") { [F.caisse, F.mvts] = await Promise.all([rest("v_caisse?select=*"), rest("mouvements_caisse?select=*&order=id.desc&limit=30")]); }
+  else if (sub === "dep") F.deps = await rest("depenses?select=*&order=date_depense.desc,id.desc&limit=100");
+  else if (sub === "imp") F.imp = await rest("v_impayes?select=*&order=reste_du.desc");
+  else if (sub === "ventes") F.ventes = await rest("v_ventes_jours?select=*&order=jour.desc&limit=30");
+}
+function vFin() {
+  if (!S.dp) S.dp = newDp();
+  const subs = finSubs(); if (!subs.some(x => x[0] === S.fsub)) S.fsub = subs[0][0];
+  const F = S.fin, seg = `<div class="seg" role="group">${subs.map(x => `<button data-a="fsub" data-k="${x[0]}" aria-pressed="${S.fsub === x[0]}">${t(x[1])}</button>`).join("")}</div>`;
+  let b = "";
+  if (S.fsub === "caisse") {
+    const tot = (F.caisse || []).reduce((s, c) => s + Number(c.solde), 0);
+    b = `<div class="kpis">${(F.caisse || []).map(c => `<div class="kpi"><small>${e(c.compte)}</small><b>${fc(c.solde)}</b></div>`).join("")}<div class="kpi"><small>${t("Total")}</small><b>${fc(tot)}</b></div></div>
+    <div class="card mem"><b>${t("Autre mouvement de caisse")}</b><small>${t("Les ventes encaissées, règlements et dépenses sont déjà comptés automatiquement.")}</small>
+    <div class="two">${sel("Compte", "mv.compte", S.mv.compte, COMPTES)}${sel("Sens", "mv.sens", S.mv.sens, ["Entrée", "Sortie"])}</div>${fld("Motif", "mv.motif", S.mv.motif)}${fld("Montant (FC)", "mv.montant", S.mv.montant, {im: "numeric"})}<button class="btn pri" data-a="mvadd">${t("Enregistrer")}</button></div>
+    <h3>${t("Derniers mouvements")}</h3><div class="list">${(F.mvts || []).map(m => `<div class="card mem"><div class="row"><div><b>${e(m.motif)}</b><br><small>${e(m.date_mouvement)} · ${e(m.compte)}</small></div><b class="num" style="color:${m.sens === "Entrée" ? "var(--good)" : "var(--bad)"}">${m.sens === "Entrée" ? "+" : "−"}${fc(m.montant)}</b></div></div>`).join("") || `<div class="empty">${t("Aucun mouvement.")}</div>`}</div>`;
+  } else if (S.fsub === "dep") {
+    const stk = !has("directeur", "comptable"), cats = stk ? ["Achat de marchandises"] : DEP_CATS;
+    const mois = today().slice(0, 7), tm = (F.deps || []).filter(d => String(d.date_depense).slice(0, 7) === mois).reduce((s, d) => s + Number(d.montant), 0);
+    b = `<div class="kpis"><div class="kpi"><small>${t("Ce mois-ci")}</small><b>${fc(tm)}</b></div></div>
+    <div class="card mem"><b>${t(stk ? "Nouvel achat" : "Nouvelle dépense")}</b>
+    <div class="two">${fld("Date", "dp.date_depense", S.dp.date_depense, {type: "date"})}${sel("Catégorie", "dp.categorie", stk ? cats[0] : S.dp.categorie, cats)}</div>
+    ${fld("Description", "dp.description", S.dp.description)}<div class="two">${fld("Fournisseur", "dp.fournisseur", S.dp.fournisseur)}${sel("Payé en", "dp.mode", S.dp.mode, COMPTES)}</div>${fld("Montant (FC)", "dp.montant", S.dp.montant, {im: "numeric"})}<button class="btn pri" data-a="dpadd">${t("Enregistrer")}</button></div>
+    <h3>${t("Dernières dépenses")}</h3><div class="list">${(F.deps || []).map(d => `<div class="card mem"><div class="row"><div><b>${e(d.categorie)}</b>${d.description ? " · " + e(d.description) : ""}<br><small>${e(d.date_depense)} · ${e(d.mode)}${d.fournisseur ? " · " + e(d.fournisseur) : ""}</small></div><b class="num">${fc(d.montant)}</b></div>${has("directeur") ? `<div><button class="btn sm bad" data-a="dpdel" data-id="${d.id}">${S.delAsk === "d" + d.id ? t("Confirmer la suppression") : t("Supprimer")}</button></div>` : ""}</div>`).join("") || `<div class="empty">${t("Aucune dépense.")}</div>`}</div>`;
+  } else if (S.fsub === "imp") {
+    const tot = (F.imp || []).reduce((s, c) => s + Number(c.reste_du), 0);
+    b = `<div class="kpis"><div class="kpi"><small>${t("Total des impayés")}</small><b>${fc(tot)}</b></div><div class="kpi"><small>${t("Clients concernés")}</small><b>${(F.imp || []).filter(c => c.reste_du > 0).length}</b></div></div>
+    <div class="list">${(F.imp || []).filter(c => Number(c.reste_du) > 0).map(c => `<div class="card mem"><div class="row"><div><b>${e(c.client_nom)}</b><br><small>${c.nb_commandes} ${t("commande(s)")} · ${t("depuis")} ${e(fmtD(c.plus_ancienne))}</small></div><b class="num" style="color:var(--bad)">${fc(c.reste_du)}</b></div>
+    ${S.rg && S.rg.client_id === c.client_id ? `<div class="two">${fld("Montant reçu (FC)", "rg.montant", S.rg.montant, {im: "numeric"})}${sel("Reçu en", "rg.compte", S.rg.compte, COMPTES)}</div><div class="acts"><button class="btn good" data-a="rgsave">${t("Enregistrer le règlement")}</button><button class="btn" data-a="rgopen" data-id="">${t("Annuler")}</button></div>` : `<button class="btn sm" data-a="rgopen" data-id="${c.client_id}">${t("Enregistrer un règlement")}</button>`}</div>`).join("") || `<div class="empty">${t("Aucun impayé.")}</div>`}</div>`;
+  } else {
+    const V = (F.ventes || []).slice(0, 14).reverse(), mx = Math.max(1, ...V.map(v => Number(v.total)));
+    const s7 = (F.ventes || []).slice(0, 7).reduce((s, v) => s + Number(v.total), 0), s30 = (F.ventes || []).reduce((s, v) => s + Number(v.total), 0);
+    b = `<div class="kpis"><div class="kpi"><small>${t("7 derniers jours")}</small><b>${fc(s7)}</b></div><div class="kpi"><small>${t("30 derniers jours")}</small><b>${fc(s30)}</b></div></div>
+    <div class="card"><div class="bars">${V.map(v => `<div class="c"><span class="v">${Math.round(v.total / 1000)}k</span><div class="b" style="height:${Math.max(3, Math.round(100 * v.total / mx))}%"></div><small>${String(v.jour).slice(8, 10)}</small></div>`).join("") || `<div class="empty">${t("Pas encore de vente livrée.")}</div>`}</div></div>`;
+  }
+  return `<div class="h"><h2>${t(has("directeur", "comptable") ? "Finances" : "Achats")}</h2></div>${seg}${b}`;
+}
+
+/* ================= Actions des nouveaux écrans ================= */
+const A2 = {
+  lang(d) { S.lang = d.k; ls.set("chg_lang", S.lang); render(); },
+  async dper(d) { S.dper = +d.k; S.mjours = S.dper; render(); if (has("directeur", "comptable")) { await guard(loadMar); render(); } },
+  dpdf() { reportPrint(dashReport()); },
+  dxls() { reportXlsx(dashReport()); },
+  jpdf() { reportPrint(jourData()); },
+  jxls() { reportXlsx(jourData()); },
+  async jtoday() { S.jday = todayK(); await guard(loadJour); render(); },
+  msub(d) { S.msub = d.k; render(); },
+  async mjours(d) { S.mjours = +d.k; await guard(loadMar); render(); },
+  async tauxsave() { await guard(async () => { const v = num(S.taux_in === "" ? S.params.taux_usd : S.taux_in); if (v <= 0) return toast(t("Taux invalide.")); await rpc("fixer_taux", {p_taux: v}); S.params.taux_usd = String(v); S.taux_in = ""; toast(t("Taux enregistré")); }); render(); },
+  async calcsave() { const c = S.calc, r = calcCalc(); await guard(async () => { if (!c.libelle.trim()) return toast(t("Indiquez ce que vous avez acheté.")); if (!r) return toast(t("Indiquez le coût et le poids.")); await rest("lots_achat", {method: "POST", body: {libelle: c.libelle.trim(), produit_id: c.pid ? +c.pid : null, cout_total: num(c.cout), devise: c.devise, taux: r.tx, quantite: r.kg, prix_vente: r.pv}, headers: {Prefer: "return=minimal"}}); await loadMar(); toast(t("Lot enregistré")); S.calc.libelle = ""; S.calc.cout = ""; S.calc.poids = ""; }); render(); },
+  async calcapply() { const r = calcCalc(); await guard(async () => { if (!r || !S.calc.pid) return toast(t("Indiquez le coût et le poids.")); await rest("couts_produits?on_conflict=produit_id", {method: "POST", body: {produit_id: +S.calc.pid, cout_fc: Math.round(r.cpk), updated_at: new Date().toISOString()}, headers: {Prefer: "resolution=merge-duplicates,return=minimal"}}); await loadMar(); toast(t("Coût du produit mis à jour")); }); render(); },
+  async coutsave(d) { const v = S.ce[d.id]; await guard(async () => { if (v === undefined || String(v).trim() === "") return toast(t("Indiquez le coût.")); await rest("couts_produits?on_conflict=produit_id", {method: "POST", body: {produit_id: +d.id, cout_fc: Math.max(0, num(v)), updated_at: new Date().toISOString()}, headers: {Prefer: "resolution=merge-duplicates,return=minimal"}}); delete S.ce[d.id]; await loadMar(); toast(t("Enregistré")); }); render(); },
+  async lotdel(d) { if (S.delAsk !== "l" + d.id) { S.delAsk = "l" + d.id; return render(); } S.delAsk = null; await guard(async () => { await rest("lots_achat?id=eq." + d.id, {method: "DELETE"}); await loadMar(); }); render(); },
+  async colis(d) { await guard(async () => { await rpc("mouvement_colis", {p_produit: +d.id, p_poids: num(d.w), p_delta: +d.n}); await loadStock(); }); render(); },
+  async coliswr(d) { const x = S.cn[d.id] || {}; await guard(async () => { const n = Math.round(num(x.nb)); if (num(x.poids) <= 0 || !n) return toast(t("Indiquez le poids et le nombre de colis.")); await rpc("mouvement_colis", {p_produit: +d.id, p_poids: num(x.poids), p_delta: n}); S.cn[d.id] = {poids: "", nb: ""}; await loadStock(); toast(t("Enregistré")); }); S.sOpen = +d.id; render(); },
+
+  async pnewtoggle() { S.pNew = !S.pNew; if (S.pNew) S.pn = {nom: "", unite: "kg", categorie: "", prix_min: "", prix_max: "", note: ""}; render(); },
+  async padd() { await guard(async () => { const b = fixRange(pBody(S.pn)); if (!b.nom) return toast(t("Indiquez le nom du produit.")); b.ordre = Math.max(0, ...(S.prodAll || []).map(p => p.ordre || 0)) + 1; await rest("produits", {method: "POST", body: b, headers: {Prefer: "return=minimal"}}); S.pNew = false; await loadProd(); toast(t("Produit ajouté")); }); render(); },
+  popen(d) { const p = S.prodAll.find(x => x.id === +d.id); S.pOpen = S.pOpen === p.id ? null : p.id; if (S.pOpen) S.pe[p.id] = {nom: p.nom, unite: p.unite, categorie: p.categorie || "", prix_min: p.prix_min == null ? "" : p.prix_min, prix_max: p.prix_max == null ? "" : p.prix_max, note: p.note || ""}; render(); },
+  async psave(d) { await guard(async () => { const b = fixRange(pBody(S.pe[d.id])); if (!b.nom) return toast(t("Indiquez le nom du produit.")); await rest("produits?id=eq." + d.id, {method: "PATCH", body: b, headers: {Prefer: "return=minimal"}}); S.pOpen = null; await loadProd(); toast(t("Enregistré")); }); render(); },
+  async ptog(d) { const p = S.prodAll.find(x => x.id === +d.id); await guard(async () => { await rest("produits?id=eq." + d.id, {method: "PATCH", body: {actif: !p.actif}, headers: {Prefer: "return=minimal"}}); S.pOpen = null; await loadProd(); toast(t("Enregistré")); }); render(); },
+  async trsave(d) { const x = S.tre[String(d.id).replace(".", "_")]; await guard(async () => { if (num(x.poids_max) <= 0) return toast(t("Poids invalide.")); await rest("livraison_tarifs?poids_max=eq." + d.id, {method: "PATCH", body: {poids_max: num(x.poids_max), frais: num(x.frais)}, headers: {Prefer: "return=minimal"}}); S.tre = {}; await loadProd(); toast(t("Enregistré")); }); render(); },
+  async trdel(d) { if (S.delAsk !== "t" + d.id) { S.delAsk = "t" + d.id; return render(); } S.delAsk = null; await guard(async () => { await rest("livraison_tarifs?poids_max=eq." + d.id, {method: "DELETE"}); S.tre = {}; await loadProd(); toast(t("Supprimé")); }); render(); },
+  async tradd() { await guard(async () => { if (num(S.trn.poids_max) <= 0 || S.trn.frais === "") return toast(t("Indiquez le poids et les frais.")); await rest("livraison_tarifs", {method: "POST", body: {poids_max: num(S.trn.poids_max), frais: num(S.trn.frais)}, headers: {Prefer: "return=minimal"}}); S.trn = {poids_max: "", frais: ""}; S.tre = {}; await loadProd(); toast(t("Ajouté")); }); render(); },
+  sopen(d) { const id = +d.id; S.sOpen = S.sOpen === id ? null : id; const r = (S.stockR || []).find(x => x.produit_id === id); if (S.sOpen) S.se[id] = {quantite: r ? r.quantite : 0, seuil: r ? r.seuil : 0, delta: ""}; render(); },
+  async ssave(d) { const id = +d.id, x = S.se[id], r = (S.stockR || []).find(q => q.produit_id === id); await guard(async () => { let q = num(x.quantite); if (String(x.delta).trim() !== "") q = num(r ? r.quantite : 0) + num(x.delta); if (q < 0) return toast(t("Le stock ne peut pas être négatif.")); const b = {quantite: q, seuil: Math.max(0, num(x.seuil)), updated_at: new Date().toISOString()}; if (r) await rest("stock?id=eq." + r.id, {method: "PATCH", body: b, headers: {Prefer: "return=minimal"}}); else await rest("stock", {method: "POST", body: Object.assign({produit_id: id}, b), headers: {Prefer: "return=minimal"}}); S.sOpen = null; await loadStock(); toast(t("Enregistré")); }); render(); },
+  async foadd() { await guard(async () => { if (!S.fo.nom.trim()) return toast(t("Indiquez le nom.")); await rest("fournisseurs", {method: "POST", body: {nom: S.fo.nom.trim(), telephone: S.fo.telephone || null, quartier: S.fo.quartier || null, produits: S.fo.produits || null}, headers: {Prefer: "return=minimal"}}); S.fo = {nom: "", telephone: "", quartier: "", produits: ""}; await loadStock(); toast(t("Ajouté")); }); render(); },
+  async fsub(d) { S.fsub = d.k; render(); await guard(loadFin); render(); },
+  async mvadd() { await guard(async () => { if (!S.mv.motif.trim() || num(S.mv.montant) <= 0) return toast(t("Indiquez le motif et le montant.")); await rest("mouvements_caisse", {method: "POST", body: {compte: S.mv.compte, sens: S.mv.sens, motif: S.mv.motif.trim(), montant: num(S.mv.montant)}, headers: {Prefer: "return=minimal"}}); S.mv = {compte: "Cash", sens: "Entrée", motif: "", montant: ""}; await loadFin(); toast(t("Enregistré")); }); render(); },
+  async dpadd() { await guard(async () => { const x = S.dp, stk = !has("directeur", "comptable"); if (num(x.montant) <= 0) return toast(t("Indiquez le montant.")); await rest("depenses", {method: "POST", body: {date_depense: x.date_depense || today(), categorie: stk ? "Achat de marchandises" : x.categorie, description: x.description || null, fournisseur: x.fournisseur || null, montant: num(x.montant), mode: x.mode}, headers: {Prefer: "return=minimal"}}); S.dp = newDp(); await loadFin(); toast(t("Enregistré")); }); render(); },
+  async dpdel(d) { if (S.delAsk !== "d" + d.id) { S.delAsk = "d" + d.id; return render(); } S.delAsk = null; await guard(async () => { await rest("depenses?id=eq." + d.id, {method: "DELETE"}); await loadFin(); toast(t("Supprimé")); }); render(); },
+  rgopen(d) { S.rg = d.id ? {client_id: +d.id, montant: "", compte: "Cash"} : null; render(); },
+  async rgsave() { await guard(async () => { if (num(S.rg.montant) <= 0) return toast(t("Indiquez le montant.")); await rest("reglements", {method: "POST", body: {client_id: S.rg.client_id, montant: num(S.rg.montant), compte: S.rg.compte}, headers: {Prefer: "return=minimal"}}); S.rg = null; await loadFin(); toast(t("Règlement enregistré")); }); render(); },
+  snd(d) { const c = ls.get("chg_sound", {}); c.tone = d.k; ls.set("chg_sound", c); ring(d.k); render(); },
+  rep() { const c = ls.get("chg_sound", {}); c.repeat = c.repeat === false; ls.set("chg_sound", c); render(); },
+  async wake() { ls.set("chg_wake", !ls.get("chg_wake", false)); if (ls.get("chg_wake", false)) await keepAwake(); else releaseAwake(); render(); },
+  try() { startAlarm("Essai de la sonnerie"); },
+  stopalarm() { stopAlarm(); }
+};
+const newDp = () => ({date_depense: today(), categorie: "Achat de marchandises", description: "", fournisseur: "", mode: "Cash", montant: ""});
+
+/* ================= Sonnerie ================= */
+const TONES = {cloche: "Cloche", sirene: "Sirène", klaxon: "Klaxon"};
+function ring(kind) {
+  kind = kind || (ls.get("chg_sound", {}).tone || "cloche");
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+    const T0 = actx.currentTime, note = (f, at, d, type, v) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0.0001, T0 + at); g.gain.exponentialRampToValueAtTime(v, T0 + at + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, T0 + at + d); o.connect(g); g.connect(actx.destination); o.start(T0 + at); o.stop(T0 + at + d + 0.02); };
+    if (kind === "sirene") { for (let i = 0; i < 4; i++) note(i % 2 ? 660 : 990, i * 0.3, 0.28, "triangle", 0.5); }
+    else if (kind === "klaxon") { for (let i = 0; i < 3; i++) { note(440, i * 0.4, 0.3, "square", 0.25); note(554, i * 0.4, 0.3, "square", 0.2); } }
+    else { [880, 1175, 880].forEach((f, i) => note(f, i * 0.22, 0.2, "sine", 0.45)); }
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  } catch (_) {}
+}
+let alarmT = null, alarmStart = 0;
+function startAlarm(txt) {
+  ring(); alarmStart = Date.now(); clearInterval(alarmT);
+  if (ls.get("chg_sound", {}).repeat !== false) alarmT = setInterval(() => { if (Date.now() - alarmStart > 300000) stopAlarm(); else ring(); }, 4000);
+  let b = $("#alarm"); if (!b) { b = document.createElement("div"); b.id = "alarm"; b.className = "alarm"; document.body.appendChild(b); }
+  b.innerHTML = `<span>🔔 ${e(txt)}</span><button class="btn sm" data-a="stopalarm">${t("Arrêter la sonnerie")}</button>`; b.hidden = false;
+}
+function stopAlarm() { clearInterval(alarmT); alarmT = null; const b = $("#alarm"); if (b) b.hidden = true; }
+document.addEventListener("click", () => { if (alarmT && Date.now() - alarmStart > 700) stopAlarm(); }, true);
+let wl = null;
+async function keepAwake() { try { if (ls.get("chg_wake", false) && navigator.wakeLock && !document.hidden && !wl) { wl = await navigator.wakeLock.request("screen"); wl.addEventListener("release", () => wl = null); } } catch (_) {} }
+function releaseAwake() { try { if (wl) wl.release(); } catch (_) {} wl = null; }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) keepAwake(); });
+
 /* ================= Événements ================= */
 function setPath(path, val) {
   const k = path.split("."); let o = S, i = 0;
   if (k[0] === "te") { const id = k[1]; const x = teamEdit(S.team.find(p => p.id === id)); x[k[2]] = val; if (k[2] === "role") x.extra = x.extra.filter(r => r !== val); return; }
-  for (; i < k.length - 1; i++) o = o[k[i]];
+  for (; i < k.length - 1; i++) o = (o[k[i]] = o[k[i]] || {});
   o[k[k.length - 1]] = val;
 }
 document.addEventListener("input", ev => {
@@ -750,14 +2337,17 @@ document.addEventListener("input", ev => {
   setPath(el.dataset.m, el.value);
   if (el.dataset.m === "nc.clientNom") { S.nc.clientId = null; $("#sugg").innerHTML = suggHTML(); }
   if (/^nc\.lines\./.test(el.dataset.m)) $("#tot").innerHTML = totalsHTML();
+  if (/^calc\./.test(el.dataset.m) && $("#calcres")) $("#calcres").innerHTML = calcRes();
 });
 document.addEventListener("change", ev => {
-  const el = ev.target; if (!el.dataset || !el.dataset.m || el.tagName !== "SELECT") return;
+  const el = ev.target; if (el && el.dataset && el.dataset.m === "jday") { S.jday = el.value || todayK(); guard(loadJour).then(render); return; }
+  if (!el.dataset || !el.dataset.m || el.tagName !== "SELECT") return;
   const m = el.dataset.m;
   setPath(m, el.value);
   const mm = m.match(/^nc\.lines\.(\d+)\.pid$/);
   if (mm) { S.nc.lines[+mm[1]].prix = ""; render(); }
   else if (/^te\./.test(m)) render();
+  else if (/^calc\./.test(m)) { if (m === "calc.devise" || m === "calc.pid") render(); else if ($("#calcres")) $("#calcres").innerHTML = calcRes(); }
   else if (/^nc\.lines\./.test(m)) $("#tot").innerHTML = totalsHTML();
 });
 document.addEventListener("submit", async ev => {
@@ -783,14 +2373,23 @@ document.addEventListener("click", async ev => {
   const b = ev.target.closest("[data-a]"); if (!b) return;
   const a = b.dataset.a, d = b.dataset;
   if (actx && actx.state === "suspended") actx.resume();
+  if (A2[a]) { A2[a](d); return; }
   switch (a) {
     case "auth": S.authView = d.v; S.authMsg = null; render(); break;
     case "logout": signOut(); break;
     case "recheck": try { await loadProfile(); if (isActive()) await loadAll(); } catch (er) { toast(er.message); } render(); break;
-    case "tab": S.tab = d.k; S.detail = null; S.cancelAsk = false; if (d.k === "team") loadTeam().then(softRender).catch(() => {}); render(); window.scrollTo(0, 0); break;
+    case "tab": S.tab = d.k; S.detail = null; S.cancelAsk = false; S.delAsk = null;
+      if (d.k === "team") loadTeam().then(softRender).catch(() => {});
+      if (d.k === "prod") loadProd().then(render).catch(er => toast(er.message));
+      if (d.k === "dash") { S.mjours = S.dper; if (has("directeur", "comptable")) loadMar().then(render).catch(() => {}); }
+      if (d.k === "jour") loadJour().then(render).catch(er => toast(er.message));
+      if (d.k === "mar") loadMar().then(render).catch(er => toast(er.message));
+      if (d.k === "stock") loadStock().then(render).catch(er => toast(er.message));
+      if (d.k === "fin") { if (!S.fsub || !finSubs().some(x => x[0] === S.fsub)) S.fsub = finSubs()[0][0]; if (!S.dp) S.dp = newDp(); loadFin().then(render).catch(er => toast(er.message)); }
+      render(); window.scrollTo(0, 0); break;
     case "filt": S.filter = d.k; render(); break;
     case "open": openDetail(+d.id); break;
-    case "back": S.detail = null; render(); break;
+    case "back": S.detail = null; document.body.classList.remove("pfmode"); render(); break;
     case "cancelask": S.cancelAsk = true; render(); break;
     case "st": {
       const id = S.detail; let liv = null;
@@ -833,10 +2432,10 @@ async function poll() {
     softRender();
   } catch (_) {}
 }
-setInterval(() => { if (!document.hidden) poll(); }, 20000);
+setInterval(() => { if (!document.hidden) poll(); }, 10000);
 
 (async function init() {
-  applyTheme();
+  applyTheme(); keepAwake();
   const h = location.hash.replace(/^#/, "");
   if (h) {
     const q = new URLSearchParams(h);
