@@ -560,7 +560,7 @@ function printTicket() {
   if (!c) return;
   const P = S.params;
   const nom = P.entreprise_nom || "Charcuterie de l'Ituri SARL";
-  const sous = P.entreprise_adresse || "Bunia, Ituri · RDC";
+  const sous = P.entreprise_adresse || "Bunia, commune Mbunya, quartier Lumumba, Poste n° 12";
   const tel = P.entreprise_tel || "";
   const l1 = L.map(l => `<div>${e(l.produit_nom)}</div><div class="r"><span>${Number(l.quantite).toLocaleString("fr-FR")} ${e(l.unite)} x ${Math.round(l.prix_unitaire).toLocaleString("fr-FR")}</span><span>${Math.round(l.montant).toLocaleString("fr-FR")}</span></div>`).join("");
   $("#ticket").innerHTML = `<img src="logo.webp" alt=""><div class="c b">${e(nom)}</div><div class="c">${e(sous)}</div>${tel ? `<div class="c">${e(tel)}</div>` : ""}<hr>
