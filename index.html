@@ -341,6 +341,17 @@ const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
 "Journal du jour": "Daily journal",
 "Jusqu'à (kg)": "Up to (kg)",
 "Kilos de viande obtenus": "Kilos of meat obtained",
+"À traiter": "To process",
+"Pris en charge par": "Handled by",
+"Pris en charge par vous": "Handled by you",
+"Je m'en occupe": "I'll handle it",
+"Libérer la commande": "Release the order",
+"Personne n'a encore pris cette commande en charge.": "Nobody has taken this order yet.",
+"Vous ne pouvez pas la traiter : elle est déjà prise en charge.": "You cannot process it: it is already being handled.",
+"Cette commande est déjà prise en charge par": "This order is already handled by",
+"Cette commande a déjà été traitée": "This order has already been processed",
+"Prise en charge": "Taken over",
+"Libérée": "Released",
 "L'écran du stock arrive bientôt.": "The stock screen is coming soon.",
 "La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.": "The ringtone works while the app is open. At the reception desk, leave it open with the screen on.",
 "Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.": "The code is given by the director. After signing up, the director must activate your account and assign you a role.",
@@ -713,6 +724,17 @@ const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
 "Journal du jour": "Shajara ya siku",
 "Jusqu'à (kg)": "Hadi (kg)",
 "Kilos de viande obtenus": "Kilo za nyama zilizopatikana",
+"À traiter": "Ya kushughulikiwa",
+"Pris en charge par": "Imeshughulikiwa na",
+"Pris en charge par vous": "Imeshughulikiwa na wewe",
+"Je m'en occupe": "Naishughulikia",
+"Libérer la commande": "Achilia agizo",
+"Personne n'a encore pris cette commande en charge.": "Hakuna aliyeshughulikia agizo hili bado.",
+"Vous ne pouvez pas la traiter : elle est déjà prise en charge.": "Huwezi kuishughulikia: tayari inashughulikiwa.",
+"Cette commande est déjà prise en charge par": "Agizo hili tayari linashughulikiwa na",
+"Cette commande a déjà été traitée": "Agizo hili tayari limeshughulikiwa",
+"Prise en charge": "Imechukuliwa",
+"Libérée": "Imeachiliwa",
 "L'écran du stock arrive bientôt.": "Skrini ya hifadhi inakuja hivi karibuni.",
 "La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.": "Mlio unafanya kazi programu ikiwa wazi. Kwenye dawati la mapokezi, iache wazi na skrini iwake.",
 "Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.": "Msimbo unatolewa na mkurugenzi. Baada ya kujisajili, mkurugenzi anapaswa kuwasha akaunti yako na kukupa nafasi.",
@@ -1091,6 +1113,17 @@ const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
 "Journal du jour": "Journal ya mokolo",
 "Jusqu'à (kg)": "Tii (kg)",
 "Kilos de viande obtenus": "Ba kilo ya misuni ezwami",
+"À traiter": "Ya kosala",
+"Pris en charge par": "Ezali kosalama na",
+"Pris en charge par vous": "Ezali kosalama na yo",
+"Je m'en occupe": "Nakosala yango",
+"Libérer la commande": "Longola commande",
+"Personne n'a encore pris cette commande en charge.": "Moto moko te asali commande oyo naino.",
+"Vous ne pouvez pas la traiter : elle est déjà prise en charge.": "Okoki kosala yango te : esili ezali kosalama.",
+"Cette commande est déjà prise en charge par": "Commande oyo ezali kosalama na",
+"Cette commande a déjà été traitée": "Commande oyo esili kosalama",
+"Prise en charge": "Ezwami",
+"Libérée": "Elongolami",
 "L'écran du stock arrive bientôt.": "Ecran ya stock ezali koya noki.",
 "La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.": "Lokito esalaka tango application ezali ofungwami. Na poste ya réception, tika yango efungwami na ecran ezali pole.",
 "Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.": "Code epesami na directeur. Nsima ya komikoma, directeur asengeli kopesa compte na yo makasi mpe kopesa yo poste.",
@@ -1517,7 +1550,11 @@ async function act(rpcName, args, id, patch) {
       S.queue.push({rpc: rpcName, args, id}); qSave();
       const c = S.cmds.find(x => x.id === id); if (c && patch) Object.assign(c, patch);
       toast("Hors ligne : enregistré, sera envoyé dès le retour du réseau.", 5000);
-    } else { toast(er.message, 5000); }
+    } else {
+      const m = /prise en charge par (.*)\.$/.exec(er.message || ""), d2 = /déjà été traitée \((.*)\)\.$/.exec(er.message || "");
+      toast(m ? t("Cette commande est déjà prise en charge par") + " " + m[1] + "." : d2 ? t("Cette commande a déjà été traitée") + " (" + t(d2[1]) + ")." : er.message, 6000);
+      try { await loadCmd(); } catch (_) {}
+    }
   }
   S.cancelAsk = false; render();
 }
@@ -1646,12 +1683,13 @@ function canCash() { return has("directeur","exploitation","comptable","livreur"
 function filters() {
   const f = [["cours", "En cours"]];
   if (canCash()) f.push(["encaisser", "À encaisser"]);
+  if (has("directeur","exploitation","reception")) f.splice(1, 0, ["atraiter", "À traiter"]);
   f.push(["fin", "Terminées"], ["all", "Toutes"]);
   return f;
 }
 function filtered() {
   const f = S.filter || "cours";
-  return S.cmds.filter(c => f === "all" ? true : f === "cours" ? ["Reçue","En préparation","Prête","En livraison"].includes(c.statut)
+  return S.cmds.filter(c => f === "all" ? true : f === "atraiter" ? (c.statut === "Reçue" && !c.pris_par) : f === "cours" ? ["Reçue","En préparation","Prête","En livraison"].includes(c.statut)
     : f === "encaisser" ? (c.statut === "Livrée" && !c.paye) : ["Livrée","Annulée"].includes(c.statut));
 }
 function vCmd() {
@@ -1669,11 +1707,18 @@ function vCmd() {
     <div class="seg" role="group">${filters().map(x => `<button data-a="filt" data-k="${x[0]}" aria-pressed="${f === x[0]}">${t(x[1])}</button>`).join("")}</div>
     <div class="list">${list.length ? list.map(ordCard).join("") : `<div class="empty">${t("Aucune commande ici.")}</div>`}</div>`;
 }
+function claimChip(c) {
+  if (!has("directeur","exploitation","reception") || ["Livrée","Annulée"].includes(c.statut)) return "";
+  if (!c.pris_par) return c.statut === "Reçue" ? `<div><span class="pill p-bad">🆕 ${t("À traiter")}</span></div>` : "";
+  const mine = S.prof && c.pris_par === S.prof.id;
+  return `<div><span class="pill ${mine ? "p-ok" : "p-prep"}">🔒 ${mine ? t("Pris en charge par vous") : t("Pris en charge par") + " " + e(c.pris_par_nom || "—")}${c.pris_at ? " · " + e(fmtD(c.pris_at)) : ""}</span></div>`;
+}
 function ordCard(c) {
   const money = !(has("boucher") && !has("directeur","exploitation","reception","comptable","commercial","livreur"));
   return `<button class="ord" data-a="open" data-id="${c.id}"><div class="row"><div><span class="cl">#${c.id} · ${e(c.client_nom)}</span></div>
     <span>${(c.remarques || "").startsWith("🌐") ? '<span class="pill p-liv">🌐 Site</span> ' : ""}<span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></span></div>
     <div class="row"><span class="meta">${e(fmtD(c.created_at))}${c.adresse ? " · " + e(c.adresse) : ""}${c.livreur_nom ? " · 🛵 " + e(c.livreur_nom) : ""}</span>${money ? `<span class="tot num">${fc(c.total)}</span>` : ""}</div>
+    ${claimChip(c)}
     ${c.remarques ? `<div class="meta">📝 ${e(c.remarques.length > 70 ? c.remarques.slice(0, 70) + "…" : c.remarques)}</div>` : ""}
     ${c.statut === "Livrée" ? `<div><span class="pill ${c.paye ? "p-ok" : c.paiement_mode === "Crédit" ? "p-prep" : "p-bad"}">${c.paye ? t("Payée") + " · " + e(c.paiement_mode) : c.paiement_mode === "Crédit" ? t("À crédit") : t("À encaisser")}</span></div>` : ""}</button>`;
 }
@@ -1701,6 +1746,14 @@ function vDetail() {
     if (has("livreur") && c.statut === "En livraison" && c.livreur_id === S.prof.id) btns.push(`<button class="btn good" data-a="st" data-s="Livrée">${t("Marquer livrée")}</button>`);
   }
   if (mgr && open) btns.push(S.cancelAsk ? `<button class="btn bad" data-a="st" data-s="Annulée">${t("Confirmer l'annulation")}</button>` : `<button class="btn" data-a="cancelask">${t("Annuler la commande")}</button>`);
+  const other = !!c.pris_par && S.prof && c.pris_par !== S.prof.id, chef = has("directeur","exploitation"), locked = mgr && open && other && !chef;
+  if (locked) btns.length = 0;
+  let claim = "";
+  if (mgr && open) {
+    if (!c.pris_par) claim = `<div class="card"><div class="msg warn">${t("Personne n'a encore pris cette commande en charge.")}</div><button class="btn pri" data-a="claim">${t("Je m'en occupe")}</button></div>`;
+    else claim = `<div class="card"><div class="msg ${locked ? "warn" : ""}">🔒 ${other ? t("Pris en charge par") + " <b>" + e(c.pris_par_nom || "—") + "</b>" : t("Pris en charge par vous")}${c.pris_at ? " · " + e(fmtD(c.pris_at)) : ""}${locked ? "<br>" + t("Vous ne pouvez pas la traiter : elle est déjà prise en charge.") : ""}</div>${(!other || chef) ? `<button class="btn" data-a="release">${t("Libérer la commande")}</button>` : ""}</div>`;
+  }
+  acts = claim + acts;
   if (btns.length) acts += `<div class="card"><div class="acts" style="align-items:end">${btns.join("")}</div></div>`;
   if (mgr && open && c.frais_livraison == null) acts += `<div class="card"><div class="msg warn">${t("Frais de livraison à confirmer (poids hors barème).")}</div><div class="field"><label for="fr">${t("Frais de livraison (FC)")}</label><input id="fr" inputmode="numeric" data-m="fraisIn" value="${e(S.fraisIn)}"></div><button class="btn pri" data-a="frais">${t("Enregistrer les frais")}</button></div>`;
   let enc = "";
@@ -2177,7 +2230,7 @@ async function loadJour() {
     J.deps = r[0] || []; J.mvts = r[1] || []; J.rgs = r[2] || [];
   }
 }
-const ta = a => String(a).replace(/^Encaissée/, m => t(m));
+const ta = a => { a = String(a); return /^Encaissée/.test(a) ? a.replace(/^Encaissée/, m => t(m)) : t(a); };
 function jourData() {
   const d = S.jday, me = S.prof.id, cm = S.cmds || [], all = has("directeur", "exploitation", "comptable"), J = S.jfin || {deps: [], mvts: [], rgs: [], hist: []};
   const cn = id => (cm.find(c => c.client_id === id) || {}).client_nom || "Client n°" + id;
@@ -2417,6 +2470,8 @@ document.addEventListener("click", async ev => {
       const patch = {statut: d.s}; if (liv) { patch.livreur_id = liv; const l = S.livreurs.find(x => x.id === liv); patch.livreur_nom = l && l.nom; }
       await act("changer_statut", {p_id: id, p_statut: d.s, p_livreur: liv}, id, patch); break;
     }
+    case "claim": { const id = S.detail; await act("prendre_en_charge", {p_id: id}, id, {pris_par: S.prof.id, pris_par_nom: S.prof.nom, pris_at: new Date().toISOString()}); break; }
+    case "release": { const id = S.detail; await act("liberer_commande", {p_id: id}, id, {pris_par: null, pris_par_nom: null, pris_at: null}); break; }
     case "enc": { const id = S.detail; await act("encaisser", {p_id: id, p_mode: d.m}, id, {paye: d.m !== "Crédit", paiement_mode: d.m}); break; }
     case "frais": { const v = num(S.fraisIn); if (S.fraisIn === "" || v < 0) return toast(t("Indiquez un montant.")); try { await rpc("fixer_frais", {p_id: S.detail, p_frais: v}); await loadCmd(); S.fraisIn = ""; toast(t("Enregistré")); } catch (er) { toast(er.message, 5000); } render(); break; }
     case "print": document.body.classList.remove("pfmode"); printTicket(); break;
