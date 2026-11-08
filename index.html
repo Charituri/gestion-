@@ -352,6 +352,18 @@ const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
 "Cette commande a déjà été traitée": "This order has already been processed",
 "Prise en charge": "Taken over",
 "Libérée": "Released",
+"Notifications sur ce téléphone": "Notifications on this phone",
+"Activer les notifications": "Turn on notifications",
+"Désactiver les notifications": "Turn off notifications",
+"Les notifications sont activées sur ce téléphone.": "Notifications are on for this phone.",
+"Les notifications sont désactivées. Activez-les pour être prévenu même quand l'application est fermée.": "Notifications are off. Turn them on to be alerted even when the app is closed.",
+"Notifications refusées : autorisez-les dans les réglages du navigateur (paramètres du site).": "Notifications were refused: allow them in the browser settings (site settings).",
+"Ce téléphone ne permet pas les notifications. Ouvrez l'application depuis Chrome ou installez-la sur l'écran d'accueil.": "This phone does not allow notifications. Open the app in Chrome or install it on the home screen.",
+"Notifications activées": "Notifications on",
+"Notifications désactivées": "Notifications off",
+"Envoyer une notification de test": "Send a test notification",
+"Test envoyé : la notification arrive dans quelques secondes.": "Test sent: the notification arrives in a few seconds.",
+"Autorisation refusée.": "Permission refused.",
 "L'écran du stock arrive bientôt.": "The stock screen is coming soon.",
 "La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.": "The ringtone works while the app is open. At the reception desk, leave it open with the screen on.",
 "Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.": "The code is given by the director. After signing up, the director must activate your account and assign you a role.",
@@ -735,6 +747,18 @@ const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
 "Cette commande a déjà été traitée": "Agizo hili tayari limeshughulikiwa",
 "Prise en charge": "Imechukuliwa",
 "Libérée": "Imeachiliwa",
+"Notifications sur ce téléphone": "Arifa kwenye simu hii",
+"Activer les notifications": "Washa arifa",
+"Désactiver les notifications": "Zima arifa",
+"Les notifications sont activées sur ce téléphone.": "Arifa zimewashwa kwenye simu hii.",
+"Les notifications sont désactivées. Activez-les pour être prévenu même quand l'application est fermée.": "Arifa zimezimwa. Ziwashe ili uarifiwe hata programu ikiwa imefungwa.",
+"Notifications refusées : autorisez-les dans les réglages du navigateur (paramètres du site).": "Arifa zimekataliwa: ziruhusu kwenye mipangilio ya kivinjari (mipangilio ya tovuti).",
+"Ce téléphone ne permet pas les notifications. Ouvrez l'application depuis Chrome ou installez-la sur l'écran d'accueil.": "Simu hii hairuhusu arifa. Fungua programu kwenye Chrome au isakinishe kwenye skrini ya mwanzo.",
+"Notifications activées": "Arifa zimewashwa",
+"Notifications désactivées": "Arifa zimezimwa",
+"Envoyer une notification de test": "Tuma arifa ya majaribio",
+"Test envoyé : la notification arrive dans quelques secondes.": "Jaribio limetumwa: arifa itafika baada ya sekunde chache.",
+"Autorisation refusée.": "Ruhusa imekataliwa.",
 "L'écran du stock arrive bientôt.": "Skrini ya hifadhi inakuja hivi karibuni.",
 "La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.": "Mlio unafanya kazi programu ikiwa wazi. Kwenye dawati la mapokezi, iache wazi na skrini iwake.",
 "Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.": "Msimbo unatolewa na mkurugenzi. Baada ya kujisajili, mkurugenzi anapaswa kuwasha akaunti yako na kukupa nafasi.",
@@ -1124,6 +1148,18 @@ const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
 "Cette commande a déjà été traitée": "Commande oyo esili kosalama",
 "Prise en charge": "Ezwami",
 "Libérée": "Elongolami",
+"Notifications sur ce téléphone": "Ba notification na telefone oyo",
+"Activer les notifications": "Pelisa ba notification",
+"Désactiver les notifications": "Kanga ba notification",
+"Les notifications sont activées sur ce téléphone.": "Ba notification ezali na telefone oyo.",
+"Les notifications sont désactivées. Activez-les pour être prévenu même quand l'application est fermée.": "Ba notification ekangami. Pelisa yango mpo ozwa nsango atako application ekangami.",
+"Notifications refusées : autorisez-les dans les réglages du navigateur (paramètres du site).": "Ba notification ekabwami : pesa nzela na réglages ya navigateur (réglages ya site).",
+"Ce téléphone ne permet pas les notifications. Ouvrez l'application depuis Chrome ou installez-la sur l'écran d'accueil.": "Telefone oyo epesi nzela te na ba notification. Fungola application na Chrome to batela yango na écran ya liboso.",
+"Notifications activées": "Ba notification epelisami",
+"Notifications désactivées": "Ba notification ekangami",
+"Envoyer une notification de test": "Tinda notification ya komeka",
+"Test envoyé : la notification arrive dans quelques secondes.": "Komeka etindami : notification ekoya na ba seconde moke.",
+"Autorisation refusée.": "Nzela epesami te.",
 "L'écran du stock arrive bientôt.": "Ecran ya stock ezali koya noki.",
 "La sonnerie fonctionne quand l'application est ouverte. Sur le poste de réception, laissez-la ouverte avec l'écran allumé.": "Lokito esalaka tango application ezali ofungwami. Na poste ya réception, tika yango efungwami na ecran ezali pole.",
 "Le code vous est donné par le directeur. Après l'inscription, le directeur doit activer votre compte et vous attribuer un poste.": "Code epesami na directeur. Nsima ya komikoma, directeur asengeli kopesa compte na yo makasi mpe kopesa yo poste.",
@@ -1450,6 +1486,7 @@ async function signUp(nom, email, pw, code) {
   return false;
 }
 function signOut() {
+  try { pushOff().catch(() => {}); } catch (_) {}
   S.sess = null; S.prof = null; S.cmds = []; S.seen = null; S.team = []; ls.del("chg_sess"); S.authView = "login"; S.authMsg = null; S.tab = "cmd"; S.detail = null; render();
 }
 async function loadProfile() {
@@ -1466,6 +1503,29 @@ async function loadTr() {
     if (JSON.stringify(r) !== old) { ls.set("chg_tr", r); applyTr(r); if (S.prof !== undefined) render(); }
   } catch (_) {}
 }
+/* ================= Notifications (même application fermée) ================= */
+const VAPID_PUB = "BB_6kM6kCPrFetZNuHwbhmKw-pkjLsDC_9zfiE0L40dp7-3eECZNZIWtgj1ETEs1uWXfNszM6beIgjIEIsyyut8";
+const pushOK = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const u8 = s => { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; const b = atob(s), o = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) o[i] = b.charCodeAt(i); return o; };
+async function pushSub() { if (!pushOK()) return null; const reg = await navigator.serviceWorker.getRegistration(); return reg ? await reg.pushManager.getSubscription() : null; }
+async function pushRefresh() {
+  try {
+    if (!pushOK()) S.pushSt = "non";
+    else if (Notification.permission === "denied") S.pushSt = "refus";
+    else { const sub = await pushSub(); S.pushSt = sub && Notification.permission === "granted" ? "on" : "off"; if (sub && S.sess) { const j = sub.toJSON(); try { await rpc("enregistrer_push", {p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_appareil: (navigator.userAgent || "").slice(0, 120)}); } catch (_) {} } }
+  } catch (_) { S.pushSt = "non"; }
+}
+async function pushOn() {
+  if (!pushOK()) throw new Error(t("Ce téléphone ne permet pas les notifications. Ouvrez l'application depuis Chrome ou installez-la sur l'écran d'accueil."));
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") throw new Error(t("Autorisation refusée."));
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: u8(VAPID_PUB)});
+  const j = sub.toJSON();
+  await rpc("enregistrer_push", {p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_appareil: (navigator.userAgent || "").slice(0, 120)});
+}
+async function pushOff() { const sub = await pushSub(); if (sub) { const j = sub.toJSON(); try { await rpc("desactiver_push", {p_endpoint: j.endpoint}); } catch (_) {} await sub.unsubscribe(); } }
 async function boot() {
   S.af = {nm:"",em:"",pw:"",cd:""};
   applyTr(ls.get("chg_tr", []));
@@ -1473,6 +1533,7 @@ async function boot() {
   await loadProfile();
   if (isActive()) await loadAll();
   render();
+  if (isActive()) pushRefresh().then(render);
 }
 async function loadAll() {
   const jobs = [];
@@ -1947,6 +2008,9 @@ function vMe() {
     ${S.code == null ? `<button class="btn" data-a="showcode">${t("Afficher le code")}</button>` : `<div class="codebox">${e(S.code)}</div>
     <div class="field"><label for="nc">${t("Nouveau code (6 caractères minimum)")}</label><input id="nc" data-m="newCode" autocapitalize="characters"></div><button class="btn pri" data-a="setcode">${t("Changer le code")}</button>`}</div>` : ""}
   <div class="card"><b>${t("Changer mon mot de passe")}</b><div class="field"><label for="np">${t("Nouveau mot de passe")}</label><input id="np" type="password" autocomplete="new-password" data-m="newPw"></div><button class="btn" data-a="setpw">${t("Enregistrer")}</button></div>
+  <div class="card"><b>${t("Notifications sur ce téléphone")}</b>
+    <small style="color:var(--muted)">${S.pushSt === "on" ? t("Les notifications sont activées sur ce téléphone.") : S.pushSt === "refus" ? t("Notifications refusées : autorisez-les dans les réglages du navigateur (paramètres du site).") : S.pushSt === "non" ? t("Ce téléphone ne permet pas les notifications. Ouvrez l'application depuis Chrome ou installez-la sur l'écran d'accueil.") : t("Les notifications sont désactivées. Activez-les pour être prévenu même quand l'application est fermée.")}</small>
+    ${S.pushSt === "on" ? `<div class="acts"><button class="btn" data-a="pushtest">🔔 ${t("Envoyer une notification de test")}</button><button class="btn" data-a="pushoff">${t("Désactiver les notifications")}</button></div>` : S.pushSt === "off" ? `<button class="btn pri" data-a="pushon">🔔 ${t("Activer les notifications")}</button>` : ""}</div>
   <div class="card"><b>${t("Sonnerie des nouvelles commandes")}</b>
     <div class="seg">${Object.keys(TONES).map(k => `<button data-a="snd" data-k="${k}" aria-pressed="${(ls.get("chg_sound", {}).tone || "cloche") === k}">${t(TONES[k])}</button>`).join("")}</div>
     <div class="seg"><button data-a="rep" aria-pressed="${ls.get("chg_sound", {}).repeat !== false}">${t("Répéter jusqu'à ce que je touche l'écran")}</button><button data-a="wake" aria-pressed="${ls.get("chg_wake", false)}">${t("Garder l'écran allumé")}</button></div>
@@ -2449,6 +2513,9 @@ document.addEventListener("click", async ev => {
   if (A2[a]) { A2[a](d); return; }
   switch (a) {
     case "auth": S.authView = d.v; S.authMsg = null; render(); break;
+    case "pushon": try { await pushOn(); S.pushSt = "on"; toast(t("Notifications activées")); } catch (er) { toast(er.message, 5000); await pushRefresh(); } render(); break;
+    case "pushoff": try { await pushOff(); S.pushSt = "off"; toast(t("Notifications désactivées")); } catch (er) { toast(er.message); } render(); break;
+    case "pushtest": try { await rpc("tester_push"); toast(t("Test envoyé : la notification arrive dans quelques secondes."), 5000); } catch (er) { toast(er.message, 5000); } break;
     case "logout": signOut(); break;
     case "recheck": try { await loadProfile(); if (isActive()) await loadAll(); } catch (er) { toast(er.message); } render(); break;
     case "tab": S.tab = d.k; S.detail = null; S.cancelAsk = false; S.delAsk = null;
