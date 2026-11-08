@@ -1317,9 +1317,19 @@ const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
 "Taux (laisser vide = taux du jour : ": "Taux (tika pamba = taux ya lelo:"
 },
   sb: {}};/*LANGEND*/
-const LANGS = [["fr", "Français"], ["en", "English"], ["sw", "Kiswahili"], ["ln", "Lingála"], ["sb", "Swahili du Congo"]];
+const LANGS = [["fr", "Français"], ["en", "English"], ["sw", "Kiswahili"], ["ln", "Lingala"], ["sb", "Swahili du Congo"]];
 const LOC = {fr: "fr-FR", en: "en-GB", sw: "sw", ln: "fr-FR", sb: "sw"};
 const t = s => ((LANG[S.lang] || {})[s]) || s;
+/* Textes modifiables depuis le Google Sheet (onglet Traductions -> table traductions) */
+const LANG0 = JSON.parse(JSON.stringify(LANG)); LANG0.fr = {};
+function applyTr(rows) {
+  Object.keys(LANG0).forEach(k => LANG[k] = Object.assign({}, LANG0[k]));
+  (rows || []).forEach(r => {
+    if (!r || !r.cle) return;
+    if (r.fr && r.fr !== r.cle) LANG.fr[r.cle] = r.fr;
+    ["en", "sw", "ln", "sb"].forEach(l => { if (r[l]) LANG[l][r.cle] = r[l]; });
+  });
+}
 
 /* ================= Utilitaires ================= */
 const $ = s => document.querySelector(s);
@@ -1415,8 +1425,18 @@ async function loadProfile() {
   const r = await rest("profiles?id=eq." + uid + "&select=*");
   S.prof = r && r[0] || null;
 }
+async function loadTr() {
+  try {
+    const r = await rest("traductions?select=cle,fr,en,sw,ln,sb&limit=5000");
+    if (!Array.isArray(r)) return;
+    const old = JSON.stringify(ls.get("chg_tr", []));
+    if (JSON.stringify(r) !== old) { ls.set("chg_tr", r); applyTr(r); if (S.prof !== undefined) render(); }
+  } catch (_) {}
+}
 async function boot() {
   S.af = {nm:"",em:"",pw:"",cd:""};
+  applyTr(ls.get("chg_tr", []));
+  loadTr();
   await loadProfile();
   if (isActive()) await loadAll();
   render();
@@ -2421,7 +2441,7 @@ document.addEventListener("click", async ev => {
 window.addEventListener("online", () => { S.online = true; flushQueue(); softRender(); });
 window.addEventListener("offline", () => { S.online = false; softRender(); });
 window.addEventListener("beforeinstallprompt", ev => { ev.preventDefault(); S.installEvt = ev; });
-document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { poll(); loadTr(); } });
 async function poll() {
   if (!S.sess || !isActive() && !(S.prof && S.prof.role === "en_attente")) return;
   try {
@@ -2445,6 +2465,8 @@ setInterval(() => { if (!document.hidden) poll(); }, 10000);
     }
     if (q.get("error_description")) { S.authMsg = {k: "err", t: "Ce lien n'est plus valable. Demandez-en un nouveau (« Mot de passe oublié ? »)."}; history.replaceState(null, "", location.pathname); }
   }
+  applyTr(ls.get("chg_tr", []));
+  loadTr();
   if (S.sess) {
     try { await boot(); await flushQueue(); }
     catch (er) {
