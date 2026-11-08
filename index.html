@@ -361,6 +361,25 @@ const PAIEMENTS = ["Cash","Mobile Money","Banque","Crédit"];
 "Ce téléphone ne permet pas les notifications. Ouvrez l'application depuis Chrome ou installez-la sur l'écran d'accueil.": "This phone does not allow notifications. Open the app in Chrome or install it on the home screen.",
 "Notifications activées": "Notifications on",
 "Notifications désactivées": "Notifications off",
+"Corbeille": "Trash",
+"Mettre à la corbeille": "Move to trash",
+"Confirmer : mettre à la corbeille": "Confirm: move to trash",
+"La commande ira dans la corbeille : vous pourrez la restaurer.": "The order will go to the trash: you can restore it.",
+"Commande mise à la corbeille.": "Order moved to trash.",
+"Restaurer": "Restore",
+"Commande restaurée.": "Order restored.",
+"Supprimer définitivement": "Delete permanently",
+"Confirmer la suppression définitive (irréversible)": "Confirm permanent deletion (cannot be undone)",
+"Commande supprimée définitivement.": "Order permanently deleted.",
+"Vider la corbeille": "Empty the trash",
+"La corbeille est vide.": "The trash is empty.",
+"Une commande à la corbeille peut être restaurée. La suppression définitive est irréversible.": "An order in the trash can be restored. Permanent deletion cannot be undone.",
+"Mise à la corbeille par": "Moved to trash by",
+"Chercher (client ou n°)": "Search (client or no.)",
+"Historique de la commande": "Order history",
+"Mise à la corbeille": "Moved to trash",
+"Restaurée": "Restored",
+"Non, garder": "No, keep it",
 "Envoyer une notification de test": "Send a test notification",
 "Test envoyé : la notification arrive dans quelques secondes.": "Test sent: the notification arrives in a few seconds.",
 "Autorisation refusée.": "Permission refused.",
@@ -1417,7 +1436,7 @@ function toast(m, ms) { const el = $("#toast"); el.textContent = m; el.hidden = 
 const S = {
   lang: ls.get("chg_lang", "fr"), sess: ls.get("chg_sess", null), prof: null, tab: "cmd", detail: null, authView: "login", authMsg: null,
   cmds: [], seen: null, filter: null, lignes: {}, livreurs: [], produits: [], clients: [], tarifs: [], team: [], te: {},
-  nc: null, queue: ls.get("chg_q", []), recovery: null, af: {nm:"",em:"",pw:"",cd:""}, code: null, busy: false, online: navigator.onLine, pickLiv: "", fraisIn: "", cancelAsk: false, installEvt: null, params: {}, prodAll: [], pOpen: null, pe: {}, pNew: false, pn: {}, tre: {}, trn: {poids_max: "", frais: ""}, delAsk: null, stockP: [], stockR: [], fourn: [], sOpen: null, se: {}, fo: {nom: "", telephone: "", quartier: "", produits: ""},
+  nc: null, queue: ls.get("chg_q", []), recovery: null, af: {nm:"",em:"",pw:"",cd:""}, code: null, busy: false, online: navigator.onLine, pickLiv: "", fraisIn: "", cancelAsk: false, q: "", trash: [], trashAsk: null, hist: {}, installEvt: null, params: {}, prodAll: [], pOpen: null, pe: {}, pNew: false, pn: {}, tre: {}, trn: {poids_max: "", frais: ""}, delAsk: null, stockP: [], stockR: [], fourn: [], sOpen: null, se: {}, fo: {nom: "", telephone: "", quartier: "", produits: ""},
   dper: 30, jday: new Date().toLocaleDateString("sv-SE", {timeZone: "Africa/Lubumbashi"}), jfin: {deps: [], mvts: [], rgs: []}, msub: "calc", mjours: 30, mar: [], lots: [], couts: {}, ce: {}, calc: {libelle: "", cout: "", devise: "USD", taux: "", poids: "", pv: "", cible: "30", pid: ""}, taux_in: "", colisR: [], cn: {}, fsub: null, fin: {}, mv: {compte: "Cash", sens: "Entrée", motif: "", montant: ""}, dp: null, rg: null
 };
 S.dp = null;
@@ -1557,6 +1576,7 @@ async function loadCmd() {
   detectNew(r);
   S.cmds = r;
 }
+async function loadTrash() { try { S.trash = await rest("v_corbeille?select=*&order=supprimee_at.desc"); } catch (_) { S.trash = []; } }
 async function loadTeam() { S.team = await rest("profiles?select=*&order=created_at.desc"); }
 
 /* ================= Alertes ================= */
@@ -1746,11 +1766,15 @@ function filters() {
   if (canCash()) f.push(["encaisser", "À encaisser"]);
   if (has("directeur","exploitation","reception")) f.splice(1, 0, ["atraiter", "À traiter"]);
   f.push(["fin", "Terminées"], ["all", "Toutes"]);
+  if (has("directeur","exploitation")) f.push(["corbeille", "Corbeille"]);
   return f;
 }
 function filtered() {
   const f = S.filter || "cours";
-  return S.cmds.filter(c => f === "all" ? true : f === "atraiter" ? (c.statut === "Reçue" && !c.pris_par) : f === "cours" ? ["Reçue","En préparation","Prête","En livraison"].includes(c.statut)
+  if (f === "corbeille") return S.trash;
+  const q = (S.q || "").trim().toLowerCase();
+  const hit = c => !q || String(c.id) === q.replace("#", "") || (c.client_nom || "").toLowerCase().includes(q);
+  return S.cmds.filter(hit).filter(c => f === "all" ? true : f === "atraiter" ? (c.statut === "Reçue" && !c.pris_par) : f === "cours" ? ["Reçue","En préparation","Prête","En livraison"].includes(c.statut)
     : f === "encaisser" ? (c.statut === "Livrée" && !c.paye) : ["Livrée","Annulée"].includes(c.statut));
 }
 function vCmd() {
@@ -1766,7 +1790,24 @@ function vCmd() {
   const list = filtered();
   return `<div class="h"><h2>${t("Commandes")}</h2><p>${S.cmds.length} ${t("au total")}</p></div>${k}
     <div class="seg" role="group">${filters().map(x => `<button data-a="filt" data-k="${x[0]}" aria-pressed="${f === x[0]}">${t(x[1])}</button>`).join("")}</div>
-    <div class="list">${list.length ? list.map(ordCard).join("") : `<div class="empty">${t("Aucune commande ici.")}</div>`}</div>`;
+    ${f !== "corbeille" ? `<div class="field" style="margin:8px 0"><input type="search" id="qs" data-m="q" value="${e(S.q)}" placeholder="${e(t("Chercher (client ou n°)"))}" aria-label="${e(t("Chercher (client ou n°)"))}"></div>` : ""}
+    <div class="list" id="cmdlist">${cmdListHTML()}</div>`;
+}
+function cmdListHTML() {
+  const f = S.filter || "cours", list = filtered();
+  if (f === "corbeille") {
+    const all = S.trashAsk === "all";
+    return (list.length ? `<div class="card"><div class="msg">${t("Une commande à la corbeille peut être restaurée. La suppression définitive est irréversible.")}</div>${all ? `<div class="acts"><button class="btn bad sm" data-a="emptyok">${t("Confirmer la suppression définitive (irréversible)")}</button><button class="btn sm" data-a="trashno">${t("Non, garder")}</button></div>` : `<button class="btn bad sm" data-a="emptyask">${t("Vider la corbeille")}</button>`}</div>` : "")
+      + (list.length ? list.map(trashCard).join("") : `<div class="empty">${t("La corbeille est vide.")}</div>`);
+  }
+  return list.length ? list.map(ordCard).join("") : `<div class="empty">${t("Aucune commande ici.")}</div>`;
+}
+function trashCard(c) {
+  const ask = S.trashAsk === c.id;
+  return `<div class="ord" style="cursor:default"><div class="row"><span class="cl">#${c.id} · ${e(c.client_nom)}</span><span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></div>
+    <div class="row"><span class="meta">${e(fmtD(c.created_at))}</span><span class="tot num">${fc(c.total)}</span></div>
+    <div class="meta">🗑 ${t("Mise à la corbeille par")} ${e(c.supprimee_par_nom || "—")} · ${e(fmtD(c.supprimee_at))}</div>
+    <div class="acts">${ask ? `<button class="btn bad sm" data-a="purgeok" data-id="${c.id}">${t("Confirmer la suppression définitive (irréversible)")}</button><button class="btn sm" data-a="trashno">${t("Non, garder")}</button>` : `<button class="btn good sm" data-a="untrash" data-id="${c.id}">${t("Restaurer")}</button><button class="btn bad sm" data-a="purgeask" data-id="${c.id}">${t("Supprimer définitivement")}</button>`}</div></div>`;
 }
 function claimChip(c) {
   if (!has("directeur","exploitation","reception") || ["Livrée","Annulée"].includes(c.statut)) return "";
@@ -1815,6 +1856,11 @@ function vDetail() {
     else claim = `<div class="card"><div class="msg ${locked ? "warn" : ""}">🔒 ${other ? t("Pris en charge par") + " <b>" + e(c.pris_par_nom || "—") + "</b>" : t("Pris en charge par vous")}${c.pris_at ? " · " + e(fmtD(c.pris_at)) : ""}${locked ? "<br>" + t("Vous ne pouvez pas la traiter : elle est déjà prise en charge.") : ""}</div>${(!other || chef) ? `<button class="btn" data-a="release">${t("Libérer la commande")}</button>` : ""}</div>`;
   }
   acts = claim + acts;
+  if (has("directeur","exploitation")) {
+    acts += `<div class="card">${S.trashAsk === c.id ? `<div class="msg warn">${t("La commande ira dans la corbeille : vous pourrez la restaurer.")}</div><div class="acts"><button class="btn bad" data-a="trashok">${t("Confirmer : mettre à la corbeille")}</button><button class="btn" data-a="trashno">${t("Non, garder")}</button></div>` : `<button class="btn" data-a="trashask">🗑 ${t("Mettre à la corbeille")}</button>`}</div>`;
+    const H = S.hist[c.id];
+    if (H && H.length) acts += `<div class="card"><b>${t("Historique de la commande")}</b>${H.map(h => `<div class="ln"><div><b>${e(t(h.action))}</b><small>${e(h.par_nom || "—")}</small></div><span class="meta">${e(fmtD(h.at))}</span></div>`).join("")}</div>`;
+  }
   if (btns.length) acts += `<div class="card"><div class="acts" style="align-items:end">${btns.join("")}</div></div>`;
   if (mgr && open && c.frais_livraison == null) acts += `<div class="card"><div class="msg warn">${t("Frais de livraison à confirmer (poids hors barème).")}</div><div class="field"><label for="fr">${t("Frais de livraison (FC)")}</label><input id="fr" inputmode="numeric" data-m="fraisIn" value="${e(S.fraisIn)}"></div><button class="btn pri" data-a="frais">${t("Enregistrer les frais")}</button></div>`;
   let enc = "";
@@ -1844,8 +1890,9 @@ function vDetail() {
   </div>`;
 }
 async function openDetail(id) {
-  S.detail = id; S.pickLiv = ""; S.fraisIn = ""; S.cancelAsk = false; render(); window.scrollTo(0, 0);
+  S.detail = id; S.pickLiv = ""; S.fraisIn = ""; S.cancelAsk = false; S.trashAsk = null; render(); window.scrollTo(0, 0);
   try { S.lignes[id] = await rest("v_lignes?commande_id=eq." + id + "&select=*"); } catch (_) { S.lignes[id] = S.lignes[id] || []; }
+  if (has("directeur","exploitation")) { try { S.hist[id] = await rest("commande_historique?commande_id=eq." + id + "&select=action,par_nom,at&order=at.asc,id.asc"); } catch (_) {} }
   if (S.detail === id) render();
 }
 
@@ -2472,6 +2519,7 @@ document.addEventListener("input", ev => {
   const el = ev.target; if (!el.dataset || !el.dataset.m) return;
   if (el.tagName === "SELECT") return;
   setPath(el.dataset.m, el.value);
+  if (el.dataset.m === "q") { const L = $("#cmdlist"); if (L) L.innerHTML = cmdListHTML(); return; }
   if (el.dataset.m === "nc.clientNom") { S.nc.clientId = null; $("#sugg").innerHTML = suggHTML(); }
   if (/^nc\.lines\./.test(el.dataset.m)) $("#tot").innerHTML = totalsHTML();
   if (/^calc\./.test(el.dataset.m) && $("#calcres")) $("#calcres").innerHTML = calcRes();
@@ -2527,7 +2575,15 @@ document.addEventListener("click", async ev => {
       if (d.k === "stock") loadStock().then(render).catch(er => toast(er.message));
       if (d.k === "fin") { if (!S.fsub || !finSubs().some(x => x[0] === S.fsub)) S.fsub = finSubs()[0][0]; if (!S.dp) S.dp = newDp(); loadFin().then(render).catch(er => toast(er.message)); }
       render(); window.scrollTo(0, 0); break;
-    case "filt": S.filter = d.k; render(); break;
+    case "filt": S.filter = d.k; S.trashAsk = null; render(); if (d.k === "corbeille") { await loadTrash(); render(); } break;
+    case "trashask": S.trashAsk = S.detail; render(); break;
+    case "trashno": S.trashAsk = null; render(); break;
+    case "trashok": { const id = S.detail; try { await rpc("supprimer_commande", {p_id: id}); toast(t("Commande mise à la corbeille.")); S.detail = null; S.trashAsk = null; await loadCmd(); } catch (er) { toast(er.message, 5000); } render(); break; }
+    case "untrash": { try { await rpc("restaurer_commande", {p_id: +d.id}); toast(t("Commande restaurée.")); await loadTrash(); await loadCmd(); } catch (er) { toast(er.message, 5000); } render(); break; }
+    case "purgeask": S.trashAsk = +d.id; render(); break;
+    case "purgeok": { try { await rpc("supprimer_definitivement", {p_id: +d.id}); toast(t("Commande supprimée définitivement.")); S.trashAsk = null; await loadTrash(); } catch (er) { toast(er.message, 5000); } render(); break; }
+    case "emptyask": S.trashAsk = "all"; render(); break;
+    case "emptyok": { try { await rpc("vider_corbeille", {}); toast(t("Commande supprimée définitivement.")); S.trashAsk = null; await loadTrash(); } catch (er) { toast(er.message, 5000); } render(); break; }
     case "open": openDetail(+d.id); break;
     case "back": S.detail = null; document.body.classList.remove("pfmode"); render(); break;
     case "cancelask": S.cancelAsk = true; render(); break;
