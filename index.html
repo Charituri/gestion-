@@ -1944,11 +1944,11 @@ function printPF() {
 
 /* ----- nouvelle commande ----- */
 function newNC() { return {clientId: null, clientNom: "", adresse: "", paiement: "Cash", remarques: "", lines: [{pid: "", qty: "", prix: ""}]}; }
-function fraisFor(poids) { if (poids <= 0) return null; const r = S.tarifs.find(x => Number(x.poids_max) >= poids); return r ? Number(r.frais) : null; }
+function fraisFor(poids) { if (poids <= 0) { const d = num(S.params.frais_piece); return d > 0 ? d : null; } const r = S.tarifs.find(x => Number(x.poids_max) >= poids); return r ? Number(r.frais) : null; }
 function ncTotals() {
   const nc = S.nc; let prod = 0, poids = 0;
-  nc.lines.forEach(l => { const p = S.produits.find(x => String(x.id) === String(l.pid)); if (!p) return; const q = num(l.qty), pr = l.prix === "" ? Number(p.prix_min || 0) : num(l.prix); prod += q * pr; if (p.unite === "kg") poids += q; });
-  return {prod, poids, frais: fraisFor(poids)};
+  nc.lines.forEach(l => { const p = S.produits.find(x => String(x.id) === String(l.pid)); if (!p) return; const q = num(l.qty), pr = l.prix === "" ? Number(p.prix_min || 0) : num(l.prix); prod += q * pr; poids += p.unite === "kg" ? q : q * Number(p.poids_unitaire || 0); });
+  poids = Math.round(poids * 100) / 100; return {prod, poids, frais: fraisFor(poids)};
 }
 function totalsHTML() {
   const T = ncTotals();
