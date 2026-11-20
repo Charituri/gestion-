@@ -66,6 +66,9 @@ a{color:var(--wine)}
 .top .t span{font-size:12.5px;opacity:.85}
 .chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.28)}
 .chip.off{background:var(--gold);color:#2B1C1D;border-color:var(--gold)}
+button.chip{cursor:pointer;font-family:inherit}
+.offbar{margin:0 0 12px;padding:10px 14px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:13.5px;font-weight:600}
+.offbar.sync{background:var(--info-soft);color:var(--ink)}
 .layout{display:grid;grid-template-columns:1fr;gap:20px;padding-block:18px 96px}
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));gap:4px}
 .nav button{position:relative;flex:1;min-width:0;background:none;border:0;border-radius:10px;padding:8px 2px;display:grid;gap:2px;justify-items:center;font-size:10.5px;color:var(--muted);cursor:pointer;font-weight:600}
@@ -1430,13 +1433,13 @@ const ls = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
   del(k) { try { localStorage.removeItem(k); } catch (_) {} }
 };
-function toast(m, ms) { const el = $("#toast"); el.textContent = m; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, ms || 3200); }
+function toast(m, ms) { if (typeof S !== "undefined" && S.qAt && Date.now() - S.qAt < 1500 && m !== S.qMsg) return; const el = $("#toast"); el.textContent = m; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, ms || 3200); }
 
 /* ================= État ================= */
 const S = {
   lang: ls.get("chg_lang", "fr"), sess: ls.get("chg_sess", null), prof: null, tab: "cmd", detail: null, authView: "login", authMsg: null,
   cmds: [], seen: null, filter: null, lignes: {}, livreurs: [], produits: [], clients: [], tarifs: [], team: [], te: {},
-  nc: null, queue: ls.get("chg_q", []), recovery: null, af: {nm:"",em:"",pw:"",cd:""}, code: null, busy: false, online: navigator.onLine, pickLiv: "", fraisIn: "", cancelAsk: false, q: "", trash: [], trashAsk: null, hist: {}, installEvt: null, params: {}, prodAll: [], pOpen: null, pe: {}, pNew: false, pn: {}, tre: {}, trn: {poids_max: "", frais: ""}, delAsk: null, stockP: [], stockR: [], fourn: [], sOpen: null, se: {}, fo: {nom: "", telephone: "", quartier: "", produits: ""},
+  nc: null, queue: ls.get("chg_q", []), qfail: ls.get("chg_qf", []), to: {r: 15000, w: 30000}, qAt: 0, qMsg: "", recovery: null, af: {nm:"",em:"",pw:"",cd:""}, code: null, busy: false, online: navigator.onLine, pickLiv: "", fraisIn: "", cancelAsk: false, q: "", trash: [], trashAsk: null, hist: {}, installEvt: null, params: {}, prodAll: [], pOpen: null, pe: {}, pNew: false, pn: {}, tre: {}, trn: {poids_max: "", frais: ""}, delAsk: null, stockP: [], stockR: [], fourn: [], sOpen: null, se: {}, fo: {nom: "", telephone: "", quartier: "", produits: ""},
   dper: 30, jday: new Date().toLocaleDateString("sv-SE", {timeZone: "Africa/Lubumbashi"}), jfin: {deps: [], mvts: [], rgs: []}, msub: "calc", mjours: 30, mar: [], lots: [], couts: {}, ce: {}, calc: {libelle: "", cout: "", devise: "USD", taux: "", poids: "", pv: "", cible: "30", pid: ""}, taux_in: "", colisR: [], cn: {}, fsub: null, fin: {}, mv: {compte: "Cash", sens: "Entrée", motif: "", montant: ""}, dp: null, rg: null
 };
 S.dp = null;
@@ -1447,15 +1450,25 @@ const canSeeCmd = () => has("directeur","exploitation","reception","comptable","
 
 /* ================= Client Supabase minimal ================= */
 class NetErr extends Error {}
+function setNet(v) {
+  if (S.online === v) return;
+  S.online = v;
+  if (v) setTimeout(() => { try { flushQueue(); } catch (_) {} }, 50);
+  try { if (S.sess && S.prof) softRender(); } catch (_) {}
+}
 async function raw(path, o) {
   o = o || {};
   const h = Object.assign({apikey: SB_KEY, "Content-Type": "application/json"}, o.headers || {});
   const tok = o.token === undefined ? (S.sess && S.sess.access_token) : o.token;
   h.Authorization = "Bearer " + (tok || SB_KEY);
-  let r;
-  try { r = await fetch(SB_URL + path, {method: o.method || "GET", headers: h, body: o.body ? JSON.stringify(o.body) : undefined}); }
-  catch (_) { throw new NetErr("Pas de réseau"); }
-  let d = null; const txt = await r.text(); if (txt) { try { d = JSON.parse(txt); } catch (_) { d = txt; } }
+  let r, txt;
+  const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const tm = ctl ? setTimeout(() => ctl.abort(), (o.method && o.method !== "GET") ? S.to.w : S.to.r) : null;
+  try { r = await fetch(SB_URL + path, {method: o.method || "GET", headers: h, body: o.body ? JSON.stringify(o.body) : undefined, signal: ctl ? ctl.signal : undefined}); txt = await r.text(); }
+  catch (_) { if (tm) clearTimeout(tm); setNet(false); throw new NetErr("Pas de réseau"); }
+  if (tm) clearTimeout(tm);
+  setNet(true);
+  let d = null; if (txt) { try { d = JSON.parse(txt); } catch (_) { d = txt; } }
   if (!r.ok) {
     const er = new Error(msgErr(d, r.status)); er.status = r.status; er.data = d; throw er;
   }
@@ -1491,8 +1504,51 @@ async function api(path, o) {
     throw er;
   }
 }
-const rest = (p, o) => api("/rest/v1/" + p, o);
-const rpc = (n, a) => api("/rest/v1/rpc/" + n, {method: "POST", body: a || {}});
+/* ----- mémoire du téléphone : les dernières données reçues restent lisibles sans réseau ----- */
+const idb = (() => {
+  let p = null;
+  const open = () => p || (p = new Promise((res, rej) => { try { const r = indexedDB.open("chg_cache", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } }));
+  return {
+    async get(k) { try { const db = await open(); return await new Promise(res => { const q = db.transaction("kv").objectStore("kv").get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(undefined); }); } catch (_) { return undefined; } },
+    async set(k, v) { try { const db = await open(); db.transaction("kv", "readwrite").objectStore("kv").put(v, k); } catch (_) {} },
+    async clear() { try { const db = await open(); db.transaction("kv", "readwrite").objectStore("kv").clear(); } catch (_) {} }
+  };
+})();
+const ckey = p => ((S.sess && S.sess.uid) || "_") + "|" + p;
+const lastStr = {};
+function cachePut(k, v) { try { const sr = JSON.stringify(v); if (lastStr[k] === sr) return; lastStr[k] = sr; } catch (_) {} idb.set(k, v); }
+const QRPC = {fixer_taux: 1, mouvement_colis: 1, fixer_frais: 1};   // écritures gardées en attente sans réseau
+const RRPC = {liste_livreurs: 1, marges_produits: 1};               // lectures gardées en mémoire
+const uuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16); });
+async function restX(p, o) {
+  const m = (o && o.method) || "GET";
+  if (m === "GET") {
+    const k = ckey("g|" + p);
+    try { const d = await api("/rest/v1/" + p, o); if (!(o && o.nocache)) cachePut(k, d); return {d, cached: false}; }
+    catch (er) { if (er instanceof NetErr) { const c = await idb.get(k); if (c !== undefined) return {d: c, cached: true}; } throw er; }
+  }
+  try { return {d: await api("/rest/v1/" + p, o), cached: false}; }
+  catch (er) {
+    if (er instanceof NetErr && !(o && o.noq)) { qAdd({k: "rest", path: p, o: {method: m, body: o.body, headers: o.headers}}); return {d: null, cached: false}; }
+    throw er;
+  }
+}
+const rest = (p, o) => restX(p, o).then(r => r.d);
+async function rpc(n, a) {
+  const rd = RRPC[n], k = ckey("r|" + n + "|" + JSON.stringify(a || {}));
+  try { const d = await api("/rest/v1/rpc/" + n, {method: "POST", body: a || {}}); if (rd) cachePut(k, d); return d; }
+  catch (er) {
+    if (er instanceof NetErr) {
+      if (rd) { const c = await idb.get(k); if (c !== undefined) return c; }
+      else if (QRPC[n]) {
+        qAdd({rpc: n, args: a || {}});
+        if (n === "fixer_frais") { const c = S.cmds.find(x => x.id === a.p_id); if (c) { c.frais_livraison = a.p_frais; c.total = Number(c.montant_produits) + Number(a.p_frais); } }
+        return null;
+      }
+    }
+    throw er;
+  }
+}
 
 /* ================= Authentification ================= */
 async function signIn(email, pw) {
@@ -1506,7 +1562,7 @@ async function signUp(nom, email, pw, code) {
 }
 function signOut() {
   try { pushOff().catch(() => {}); } catch (_) {}
-  S.sess = null; S.prof = null; S.cmds = []; S.seen = null; S.team = []; ls.del("chg_sess"); ["prof","cmds","prod","cli","tar","par"].forEach(k => ls.del("chg_c_"+k)); S.authView = "login"; S.authMsg = null; S.tab = "cmd"; S.detail = null; render();
+  S.sess = null; S.prof = null; S.cmds = []; S.seen = null; S.team = []; S.lignes = {}; try { idb.clear(); } catch (_) {} ls.del("chg_sess"); ["prof","cmds","prod","cli","tar","par"].forEach(k => ls.del("chg_c_"+k)); S.authView = "login"; S.authMsg = null; S.tab = "cmd"; S.detail = null; render();
 }
 async function loadProfile() {
   const uid = S.sess.uid || JSON.parse(atob(S.sess.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub;
@@ -1573,10 +1629,21 @@ async function loadAll() {
   await Promise.all(jobs);
 }
 async function loadCmd() {
-  const r = await rest("v_commandes?select=*&order=id.desc&limit=400");
-  detectNew(r);
-  S.cmds = r;
-  ls.set("chg_c_cmds", r);
+  const x = await restX("v_commandes?select=*&order=id.desc&limit=400"), r = x.d;
+  if (x.cached && S.cmds.some(c => !c.local)) { S.cmds = localCmds().concat(S.cmds.filter(c => !c.local)); return; }   // sans réseau : on garde l'écran actuel
+  if (!x.cached) detectNew(r);
+  S.cmds = localCmds().concat(r);
+  if (!x.cached) { ls.set("chg_c_cmds", r); prefetchLines(r); }
+}
+async function prefetchLines(list) {
+  try {
+    const ids = list.filter(c => !["Livrée", "Annulée"].includes(c.statut) && !S.lignes[c.id]).map(c => c.id).slice(0, 80);
+    if (!ids.length) return;
+    const rows = await rest("v_lignes?commande_id=in.(" + ids.join(",") + ")&select=*", {nocache: true});
+    ids.forEach(id => S.lignes[id] = rows.filter(l => l.commande_id === id));
+    const keep = {}; S.cmds.forEach(c => { if (S.lignes[c.id]) keep[c.id] = S.lignes[c.id]; });
+    idb.set(ckey("lignes"), keep);
+  } catch (_) {}
 }
 async function loadTrash() { try { S.trash = await rest("v_corbeille?select=*&order=supprimee_at.desc"); } catch (_) { S.trash = []; } }
 async function loadTeam() { S.team = await rest("profiles?select=*&order=created_at.desc"); }
@@ -1612,18 +1679,56 @@ function detectNew(list) {
 
 /* ================= File d'attente hors ligne ================= */
 function qSave() { ls.set("chg_q", S.queue); }
-async function flushQueue() {
-  if (!S.queue.length || !S.sess) return;
-  let changed = false;
-  while (S.queue.length) {
-    const it = S.queue[0];
-    try { await rpc(it.rpc, it.args); S.queue.shift(); changed = true; }
-    catch (er) {
-      if (er instanceof NetErr) break;
-      S.queue.shift(); changed = true; toast("Action #" + it.id + " refusée : " + er.message, 6000);
-    }
+function qfSave() { ls.set("chg_qf", S.qfail); }
+const mineQ = () => S.queue.filter(x => !x.uid || !S.sess || !S.sess.uid || x.uid === S.sess.uid);
+const localCmds = () => S.queue.filter(x => x.k === "create" && x.local).map(x => x.local);
+function qAdd(it) {
+  it.uid = S.sess && S.sess.uid; it.at = Date.now();
+  S.queue.push(it); qSave();
+  S.qMsg = t("Hors ligne : enregistré sur ce téléphone, envoi automatique au retour du réseau.");
+  S.qAt = 0; toast(S.qMsg, 5000); S.qAt = Date.now();
+  try { if (S.sess && S.prof) softRender(); } catch (_) {}
+}
+async function rpcCreate(args, key) {
+  try { return await api("/rest/v1/rpc/creer_commande", {method: "POST", body: Object.assign({p_cle: key}, args)}); }
+  catch (er) {
+    // base de données pas encore mise à jour (partie 22) : on envoie sans la clé anti-doublon
+    if (!(er instanceof NetErr) && (er.status === 404 || /PGRST202|Could not find the function/i.test(JSON.stringify(er.data || er.message || "")))) return api("/rest/v1/rpc/creer_commande", {method: "POST", body: args});
+    throw er;
   }
-  qSave();
+}
+async function sendItem(it) {
+  if (it.k === "create") return rpcCreate(it.args, it.key);
+  if (it.k === "rest") return api("/rest/v1/" + it.path, it.o);
+  return api("/rest/v1/rpc/" + it.rpc, {method: "POST", body: it.args || {}});
+}
+async function flushQueue() {
+  if (S.flushing || !S.queue.length || !S.sess) return;
+  S.flushing = true;
+  let changed = false;
+  try {
+    for (;;) {
+      const i = S.queue.findIndex(x => !x.uid || !S.sess || !S.sess.uid || x.uid === S.sess.uid);
+      if (i < 0) break;
+      const it = S.queue[i];
+      try {
+        const res = await sendItem(it);
+        S.queue.splice(i, 1); qSave(); changed = true;
+        if (it.k === "create") {
+          const nid = Number(res);
+          S.seen = S.seen || {}; if (nid) S.seen[nid] = "Reçue";
+          if (nid && it.local && S.detail === it.local.id) { S.lignes[nid] = it.lines; S.detail = nid; }
+          toast(t("Commande") + " #" + nid + " " + t("envoyée"), 5000);
+        }
+      } catch (er) {
+        if (er instanceof NetErr) break;
+        if (er.status === 401 || er.message === "Session expirée") break;     // problème de connexion au compte : on garde tout
+        S.queue.splice(i, 1); qSave();
+        S.qfail.push({it: it, msg: er.message, at: Date.now()}); qfSave(); changed = true;
+        toast("Action refusée : " + er.message, 7000);
+      }
+    }
+  } finally { S.flushing = false; }
   if (changed) { try { await loadCmd(); } catch (_) {} softRender(); }
 }
 async function act(rpcName, args, id, patch) {
@@ -1735,10 +1840,10 @@ function todoCount() {
 function badgeFor(k) { const n = k === "team" ? pendingCount() : k === "cmd" ? todoCount() : 0; return n ? `<span class="bdg" data-bdg="${k}">${n}</span>` : ""; }
 function vShell() {
   const nav = navItems();
-  if (!nav.some(x => x[0] === S.tab)) S.tab = nav[0][0];
-  const off = !S.online || S.queue.length;
+  if (S.tab !== "queue" && !nav.some(x => x[0] === S.tab)) S.tab = nav[0][0];
+  const nq = mineQ().length, nf = S.qfail.length, off = !S.online || nq || nf;
   const top = `<header class="top"><img src="logo.webp" alt=""><div class="t"><b>Charituri</b><span>${e(S.prof.nom)} · ${e(roles().map(r => rl(r)).join(", "))}</span></div>
-    ${off ? `<span class="chip off">${!S.online ? t("Hors ligne") : t("Envoi en cours")}${S.queue.length ? " · " + S.queue.length : ""}</span>` : ""}</header>`;
+    ${off ? `<button type="button" class="chip off" data-a="tab" data-k="queue">${nf ? "⚠ " + t("À vérifier") + " · " + nf : !S.online ? t("Hors ligne") + (nq ? " · " + nq : "") : t("Envoi en cours") + " · " + nq}</button>` : ""}</header>`;
   const nv = `<nav class="nav" aria-label="Menu">${nav.map(x => `<button data-a="tab" data-k="${x[0]}" ${S.tab === x[0] && !(S.detail && x[0] === "cmd") ? 'aria-current="page"' : S.tab === x[0] ? 'aria-current="page"' : ""}><span class="i">${x[1]}</span>${t(x[2])}${badgeFor(x[0])}</button>`).join("")}</nav>`;
   let main = "";
   if (S.tab === "cmd") main = S.detail ? vDetail() : (canSeeCmd() ? vCmd() : vStock());
@@ -1750,8 +1855,10 @@ function vShell() {
   else if (S.tab === "jour") main = vJour();
   else if (S.tab === "new") main = vNew();
   else if (S.tab === "team") main = vTeam();
+  else if (S.tab === "queue") main = vQueue();
   else main = vMe();
-  return `${top}<div class="layout">${nv}<main>${main}</main></div>`;
+  const bar = !S.online ? `<div class="offbar">📴 ${t("Pas de réseau : vous pouvez continuer à travailler. Tout sera envoyé automatiquement au retour de la connexion.")}</div>` : nq ? `<div class="offbar sync">⏳ ${t("Envoi en cours")} · ${nq}</div>` : "";
+  return `${top}<div class="layout">${nv}<main>${bar}${main}</main></div>`;
 }
 function updateBadges() {
   document.querySelectorAll(".bdg").forEach(b => b.remove());
@@ -1819,8 +1926,8 @@ function claimChip(c) {
 }
 function ordCard(c) {
   const money = !(has("boucher") && !has("directeur","exploitation","reception","comptable","commercial","livreur"));
-  return `<button class="ord" data-a="open" data-id="${c.id}"><div class="row"><div><span class="cl">#${c.id} · ${e(c.client_nom)}</span></div>
-    <span>${(c.remarques || "").startsWith("🌐") ? '<span class="pill p-liv">🌐 Site</span> ' : ""}<span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></span></div>
+  return `<button class="ord" data-a="open" data-id="${c.id}"><div class="row"><div><span class="cl">${c.local ? "⏳" : "#" + c.id} · ${e(c.client_nom)}</span></div>
+    <span>${c.local ? '<span class="pill p-prep">⏳ ' + t("En attente d\'envoi") + '</span> ' : ""}${(c.remarques || "").startsWith("🌐") ? '<span class="pill p-liv">🌐 Site</span> ' : ""}<span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></span></div>
     <div class="row"><span class="meta">${e(fmtD(c.created_at))}${c.adresse ? " · " + e(c.adresse) : ""}${c.livreur_nom ? " · 🛵 " + e(c.livreur_nom) : ""}</span>${money ? `<span class="tot num">${fc(c.total)}</span>` : ""}</div>
     ${claimChip(c)}
     ${c.remarques ? `<div class="meta">📝 ${e(c.remarques.length > 70 ? c.remarques.slice(0, 70) + "…" : c.remarques)}</div>` : ""}
@@ -1833,6 +1940,7 @@ function waNum(tel) { let d = String(tel || "").replace(/\D/g, ""); if (d.starts
 function vDetail() {
   const c = S.cmds.find(x => x.id === S.detail);
   if (!c) return `<button class="btn" data-a="back">← ${t("Retour")}</button><div class="empty">${t("Commande introuvable.")}</div>`;
+  if (c.local) return vLocalDetail(c);
   const L = S.lignes[c.id];
   const money = !(has("boucher") && !has("directeur","exploitation","reception","comptable","commercial","livreur"));
   const mgr = has("directeur","exploitation","reception");
@@ -1895,8 +2003,43 @@ function vDetail() {
     ${acts}${enc}
   </div>`;
 }
+function vLocalDetail(c) {
+  const it = S.queue.find(x => x.k === "create" && x.local && x.local.id === c.id), L = (it && it.lines) || [];
+  const money = !(has("boucher") && !has("directeur","exploitation","reception","comptable","commercial","livreur"));
+  return `<div class="acts"><button class="btn" data-a="back">← ${t("Retour")}</button></div>
+  <div class="detail"><div class="h"><h2>⏳ ${e(c.client_nom)}</h2><span class="pill p-prep">${t("En attente d'envoi")}</span></div>
+  <div class="card"><div class="msg warn">${t("Cette commande est enregistrée sur ce téléphone. Elle sera envoyée automatiquement dès que le réseau revient, puis elle recevra son numéro.")}</div>
+    <div class="dl"><div><span>${t("Créée le")}</span><span>${e(fmtD(c.created_at))}</span></div>
+    ${c.adresse ? `<div><span>${t("Adresse")}</span><span>${e(c.adresse)}</span></div>` : ""}
+    ${c.paiement_prevu && money ? `<div><span>${t("Paiement prévu")}</span><span>${e(c.paiement_prevu)}</span></div>` : ""}</div>
+    ${c.remarques ? `<div class="note"><b>${t("Note")} :</b> ${e(c.remarques)}</div>` : ""}</div>
+  <div class="card"><b>${t("Produits")}</b>${L.map(l => `<div class="ln"><div><b>${e(l.produit_nom)}</b><small>${Number(l.quantite).toLocaleString("fr-FR")} ${e(l.unite)}${money ? " × " + fc(l.prix_unitaire) : ""}</small></div>${money ? `<span class="num">${fc(l.montant)}</span>` : ""}</div>`).join("")}
+    ${money ? `<div class="sum"><div><span>${t("Produits")}</span><span class="num">${fc(c.montant_produits)}</span></div><div><span>${t("Livraison")}${c.poids_kg > 0 ? " (" + Number(c.poids_kg).toLocaleString("fr-FR") + " kg)" : ""}</span><span class="num">${c.frais_livraison == null ? t("à confirmer") : fc(c.frais_livraison)}</span></div><div class="t"><span>${t("Total")}</span><span class="num">${fc(c.total)}</span></div></div>` : ""}</div>
+  <div class="card"><div class="acts">${S.cancelAsk ? `<button class="btn bad" data-a="qcancel" data-id="${c.id}">${t("Confirmer : supprimer cette commande en attente")}</button>` : `<button class="btn" data-a="qcancel" data-id="${c.id}">${t("Supprimer cette commande en attente")}</button>`}</div></div></div>`;
+}
+function qLabel(it) {
+  if (it.k === "create") return "🆕 " + t("Nouvelle commande") + " · " + e(it.local.client_nom) + " · " + fc(it.local.total);
+  if (it.k === "rest") {
+    const tb = String(it.path).split("?")[0];
+    const nm = {depenses: "Dépense", mouvements_caisse: "Mouvement de caisse", reglements: "Règlement client", fournisseurs: "Fournisseur", lots_achat: "Achat (calcul)", couts_produits: "Coût d'un produit", produits: "Produit", livraison_tarifs: "Tarif de livraison"}[tb] || tb;
+    const mt = {POST: "ajout", PATCH: "modification", DELETE: "suppression"}[it.o.method] || it.o.method;
+    return "📝 " + t(nm) + " · " + t(mt);
+  }
+  const a = it.args || {};
+  const n = {changer_statut: () => "Commande #" + a.p_id + " → " + t(a.p_statut), prendre_en_charge: () => "Commande #" + a.p_id + " · " + t("prise en charge"), liberer_commande: () => "Commande #" + a.p_id + " · " + t("libérée"),
+    encaisser: () => "Commande #" + a.p_id + " · " + t("encaissement") + " (" + a.p_mode + ")", fixer_frais: () => t("Frais de livraison") + " · #" + a.p_id, fixer_taux: () => t("Taux du dollar"), mouvement_colis: () => t("Mouvement de colis")}[it.rpc];
+  return "📝 " + (n ? n() : it.rpc);
+}
+function vQueue() {
+  const mine = mineQ();
+  return `<div class="h"><h2>${t("Envois en attente")}</h2><p>${S.online ? t("Réseau disponible") : t("Pas de réseau")}</p></div>
+  <div class="card">${mine.length ? mine.map(it => `<div class="ln"><div><b>${qLabel(it)}</b><small>${e(fmtD(new Date(it.at || Date.now()).toISOString()))}</small></div></div>`).join("") : `<div class="empty">${t("Rien en attente : tout est envoyé.")}</div>`}
+    ${mine.length ? `<button class="btn pri" data-a="qsend">${t("Envoyer maintenant")}</button>` : ""}</div>
+  ${S.qfail.length ? `<h3>${t("À vérifier : refusé par le serveur")}</h3>` + S.qfail.map((f, i) => `<div class="card"><div class="msg err">${e(f.msg)}</div><div><b>${qLabel(f.it)}</b></div><div class="acts"><button class="btn" data-a="qretry" data-i="${i}">${t("Réessayer")}</button><button class="btn bad" data-a="qdrop" data-i="${i}">${t("Supprimer")}</button></div></div>`).join("") : ""}`;
+}
 async function openDetail(id) {
   S.detail = id; S.pickLiv = ""; S.fraisIn = ""; S.cancelAsk = false; S.trashAsk = null; render(); window.scrollTo(0, 0);
+  if (id < 0) return;
   if (has("directeur","exploitation","reception")) rpc("liste_livreurs").then(r => { if (JSON.stringify(r) !== JSON.stringify(S.livreurs)) { S.livreurs = r; if (S.detail === id) render(); } }).catch(() => {});
   try { S.lignes[id] = await rest("v_lignes?commande_id=eq." + id + "&select=*"); } catch (_) { S.lignes[id] = S.lignes[id] || []; }
   if (has("directeur","exploitation")) { try { S.hist[id] = await rest("commande_historique?commande_id=eq." + id + "&select=action,par_nom,at&order=at.asc,id.asc"); } catch (_) {} }
@@ -2002,13 +2145,34 @@ async function createOrder() {
   if (!nc.clientNom.trim()) return toast(t("Indiquez le client."));
   const lignes = nc.lines.filter(l => l.pid && num(l.qty) > 0).map(l => { const o = {produit_id: Number(l.pid), quantite: num(l.qty)}; if (l.prix !== "") o.prix = num(l.prix); return o; });
   if (!lignes.length) return toast(t("Ajoutez au moins un produit avec sa quantité."));
+  const args = {p_client_id: nc.clientId, p_client_nom: nc.clientNom.trim(), p_adresse: nc.adresse, p_paiement_prevu: nc.paiement, p_remarques: nc.remarques, p_lignes: lignes};
+  const key = nc.key || (nc.key = uuid());
   S.busy = true; render();
-  try {
-    const id = await rpc("creer_commande", {p_client_id: nc.clientId, p_client_nom: nc.clientNom.trim(), p_adresse: nc.adresse, p_paiement_prevu: nc.paiement, p_remarques: nc.remarques, p_lignes: lignes});
-    S.nc = newNC(); S.busy = false;
-    await loadCmd(); rest("clients?select=id,nom,telephone,whatsapp,quartier,adresse&order=nom&limit=2000").then(r => S.clients = r).catch(() => {});
-    S.tab = "cmd"; toast(t("Commande") + " #" + id + " " + t("enregistrée")); await openDetail(id);
-  } catch (er) { S.busy = false; toast(er instanceof NetErr ? t("Pas de réseau : la commande n'a pas été enregistrée. Réessayez.") : er.message, 6000); render(); }
+  let id;
+  try { id = await rpcCreate(args, key); }
+  catch (er) {
+    S.busy = false;
+    if (er instanceof NetErr) { queueCreate(nc, args, key); return; }
+    toast(er.message, 6000); render(); return;
+  }
+  S.nc = newNC(); S.busy = false;
+  try { await loadCmd(); rest("clients?select=id,nom,telephone,whatsapp,quartier,adresse&order=nom&limit=2000").then(r => S.clients = r).catch(() => {}); } catch (_) {}
+  S.tab = "cmd"; toast(t("Commande") + " #" + id + " " + t("enregistrée")); await openDetail(Number(id));
+}
+function queueCreate(nc, args, key) {
+  const T = ncTotals();
+  const lv = nc.lines.filter(l => l.pid && num(l.qty) > 0).map(l => {
+    const p = S.produits.find(x => String(x.id) === String(l.pid)), pr = l.prix === "" ? Number(p.prix_min || 0) : num(l.prix);
+    return {produit_id: p.id, produit_nom: p.nom, unite: p.unite, quantite: num(l.qty), prix_unitaire: pr, montant: num(l.qty) * pr};
+  });
+  let tmp = -Date.now(); while (S.queue.some(x => x.k === "create" && x.local.id === tmp)) tmp--;
+  const local = {id: tmp, local: true, statut: "Reçue", client_id: nc.clientId, client_nom: nc.clientNom.trim(), client_tel: null, adresse: nc.adresse || null, remarques: nc.remarques || null,
+    paiement_prevu: nc.paiement, frais_livraison: T.frais, montant_produits: T.prod, poids_kg: T.poids, total: T.prod + (T.frais || 0), created_at: new Date().toISOString(),
+    paye: false, paiement_mode: null, livreur_id: null, livreur_nom: null, pris_par: null, pris_par_nom: null, pris_at: null, date_livraison: null};
+  qAdd({k: "create", key: key, args: args, lines: lv, local: local});
+  S.nc = newNC(); S.tab = "cmd"; S.filter = "cours"; S.detail = null;
+  S.cmds = localCmds().concat(S.cmds.filter(c => !c.local));
+  render();
 }
 
 /* ----- équipe ----- */
@@ -2611,6 +2775,14 @@ document.addEventListener("click", async ev => {
     case "rmline": S.nc.lines.splice(+d.i, 1); render(); break;
     case "pickc": { const c = S.clients.find(x => x.id === +d.id); S.nc.clientId = c.id; S.nc.clientNom = c.nom; if (!S.nc.adresse) S.nc.adresse = c.adresse || c.quartier || ""; render(); break; }
     case "create": createOrder(); break;
+    case "qcancel": {
+      if (!S.cancelAsk) { S.cancelAsk = true; return render(); }
+      const id = +d.id; S.queue = S.queue.filter(x => !(x.k === "create" && x.local && x.local.id === id)); qSave();
+      S.cmds = S.cmds.filter(x => x.id !== id); S.cancelAsk = false; S.detail = null; render(); break;
+    }
+    case "qsend": toast(t("Envoi…")); await flushQueue(); render(); break;
+    case "qretry": { const f = S.qfail.splice(+d.i, 1)[0]; if (f) { S.queue.push(f.it); qSave(); qfSave(); flushQueue(); } render(); break; }
+    case "qdrop": S.qfail.splice(+d.i, 1); qfSave(); render(); break;
     case "tx": { const x = S.te[d.id]; const i = x.extra.indexOf(d.r); if (i >= 0) x.extra.splice(i, 1); else x.extra.push(d.r); render(); break; }
     case "tsave": teamSave(d.id, d.on === "1"); break;
     case "toff": teamOff(d.id); break;
@@ -2630,13 +2802,15 @@ window.addEventListener("beforeinstallprompt", ev => { ev.preventDefault(); S.in
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { poll(); loadTr(); } });
 async function poll() {
   if (!S.sess || !isActive() && !(S.prof && S.prof.role === "en_attente")) return;
+  if (S.polling) return;
+  S.polling = true;
   try {
     await flushQueue();
     if (S.prof && S.prof.role === "en_attente") { await loadProfile(); if (isActive()) { await loadAll(); } render(); return; }
     if (canSeeCmd()) await loadCmd();
     if (has("directeur")) await loadTeam();
     softRender();
-  } catch (_) {}
+  } catch (_) {} finally { S.polling = false; }
 }
 setInterval(() => { if (!document.hidden) poll(); }, 10000);
 
@@ -2654,13 +2828,14 @@ setInterval(() => { if (!document.hidden) poll(); }, 10000);
   applyTr(ls.get("chg_tr", []));
   loadTr();
   if (S.sess) {
+    try { const lg = await idb.get(ckey("lignes")); if (lg && typeof lg === "object") S.lignes = lg; } catch (_) {}
     try { await boot(); await flushQueue(); }
     catch (er) {
       if (er instanceof NetErr) {
         const cp = ls.get("chg_c_prof", null);
         if (cp && cp.uid === S.sess.uid && cp.v && cp.v.actif && cp.v.role !== "en_attente") {
           S.prof = cp.v; S.online = false;
-          S.cmds = ls.get("chg_c_cmds", []); S.produits = ls.get("chg_c_prod", S.produits || []);
+          S.cmds = localCmds().concat(ls.get("chg_c_cmds", [])); S.produits = ls.get("chg_c_prod", S.produits || []);
           S.clients = ls.get("chg_c_cli", S.clients || []); S.tarifs = ls.get("chg_c_tar", S.tarifs || []);
           S.params = ls.get("chg_c_par", S.params || {});
           toast("Hors ligne : données de la dernière connexion.", 5000);
