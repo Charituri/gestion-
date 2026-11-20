@@ -1506,13 +1506,14 @@ async function signUp(nom, email, pw, code) {
 }
 function signOut() {
   try { pushOff().catch(() => {}); } catch (_) {}
-  S.sess = null; S.prof = null; S.cmds = []; S.seen = null; S.team = []; ls.del("chg_sess"); S.authView = "login"; S.authMsg = null; S.tab = "cmd"; S.detail = null; render();
+  S.sess = null; S.prof = null; S.cmds = []; S.seen = null; S.team = []; ls.del("chg_sess"); ["prof","cmds","prod","cli","tar","par"].forEach(k => ls.del("chg_c_"+k)); S.authView = "login"; S.authMsg = null; S.tab = "cmd"; S.detail = null; render();
 }
 async function loadProfile() {
   const uid = S.sess.uid || JSON.parse(atob(S.sess.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub;
   S.sess.uid = uid;
   const r = await rest("profiles?id=eq." + uid + "&select=*");
   S.prof = r && r[0] || null;
+  if (S.prof) ls.set("chg_c_prof", {uid: uid, v: S.prof});
 }
 async function loadTr() {
   try {
@@ -1558,12 +1559,12 @@ async function loadAll() {
   const jobs = [];
   if (canSeeCmd()) jobs.push(loadCmd());
   if (has("directeur","exploitation","reception")) {
-    jobs.push(rest("produits?actif=eq.true&select=*&order=categorie,ordre,nom").then(r => S.produits = r).catch(() => {}));
-    jobs.push(rest("clients?select=id,nom,telephone,whatsapp,quartier,adresse&order=nom&limit=2000").then(r => S.clients = r).catch(() => {}));
-    jobs.push(rest("livraison_tarifs?select=*&order=poids_max").then(r => S.tarifs = r).catch(() => {}));
+    jobs.push(rest("produits?actif=eq.true&select=*&order=categorie,ordre,nom").then(r => { S.produits = r; ls.set("chg_c_prod", r); }).catch(() => {}));
+    jobs.push(rest("clients?select=id,nom,telephone,whatsapp,quartier,adresse&order=nom&limit=2000").then(r => { S.clients = r; ls.set("chg_c_cli", r); }).catch(() => {}));
+    jobs.push(rest("livraison_tarifs?select=*&order=poids_max").then(r => { S.tarifs = r; ls.set("chg_c_tar", r); }).catch(() => {}));
     jobs.push(rpc("liste_livreurs").then(r => S.livreurs = r).catch(() => {}));
   }
-  jobs.push(rest("parametres?select=*").then(r => { S.params = {}; (r || []).forEach(p => S.params[p.cle] = p.valeur); }).catch(() => {}));
+  jobs.push(rest("parametres?select=*").then(r => { S.params = {}; (r || []).forEach(p => S.params[p.cle] = p.valeur); ls.set("chg_c_par", S.params); }).catch(() => {}));
   if (has("directeur")) jobs.push(loadTeam());
   if (has("directeur", "exploitation", "stock", "comptable")) jobs.push(loadStock().catch(() => {}));
   if (canProd()) jobs.push(loadProd().catch(() => {}));
@@ -1575,6 +1576,7 @@ async function loadCmd() {
   const r = await rest("v_commandes?select=*&order=id.desc&limit=400");
   detectNew(r);
   S.cmds = r;
+  ls.set("chg_c_cmds", r);
 }
 async function loadTrash() { try { S.trash = await rest("v_corbeille?select=*&order=supprimee_at.desc"); } catch (_) { S.trash = []; } }
 async function loadTeam() { S.team = await rest("profiles?select=*&order=created_at.desc"); }
@@ -1840,7 +1842,11 @@ function vDetail() {
   if (mgr && open) {
     if (c.statut === "Reçue") btns.push(`<button class="btn pri" data-a="st" data-s="En préparation">${t("Mettre en préparation")}</button>`);
     if (c.statut === "En préparation") btns.push(`<button class="btn pri" data-a="st" data-s="Prête">${t("Marquer prête")}</button>`);
-    if (c.statut === "Prête") btns.push(`<div class="field" style="min-width:200px;flex:1"><label for="lv">${t("Livreur")}</label><select id="lv" data-m="pickLiv"><option value="">${t("— Choisir —")}</option>${S.livreurs.map(l => `<option value="${l.id}" ${S.pickLiv === l.id ? "selected" : ""}>${e(l.nom)}</option>`).join("")}</select></div><button class="btn pri" data-a="st" data-s="En livraison">${t("Confier au livreur")}</button>`);
+    if (c.statut === "Prête") {
+      if (!S.pickLiv && S.livreurs.length === 1) S.pickLiv = S.livreurs[0].id;
+      btns.push(S.livreurs.length ? `<div class="field" style="min-width:200px;flex:1"><label for="lv">${t("Livreur")}</label><select id="lv" data-m="pickLiv"><option value="">${t("— Choisir —")}</option>${S.livreurs.map(l => `<option value="${l.id}" ${S.pickLiv === l.id ? "selected" : ""}>${e(l.nom)}</option>`).join("")}</select></div><button class="btn pri" data-a="st" data-s="En livraison">${t("Confier au livreur")}</button>`
+        : `<div class="msg" style="flex:1;min-width:200px">${t("Aucun livreur actif pour le moment. Dans l'onglet Équipe, acceptez le compte du livreur avec le poste « Livreur », puis touchez Actualiser.")}</div><button class="btn" data-a="rl">${t("Actualiser la liste")}</button>`);
+    }
     if (c.statut === "En livraison") btns.push(`<button class="btn good" data-a="st" data-s="Livrée">${t("Marquer livrée")}</button>`);
   } else {
     if (has("boucher") && c.statut === "Reçue") btns.push(`<button class="btn pri" data-a="st" data-s="En préparation">${t("Commencer la préparation")}</button>`);
@@ -1891,6 +1897,7 @@ function vDetail() {
 }
 async function openDetail(id) {
   S.detail = id; S.pickLiv = ""; S.fraisIn = ""; S.cancelAsk = false; S.trashAsk = null; render(); window.scrollTo(0, 0);
+  if (has("directeur","exploitation","reception")) rpc("liste_livreurs").then(r => { if (JSON.stringify(r) !== JSON.stringify(S.livreurs)) { S.livreurs = r; if (S.detail === id) render(); } }).catch(() => {});
   try { S.lignes[id] = await rest("v_lignes?commande_id=eq." + id + "&select=*"); } catch (_) { S.lignes[id] = S.lignes[id] || []; }
   if (has("directeur","exploitation")) { try { S.hist[id] = await rest("commande_historique?commande_id=eq." + id + "&select=action,par_nom,at&order=at.asc,id.asc"); } catch (_) {} }
   if (S.detail === id) render();
@@ -2589,10 +2596,11 @@ document.addEventListener("click", async ev => {
     case "cancelask": S.cancelAsk = true; render(); break;
     case "st": {
       const id = S.detail; let liv = null;
-      if (d.s === "En livraison") { liv = S.pickLiv; if (!liv) return toast(t("Choisissez un livreur.")); }
+      if (d.s === "En livraison") { liv = S.pickLiv || (S.livreurs.length === 1 ? S.livreurs[0].id : ""); if (!liv) return toast(t("Choisissez un livreur.")); }
       const patch = {statut: d.s}; if (liv) { patch.livreur_id = liv; const l = S.livreurs.find(x => x.id === liv); patch.livreur_nom = l && l.nom; }
       await act("changer_statut", {p_id: id, p_statut: d.s, p_livreur: liv}, id, patch); break;
     }
+    case "rl": { try { S.livreurs = await rpc("liste_livreurs"); if (has("directeur")) await loadTeam(); if (!S.livreurs.length) toast(t("Toujours aucun livreur actif.")); } catch (er) { toast(er.message, 5000); } render(); break; }
     case "claim": { const id = S.detail; await act("prendre_en_charge", {p_id: id}, id, {pris_par: S.prof.id, pris_par_nom: S.prof.nom, pris_at: new Date().toISOString()}); break; }
     case "release": { const id = S.detail; await act("liberer_commande", {p_id: id}, id, {pris_par: null, pris_par_nom: null, pris_at: null}); break; }
     case "enc": { const id = S.detail; await act("encaisser", {p_id: id, p_mode: d.m}, id, {paye: d.m !== "Crédit", paiement_mode: d.m}); break; }
@@ -2648,7 +2656,16 @@ setInterval(() => { if (!document.hidden) poll(); }, 10000);
   if (S.sess) {
     try { await boot(); await flushQueue(); }
     catch (er) {
-      if (er instanceof NetErr) { S.authMsg = {k: "err", t: "Pas de connexion. Réessayez quand le réseau revient."}; S.sess = S.sess; }
+      if (er instanceof NetErr) {
+        const cp = ls.get("chg_c_prof", null);
+        if (cp && cp.uid === S.sess.uid && cp.v && cp.v.actif && cp.v.role !== "en_attente") {
+          S.prof = cp.v; S.online = false;
+          S.cmds = ls.get("chg_c_cmds", []); S.produits = ls.get("chg_c_prod", S.produits || []);
+          S.clients = ls.get("chg_c_cli", S.clients || []); S.tarifs = ls.get("chg_c_tar", S.tarifs || []);
+          S.params = ls.get("chg_c_par", S.params || {});
+          toast("Hors ligne : données de la dernière connexion.", 5000);
+        } else S.authMsg = {k: "err", t: "Pas de connexion. Réessayez quand le réseau revient."};
+      }
       else { S.sess = null; ls.del("chg_sess"); }
       render();
     }
