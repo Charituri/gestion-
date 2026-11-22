@@ -94,6 +94,9 @@ main{min-width:0;display:grid;gap:16px;align-content:start}
 .list{display:grid;gap:10px}
 .ord{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;min-width:0;cursor:pointer;text-align:left;width:100%}
 .ord:hover{border-color:var(--wine)}
+.selc{display:flex;align-items:center;gap:12px}
+.selc input{width:24px;height:24px;flex:none;accent-color:var(--wine)}
+.selbar{position:sticky;top:0;z-index:5;display:grid;gap:8px}
 .ord .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
 .ord .cl{font-weight:700;overflow-wrap:anywhere}
 .ord .meta{color:var(--muted);font-size:13.5px;overflow-wrap:anywhere}
@@ -1444,7 +1447,8 @@ const S = {
 };
 S.dp = null;
 const roles = () => S.prof ? [S.prof.role].concat(S.prof.roles_extra || []) : [];
-const has = (...r) => roles().some(x => r.indexOf(x) >= 0);
+// Le responsable d'exploitation a tous les droits du directeur, sauf ceux réservés au directeur seul (Équipe)
+const has = (...r) => { if (r.length > 1 && r.indexOf("directeur") >= 0) r = r.concat("exploitation"); return roles().some(x => r.indexOf(x) >= 0); };
 const isActive = () => S.prof && S.prof.actif && S.prof.role !== "en_attente";
 const canSeeCmd = () => has("directeur","exploitation","reception","comptable","commercial","boucher","livreur");
 
@@ -1685,8 +1689,6 @@ const localCmds = () => S.queue.filter(x => x.k === "create" && x.local).map(x =
 function qAdd(it) {
   it.uid = S.sess && S.sess.uid; it.at = Date.now();
   S.queue.push(it); qSave();
-  S.qMsg = t("Hors ligne : enregistré sur ce téléphone, envoi automatique au retour du réseau.");
-  S.qAt = 0; toast(S.qMsg, 5000); S.qAt = Date.now();
   try { if (S.sess && S.prof) softRender(); } catch (_) {}
 }
 async function rpcCreate(args, key) {
@@ -1737,7 +1739,6 @@ async function act(rpcName, args, id, patch) {
     if (er instanceof NetErr) {
       S.queue.push({rpc: rpcName, args, id}); qSave();
       const c = S.cmds.find(x => x.id === id); if (c && patch) Object.assign(c, patch);
-      toast("Hors ligne : enregistré, sera envoyé dès le retour du réseau.", 5000);
     } else {
       const m = /prise en charge par (.*)\.$/.exec(er.message || ""), d2 = /déjà été traitée \((.*)\)\.$/.exec(er.message || "");
       toast(m ? t("Cette commande est déjà prise en charge par") + " " + m[1] + "." : d2 ? t("Cette commande a déjà été traitée") + " (" + t(d2[1]) + ")." : er.message, 6000);
@@ -1902,14 +1903,34 @@ function vCmd() {
     ${f !== "corbeille" ? `<div class="field" style="margin:8px 0"><input type="search" id="qs" data-m="q" value="${e(S.q)}" placeholder="${e(t("Chercher (client ou n°)"))}" aria-label="${e(t("Chercher (client ou n°)"))}"></div>` : ""}
     <div class="list" id="cmdlist">${cmdListHTML()}</div>`;
 }
+const SEL = () => (S.sel = S.sel || {});
+const RZ = () => (S.rz = S.rz || {fin: true, cmd: false, mot: "", ask: false});
+function selHead(f, list) {
+  if (!has("directeur", "exploitation") || !list.length) return "";
+  if (!S.selOn) return `<div class="acts"><button class="btn sm" data-a="selmode">☑ ${t("Sélectionner plusieurs")}</button></div>`;
+  const n = Object.keys(SEL()).length;
+  let h = `<div class="row"><b>${n} ${t(n > 1 ? "sélectionnées" : "sélectionnée")}</b><span class="acts"><button class="btn sm" data-a="selall">${t("Tout cocher")}</button><button class="btn sm" data-a="selnone">${t("Tout décocher")}</button><button class="btn sm" data-a="selmode">${t("Terminer")}</button></span></div>`;
+  if (n) {
+    if (S.selAsk) h += `<div class="msg warn">${S.selAsk === "purge" ? t("Suppression définitive : impossible de revenir en arrière.") : t("Les commandes cochées iront à la corbeille : vous pourrez les restaurer.")}</div>
+      <div class="acts"><button class="btn bad sm" data-a="selok">${S.selAsk === "purge" ? t("Confirmer la suppression définitive") : t("Confirmer : mettre à la corbeille")} (${n})</button><button class="btn sm" data-a="selno">${t("Non")}</button></div>`;
+    else if (f === "corbeille") h += `<div class="acts"><button class="btn good sm" data-a="selrestore">${t("Restaurer")} (${n})</button><button class="btn bad sm" data-a="selpurge">${t("Supprimer définitivement")} (${n})</button></div>`;
+    else h += `<div class="acts"><button class="btn bad sm" data-a="seltrash">🗑 ${t("Mettre à la corbeille")} (${n})</button></div>`;
+  }
+  return `<div class="card selbar">${h}</div>`;
+}
+function selCard(c) {
+  if (c.local) return ordCard(c);
+  return `<label class="ord selc"><input type="checkbox" data-a="selone" data-id="${c.id}" ${SEL()[c.id] ? "checked" : ""}><span style="min-width:0;display:grid;gap:2px"><span class="cl">#${c.id} · ${e(c.client_nom)} <span class="pill ${pillCls(c.statut)}">${t(c.statut)}</span></span><span class="meta">${e(fmtD(c.created_at))} · ${fc(c.total)}</span></span></label>`;
+}
 function cmdListHTML() {
   const f = S.filter || "cours", list = filtered();
+  const head = selHead(f, list), card = S.selOn ? selCard : null;
   if (f === "corbeille") {
     const all = S.trashAsk === "all";
-    return (list.length ? `<div class="card"><div class="msg">${t("Une commande à la corbeille peut être restaurée. La suppression définitive est irréversible.")}</div>${all ? `<div class="acts"><button class="btn bad sm" data-a="emptyok">${t("Confirmer la suppression définitive (irréversible)")}</button><button class="btn sm" data-a="trashno">${t("Non, garder")}</button></div>` : `<button class="btn bad sm" data-a="emptyask">${t("Vider la corbeille")}</button>`}</div>` : "")
-      + (list.length ? list.map(trashCard).join("") : `<div class="empty">${t("La corbeille est vide.")}</div>`);
+    return head + (list.length ? `<div class="card"><div class="msg">${t("Une commande à la corbeille peut être restaurée. La suppression définitive est irréversible.")}</div>${S.selOn ? "" : all ? `<div class="acts"><button class="btn bad sm" data-a="emptyok">${t("Confirmer la suppression définitive (irréversible)")}</button><button class="btn sm" data-a="trashno">${t("Non, garder")}</button></div>` : `<button class="btn bad sm" data-a="emptyask">${t("Vider la corbeille")}</button>`}</div>` : "")
+      + (list.length ? list.map(card ? selCard : trashCard).join("") : `<div class="empty">${t("La corbeille est vide.")}</div>`);
   }
-  return list.length ? list.map(ordCard).join("") : `<div class="empty">${t("Aucune commande ici.")}</div>`;
+  return head + (list.length ? list.map(card || ordCard).join("") : `<div class="empty">${t("Aucune commande ici.")}</div>`);
 }
 function trashCard(c) {
   const ask = S.trashAsk === c.id;
@@ -2574,6 +2595,12 @@ async function loadFin() {
   else if (sub === "imp") F.imp = await rest("v_impayes?select=*&order=reste_du.desc");
   else if (sub === "ventes") F.ventes = await rest("v_ventes_jours?select=*&order=jour.desc&limit=30");
 }
+function vReset() {
+  const R = RZ(), row = (k, txt) => `<button class="btn sm" data-a="rztog" data-k="${k}" aria-pressed="${!!R[k]}" style="justify-content:flex-start;text-align:left;white-space:normal">${R[k] ? "☑" : "☐"} ${t(txt)}</button>`;
+  return `<div class="card mem"><b>${t("Remise à zéro avant le vrai départ")}</b><small>${t("Efface définitivement les chiffres de test. Impossible de revenir en arrière. Les produits, prix, clients et comptes sont gardés.")}</small>
+    <div class="acts" style="flex-direction:column;align-items:stretch">${row("fin", "Finance : dépenses, mouvements de caisse, règlements, achats")}${row("cmd", "Toutes les commandes (ventes et historique) ; la numérotation recommence à 1")}</div>
+    ${R.ask ? `<div class="msg warn">${t("Écrivez ZERO pour confirmer.")}</div>${fld("Mot de confirmation", "rz.mot", R.mot, {ph: "ZERO"})}<div class="acts"><button class="btn bad" data-a="rzok">${t("Confirmer la remise à zéro")}</button><button class="btn" data-a="rzno">${t("Annuler")}</button></div>` : `<button class="btn bad" data-a="rzask">${t("Remettre à zéro…")}</button>`}</div>`;
+}
 function vFin() {
   if (!S.dp) S.dp = newDp();
   const subs = finSubs(); if (!subs.some(x => x[0] === S.fsub)) S.fsub = subs[0][0];
@@ -2604,11 +2631,39 @@ function vFin() {
     b = `<div class="kpis"><div class="kpi"><small>${t("7 derniers jours")}</small><b>${fc(s7)}</b></div><div class="kpi"><small>${t("30 derniers jours")}</small><b>${fc(s30)}</b></div></div>
     <div class="card"><div class="bars">${V.map(v => `<div class="c"><span class="v">${Math.round(v.total / 1000)}k</span><div class="b" style="height:${Math.max(3, Math.round(100 * v.total / mx))}%"></div><small>${String(v.jour).slice(8, 10)}</small></div>`).join("") || `<div class="empty">${t("Pas encore de vente livrée.")}</div>`}</div></div>`;
   }
-  return `<div class="h"><h2>${t(has("directeur", "comptable") ? "Finances" : "Achats")}</h2></div>${seg}${b}`;
+  return `<div class="h"><h2>${t(has("directeur", "comptable") ? "Finances" : "Achats")}</h2></div>${seg}${b}${has("directeur", "exploitation") ? vReset() : ""}`;
 }
 
 /* ================= Actions des nouveaux écrans ================= */
+const refreshSel = () => { const L = $("#cmdlist"); if (L) L.innerHTML = cmdListHTML(); };
+async function selDo(name, msg) {
+  const ids = Object.keys(SEL()).map(Number); if (!ids.length) return;
+  await guard(async () => { const n = await rpc(name, {p_ids: ids}); toast(n + " " + t(msg), 4000); S.sel = {}; S.selAsk = null; await loadCmd(); await loadTrash(); });
+  S.selAsk = null; render();
+}
 const A2 = {
+  selmode() { S.selOn = !S.selOn; S.sel = {}; S.selAsk = null; refreshSel(); },
+  selone(d) { const s = SEL(); if (s[d.id]) delete s[d.id]; else s[d.id] = 1; S.selAsk = null; refreshSel(); },
+  selall() { const s = SEL(); filtered().filter(c => !c.local).forEach(c => { s[c.id] = 1; }); S.selAsk = null; refreshSel(); },
+  selnone() { S.sel = {}; S.selAsk = null; refreshSel(); },
+  seltrash() { S.selAsk = "trash"; refreshSel(); },
+  selpurge() { S.selAsk = "purge"; refreshSel(); },
+  selno() { S.selAsk = null; refreshSel(); },
+  async selrestore() { await selDo("restaurer_commandes", "commande(s) restaurée(s)."); },
+  async selok() { await (S.selAsk === "purge" ? selDo("supprimer_definitivement_multi", "commande(s) supprimée(s) définitivement.") : selDo("supprimer_commandes", "commande(s) mise(s) à la corbeille.")); },
+  rztog(d) { const R = RZ(); R[d.k] = !R[d.k]; R.ask = false; render(); },
+  rzask() { const R = RZ(); if (!R.fin && !R.cmd) return toast(t("Cochez ce qu'il faut effacer.")); R.ask = true; R.mot = ""; render(); },
+  rzno() { RZ().ask = false; render(); },
+  async rzok() {
+    const R = RZ(); if (String(R.mot).trim().toUpperCase() !== "ZERO") return toast(t("Écrivez ZERO pour confirmer."));
+    await guard(async () => {
+      const r = await rpc("remettre_a_zero", {p_finance: !!R.fin, p_commandes: !!R.cmd, p_mot: "ZERO"});
+      toast(t("Remise à zéro faite.") + (r && r.commandes ? " " + r.commandes + " " + t("commande(s) effacée(s).") : ""), 5000);
+      S.rz = null; S.sel = {}; S.selOn = false; S.fin = {};
+      await loadCmd(); await loadTrash(); await loadFin(); if (has("directeur", "comptable")) await loadMar().catch(() => {});
+    });
+    render();
+  },
   lang(d) { S.lang = d.k; ls.set("chg_lang", S.lang); render(); },
   async dper(d) { S.dper = +d.k; S.mjours = S.dper; render(); if (has("directeur", "comptable")) { await guard(loadMar); render(); } },
   dpdf() { reportPrint(dashReport()); },
@@ -2746,7 +2801,7 @@ document.addEventListener("click", async ev => {
       if (d.k === "stock") loadStock().then(render).catch(er => toast(er.message));
       if (d.k === "fin") { if (!S.fsub || !finSubs().some(x => x[0] === S.fsub)) S.fsub = finSubs()[0][0]; if (!S.dp) S.dp = newDp(); loadFin().then(render).catch(er => toast(er.message)); }
       render(); window.scrollTo(0, 0); break;
-    case "filt": S.filter = d.k; S.trashAsk = null; render(); if (d.k === "corbeille") { await loadTrash(); render(); } break;
+    case "filt": S.filter = d.k; S.trashAsk = null; S.sel = {}; S.selAsk = null; S.selOn = false; render(); if (d.k === "corbeille") { await loadTrash(); render(); } break;
     case "trashask": S.trashAsk = S.detail; render(); break;
     case "trashno": S.trashAsk = null; render(); break;
     case "trashok": { const id = S.detail; try { await rpc("supprimer_commande", {p_id: id}); toast(t("Commande mise à la corbeille.")); S.detail = null; S.trashAsk = null; await loadCmd(); } catch (er) { toast(er.message, 5000); } render(); break; }
@@ -2838,7 +2893,6 @@ setInterval(() => { if (!document.hidden) poll(); }, 10000);
           S.cmds = localCmds().concat(ls.get("chg_c_cmds", [])); S.produits = ls.get("chg_c_prod", S.produits || []);
           S.clients = ls.get("chg_c_cli", S.clients || []); S.tarifs = ls.get("chg_c_tar", S.tarifs || []);
           S.params = ls.get("chg_c_par", S.params || {});
-          toast("Hors ligne : données de la dernière connexion.", 5000);
         } else S.authMsg = {k: "err", t: "Pas de connexion. Réessayez quand le réseau revient."};
       }
       else { S.sess = null; ls.del("chg_sess"); }
