@@ -1442,7 +1442,7 @@ function toast(m, ms) { if (typeof S !== "undefined" && S.qAt && Date.now() - S.
 const S = {
   lang: ls.get("chg_lang", "fr"), sess: ls.get("chg_sess", null), prof: null, tab: "cmd", detail: null, authView: "login", authMsg: null,
   cmds: [], seen: null, filter: null, lignes: {}, livreurs: [], produits: [], clients: [], tarifs: [], team: [], te: {},
-  nc: null, queue: ls.get("chg_q", []), qfail: ls.get("chg_qf", []), to: {r: 15000, w: 30000}, qAt: 0, qMsg: "", recovery: null, af: {nm:"",em:"",pw:"",cd:""}, code: null, busy: false, online: navigator.onLine, pickLiv: "", fraisIn: "", cancelAsk: false, q: "", trash: [], trashAsk: null, hist: {}, installEvt: null, params: {}, prodAll: [], pOpen: null, pe: {}, pNew: false, pn: {}, tre: {}, trn: {poids_max: "", frais: ""}, delAsk: null, stockP: [], stockR: [], fourn: [], sOpen: null, se: {}, fo: {nom: "", telephone: "", quartier: "", produits: ""},
+  nc: null, queue: ls.get("chg_q", []), qfail: ls.get("chg_qf", []), to: {r: 15000, w: 30000}, qAt: 0, qMsg: "", recovery: null, af: {nm:"",em:"",pw:"",cd:""}, code: null, busy: false, online: navigator.onLine, pickLiv: "", fraisIn: "", cancelAsk: false, q: "", trash: [], trashAsk: null, hist: {}, installEvt: null, params: {}, prodAll: [], pOpen: null, pe: {}, pNew: false, pn: {}, tre: {}, trn: {poids_max: "", frais: ""}, delAsk: null, stockP: [], stockR: [], ssub: "etat", fa: [], fm: [], ff: {}, fe: null, ab: {a: {}, m: {}}, fnewAsk: false, fourn: [], sOpen: null, se: {}, fo: {nom: "", telephone: "", quartier: "", produits: ""},
   dper: 30, jday: new Date().toLocaleDateString("sv-SE", {timeZone: "Africa/Lubumbashi"}), jfin: {deps: [], mvts: [], rgs: []}, msub: "calc", mjours: 30, mar: [], lots: [], couts: {}, ce: {}, calc: {libelle: "", cout: "", devise: "USD", taux: "", poids: "", pv: "", cible: "30", pid: ""}, taux_in: "", colisR: [], cn: {}, fsub: null, fin: {}, mv: {compte: "Cash", sens: "Entrée", motif: "", montant: ""}, dp: null, rg: null
 };
 S.dp = null;
@@ -1627,6 +1627,7 @@ async function loadAll() {
   jobs.push(rest("parametres?select=*").then(r => { S.params = {}; (r || []).forEach(p => S.params[p.cle] = p.valeur); ls.set("chg_c_par", S.params); }).catch(() => {}));
   if (has("directeur")) jobs.push(loadTeam());
   if (has("directeur", "exploitation", "stock", "comptable")) jobs.push(loadStock().catch(() => {}));
+  if (canFV()) jobs.push(loadFiche().catch(() => {}));
   if (canProd()) jobs.push(loadProd().catch(() => {}));
   if (has("directeur","comptable")) jobs.push(loadMar().catch(() => {}));
   if (has("directeur", "comptable", "stock")) { S.fsub = finSubs()[0][0]; S.dp = newDp(); jobs.push(loadFin().catch(() => {})); }
@@ -1822,7 +1823,7 @@ function navItems() {
   const n = [];
   if (canSeeCmd()) n.push(["cmd", "📋", "Commandes"]);
   if (has("directeur","exploitation","reception")) n.push(["new", "➕", "Nouvelle"]);
-  if (has("directeur","exploitation","stock","comptable")) n.push(["stock", "📦", "Stock"]);
+  if (canFV()) n.push(["stock", "📦", "Stock"]);
   if (has("directeur","comptable","stock")) n.push(["fin", "💰", has("directeur","comptable") ? "Finances" : "Achats"]);
   if (canProd()) n.push(["prod", "🏷️", "Produits"]);
   if (has("directeur","comptable")) n.push(["mar", "📈", "Marges"]);
@@ -2309,7 +2310,7 @@ async function loadStock() {
   S.prodAll = S.prodAll && S.prodAll.length ? S.prodAll : p; S.stockP = p; S.stockR = s; S.fourn = f;
   try { S.colisR = await rest("stock_colis?select=*&order=poids"); } catch (_) { S.colisR = []; }
 }
-function vStockScreen() {
+function vStockOld() {
   const bySt = {}; (S.stockR || []).forEach(r => bySt[r.produit_id] = r);
   const items = (S.stockP || []).filter(p => p.actif);
   const low = items.filter(p => { const r = bySt[p.id]; return r && Number(r.seuil) > 0 && Number(r.quantite) <= Number(r.seuil); });
@@ -2327,6 +2328,110 @@ function vStockScreen() {
   ${has("directeur", "stock") ? `<div class="card mem"><b>${t("Nouveau fournisseur")}</b>${fld("Nom", "fo.nom", S.fo.nom)}<div class="two">${fld("Téléphone", "fo.telephone", S.fo.telephone, {im: "tel"})}${fld("Quartier", "fo.quartier", S.fo.quartier)}</div>${fld("Produits fournis", "fo.produits", S.fo.produits)}<button class="btn pri" data-a="foadd">${t("Ajouter")}</button></div>` : ""}` : ""}`;
 }
 
+
+/* ================= État de stock (fiche) : animaux vivants + viandes abattues non livrées ================= */
+const canFV = () => has("directeur", "stock", "reception", "boucher", "commercial", "comptable");
+const canAb = () => has("directeur", "stock", "boucher");
+const fq = v => Number(v || 0).toLocaleString("fr-FR");
+const feA = r => num(r.stock_initial) + num(r.entrees) - num(r.abattus) - num(r.ventes_pertes);
+const feM = r => num(r.stock_precedent) + num(r.nouvel_abattage) - num(r.quantite_livree);
+const ulab = r => r.unite === "pièce" ? "pièce" + (r.calibre ? " · " + r.calibre : "") : "kg";
+async function loadFiche() {
+  const [a, m, f] = await Promise.all([rest("stock_animaux?select=*&order=ordre"), rest("stock_viandes?select=*&order=ordre"), rest("stock_fiche?select=*")]);
+  S.fa = a || []; S.fm = m || []; S.ff = (f && f[0]) || {responsable: "Christel Makelele"};
+}
+function feInit() {
+  const F = S.ff || {};
+  S.fe = {
+    an: (S.fa || []).map(r => ({id: r.id, espece: r.espece, stock_initial: r.stock_initial, entrees: r.entrees, abattus: r.abattus, ventes_pertes: r.ventes_pertes, observations: r.observations || ""})),
+    me: (S.fm || []).map(r => ({id: r.id, produit: r.produit, unite: r.unite, calibre: r.calibre || "", stock_precedent: r.stock_precedent, nouvel_abattage: r.nouvel_abattage, quantite_livree: r.quantite_livree, date_client: r.date_client || ""})),
+    ff: {date_maj: F.date_maj || "", periode: F.periode || "", responsable: F.responsable || "Christel Makelele"}
+  };
+}
+function stSubs() {
+  const s = [["etat", "État du stock"]];
+  if (canStockW()) s.push(["maj", "Mise à jour"]);
+  if (canAb()) s.push(["abat", "Abattage"]);
+  if (has("directeur", "stock", "comptable")) s.push(["prod", "Produits"]);
+  return s;
+}
+function vStockScreen() {
+  const subs = stSubs(); if (!subs.some(x => x[0] === S.ssub)) S.ssub = "etat";
+  if (S.ssub === "maj" && !S.fe) feInit();
+  const seg = subs.length > 1 ? `<div class="seg" role="group">${subs.map(x => `<button data-a="ssub" data-k="${x[0]}" aria-pressed="${S.ssub === x[0]}">${t(x[1])}</button>`).join("")}</div>` : "";
+  return seg + (S.ssub === "maj" ? vFMaj() : S.ssub === "abat" ? vFAb() : S.ssub === "prod" ? vStockOld() : vFEtat());
+}
+function ficheTot() {
+  let ta = 0, kg = 0, pc = 0;
+  (S.fa || []).forEach(r => ta += Number(r.stock_final));
+  (S.fm || []).forEach(r => { if (r.unite === "pièce") pc += Number(r.reste_a_livrer); else kg += Number(r.reste_a_livrer); });
+  return {ta, kg, pc};
+}
+function vFEtat() {
+  const F = S.ff || {}, T = ficheTot();
+  const ra = (S.fa || []).map(r => `<div class="card mem"><div class="row"><div><b>${e(r.espece)}</b><br><small>${t("Initial")} ${fq(r.stock_initial)} · +${fq(r.entrees)} · −${fq(r.abattus)} ${t("abattus")} · −${fq(r.ventes_pertes)} ${t("ventes/pertes")}</small>${r.observations ? `<br><small>📝 ${e(r.observations)}</small>` : ""}</div><span class="num">${fq(r.stock_final)}</span></div></div>`).join("");
+  const rm = (S.fm || []).map(r => `<div class="card mem"><div class="row"><div><b>${e(r.produit)}</b> <span class="pill">${e(ulab(r))}</span><br><small>${t("Précédent")} ${fq(r.stock_precedent)} · +${fq(r.nouvel_abattage)} ${t("abattage")} · −${fq(r.quantite_livree)} ${t("livré")}</small>${r.date_client ? `<br><small>📅 ${e(r.date_client)}</small>` : ""}</div><span class="num">${fq(r.reste_a_livrer)}</span></div></div>`).join("");
+  return `<div class="h"><h2>${t("État du stock")}</h2><p>${F.date_maj ? t("Dernière mise à jour") + " : " + e(fdate(F.date_maj)) + (F.periode ? " · " + e(F.periode) : "") : t("Pas encore de mise à jour.")} · ${t("Responsable du suivi")} : ${e(F.responsable || "")}</p></div>
+  <div class="acts"><button class="btn" data-a="fpdf">📄 PDF</button><button class="btn" data-a="fxls">📊 Excel</button></div>
+  <h3>${t("Animaux vivants de la ferme")}</h3><div class="list">${ra || `<div class="empty">—</div>`}</div>
+  <div class="card mem"><div class="row"><b>${t("TOTAL EFFECTIFS")}</b><span class="num">${fq(T.ta)}</span></div></div>
+  <h3>${t("Viandes abattues non livrées")}</h3><div class="list">${rm || `<div class="empty">—</div>`}</div>
+  <div class="card mem"><div class="row"><b>${t("TOTAL EN STOCK")}</b><span class="num">${fq(T.kg)} kg · ${fq(T.pc)} pcs</span></div></div>`;
+}
+function vFMaj() {
+  const X = S.fe; if (!X) return "";
+  const an = X.an.map((r, i) => `<div class="card mem"><div class="row"><b>${e(r.espece)}</b><span><small>${t("Stock final")}</small> <span class="num" id="fa${i}">${fq(feA(r))}</span></span></div>
+    <div class="two">${fld("Stock initial", `fe.an.${i}.stock_initial`, r.stock_initial, {im: "decimal"})}${fld("Entrées (+)", `fe.an.${i}.entrees`, r.entrees, {im: "decimal"})}</div>
+    <div class="two">${fld("Abattus (−)", `fe.an.${i}.abattus`, r.abattus, {im: "decimal"})}${fld("Ventes / Pertes (−)", `fe.an.${i}.ventes_pertes`, r.ventes_pertes, {im: "decimal"})}</div>
+    ${fld("Observations", `fe.an.${i}.observations`, r.observations)}</div>`).join("");
+  const me = X.me.map((r, i) => `<div class="card mem"><div class="row"><b>${e(r.produit)}</b><span><small>${t("Reste à livrer")}</small> <span class="num" id="fm${i}">${fq(feM(r))}</span></span></div>
+    <div class="two">${sel("Unité", `fe.me.${i}.unite`, r.unite, ["kg", "pièce"])}${r.unite === "pièce" ? sel("Calibre", `fe.me.${i}.calibre`, r.calibre || "Cat. 1", ["Cat. 1", "Cat. 2", "Cat. 3"]) : "<span></span>"}</div>
+    <div class="two">${fld("Stock précédent", `fe.me.${i}.stock_precedent`, r.stock_precedent, {im: "decimal"})}${fld("Nouvel abattage (+)", `fe.me.${i}.nouvel_abattage`, r.nouvel_abattage, {im: "decimal"})}</div>
+    <div class="two">${fld("Quantité livrée (−)", `fe.me.${i}.quantite_livree`, r.quantite_livree, {im: "decimal"})}${fld("Date abattage / Client", `fe.me.${i}.date_client`, r.date_client)}</div></div>`).join("");
+  return `<div class="h"><h2>${t("Mise à jour du stock")}</h2></div>
+  <div class="card mem"><div class="two">${fld("Date de mise à jour", "fe.ff.date_maj", X.ff.date_maj, {type: "date"})}${fld("Période / Lot", "fe.ff.periode", X.ff.periode, {ph: "Ex. : semaine 47"})}</div>${fld("Responsable du suivi", "fe.ff.responsable", X.ff.responsable)}</div>
+  <h3>${t("Animaux vivants de la ferme")}</h3><div class="list">${an}</div>
+  <div class="card mem"><div class="row"><b>${t("TOTAL EFFECTIFS")}</b><span class="num" id="fta"></span></div></div>
+  <h3>${t("Viandes abattues non livrées")}</h3><div class="list">${me}</div>
+  <div class="card mem"><div class="row"><b>${t("TOTAL EN STOCK")}</b><span class="num" id="ftm"></span></div></div>
+  <div class="acts"><button class="btn pri" data-a="fsave">${t("Enregistrer la mise à jour")}</button></div>
+  ${S.fnewAsk ? `<div class="card mem"><b>${t("Commencer une nouvelle période ?")}</b><small>${t("Les chiffres finaux deviennent le stock de départ. Entrées, abattus, ventes et livraisons repartent à zéro. Enregistrez d'abord vos modifications.")}</small><div class="acts"><button class="btn bad" data-a="fnewok">${t("Oui, commencer")}</button><button class="btn" data-a="fnewask">${t("Annuler")}</button></div></div>` : `<div class="acts"><button class="btn" data-a="fnewask">${t("Commencer une nouvelle période")}</button></div>`}`;
+}
+function feCalc() {
+  const X = S.fe; if (!X) return; let ta = 0, kg = 0, pc = 0;
+  X.an.forEach((r, i) => { const f = feA(r); ta += f; const el = $("#fa" + i); if (el) { el.textContent = fq(f); el.style.color = f < 0 ? "var(--bad)" : ""; } });
+  X.me.forEach((r, i) => { const f = feM(r); if (r.unite === "pièce") pc += f; else kg += f; const el = $("#fm" + i); if (el) { el.textContent = fq(f); el.style.color = f < 0 ? "var(--bad)" : ""; } });
+  const a = $("#fta"), b = $("#ftm"); if (a) a.textContent = fq(ta); if (b) b.textContent = fq(kg) + " kg · " + fq(pc) + " pcs";
+}
+function vFAb() {
+  const A = S.ab || (S.ab = {a: {}, m: {}});
+  const rows = (S.fm || []).map((r, i) => { const an = i < 7 && (S.fa || [])[i];
+    return `<div class="card mem"><b>${e(an ? an.espece : r.produit)}</b><div class="two">${an ? fld("Animaux abattus (nombre)", `ab.a.${i}`, (A.a || {})[i], {im: "decimal"}) : "<span></span>"}${fld((an ? "Viande obtenue" : "Quantité reçue") + " (" + ulab(r) + ")", `ab.m.${i}`, (A.m || {})[i], {im: "decimal"})}</div></div>`; }).join("");
+  return `<div class="h"><h2>${t("Abattage")}</h2><p>${t("Saisissez ce qui a été abattu. Les chiffres s'ajoutent automatiquement à l'état du stock.")}</p></div>${rows}<div class="acts"><button class="btn pri" data-a="abok">${t("Enregistrer l'abattage")}</button></div>`;
+}
+function ficheXlsx() {
+  const F = S.ff || {}, T = ficheTot();
+  reportXlsx({titre: "Fiche de mise à jour de l'état de stock", sous: "Charcuterie de l'Ituri SARL (CHARITURI)", nom: "etat-de-stock-" + (F.date_maj || todayK()),
+    kpis: [["Responsable du suivi", F.responsable || ""], ["Date de mise à jour", F.date_maj || ""], ["Période / Lot", F.periode || ""], ["Total effectifs", T.ta], ["Total viandes (kg)", T.kg], ["Total viandes (pièces)", T.pc]],
+    sections: [
+      {titre: "Animaux vivants", head: ["Espèce animale", "Stock initial", "Entrées (+)", "Abattus (-)", "Ventes / Pertes (-)", "Stock final", "Observations"], rows: (S.fa || []).map(r => [r.espece, Number(r.stock_initial), Number(r.entrees), Number(r.abattus), Number(r.ventes_pertes), Number(r.stock_final), r.observations || ""])},
+      {titre: "Viandes non livrées", head: ["Produit / Espèce", "Unité et calibre", "Stock précédent", "Nouvel abattage (+)", "Quantité livrée (-)", "Reste à livrer", "Date abattage / Client"], rows: (S.fm || []).map(r => [r.produit, ulab(r), Number(r.stock_precedent), Number(r.nouvel_abattage), Number(r.quantite_livree), Number(r.reste_a_livrer), r.date_client || ""])}]});
+}
+function fichePrint() {
+  const F = S.ff || {}, T = ficheTot(), c = v => v === 0 ? "0" : fq(v);
+  const th = a => a.map(x => `<th>${x}</th>`).join("");
+  $("#pf").innerHTML = `<style>.fc{font-family:Arial,Helvetica,sans-serif;color:#1c2a4a;font-size:10.5px}.fc .hd2{display:flex;justify-content:space-between;align-items:center}.fc .hd2 img{width:46px;height:auto}.fc h1{color:#7a1b1f;font-size:17px;text-align:center;margin:0}.fc h2{font-size:16px;text-align:center;margin:10px 0;padding:8px;background:#f3f6fa;border-top:1px solid #cfd8e5;border-bottom:1px solid #cfd8e5;color:#1c2a4a}.fc .mt{display:flex;justify-content:space-between;margin:5px 0;font-size:11px}.fc .bd{color:#fff;font-weight:700;font-size:12px;padding:6px 8px;margin-top:12px}.fc .g{background:#1d4d36}.fc .w{background:#7a1b1f}.fc .it{font-style:italic;color:#555;font-size:9.5px;margin:4px 0}.fc table{width:100%;border-collapse:collapse;font-size:10px}.fc th{background:#f1f4f9;border:1.5px solid #b9c4d6;padding:5px 3px;color:#1c2a4a}.fc td{border:1px solid #cfd8e5;padding:4px 5px;height:20px}.fc td.l{font-weight:700;background:#fbfcfe}.fc tr.t td{background:#f1f4f9;font-weight:700}.fc .sg2{display:flex;border:1px solid #cfd8e5;margin-top:8px;font-weight:700;font-size:10.5px}.fc .sg2 div{flex:1;padding:7px;height:50px}.fc .ft2{display:flex;justify-content:space-between;color:#6b7d99;font-size:9.5px;border-top:1px solid #cfd8e5;margin-top:18px;padding-top:5px}</style>
+  <div class="fc"><div class="hd2"><img src="logo.webp" alt=""><h1>CHARCUTERIE DE L'ITURI SARL (CHARITURI)</h1><img src="logo.webp" alt=""></div><h2>FICHE DE MISE À JOUR DE L'ÉTAT DE STOCK</h2>
+  <div class="mt"><span><b>Date de mise à jour :</b> ${e(F.date_maj ? new Date(F.date_maj + "T12:00:00").toLocaleDateString("fr-FR") : "")}</span><span><b>Période / Lot :</b> ${e(F.periode || "")}</span></div><div class="mt"><span><b>Responsable du suivi :</b> ${e(F.responsable || "")}</span></div><hr style="border:1.5px solid #7a1b1f">
+  <div class="bd g">1. Catégorie : Animaux Vivants de la Ferme (Effectifs sur Pied)</div><div class="it">Suivi des effectifs disponibles à la ferme (entrées, naissances, sorties pour abattage, ventes sur pied et mortalités).</div>
+  <table><tr>${th(["Espèce Animale", "Stock Initial", "Entrées (+)", "Abattus (-)", "Ventes / Pertes (-)", "Stock Final", "Observations"])}</tr>${(S.fa || []).map(r => `<tr><td class="l">${e(r.espece)}</td><td>${c(+r.stock_initial)}</td><td>${c(+r.entrees)}</td><td>${c(+r.abattus)}</td><td>${c(+r.ventes_pertes)}</td><td>${c(+r.stock_final)}</td><td>${e(r.observations || "")}</td></tr>`).join("")}<tr class="t"><td>TOTAL EFFECTIFS</td><td></td><td></td><td></td><td></td><td>${c(T.ta)}</td><td></td></tr></table>
+  <div class="bd w">2. Catégorie : Viandes Abattues Non Livrées (En Chambre Froide / Stock)</div><div class="it">Suivi des viandes prêtes à la livraison : préciser l'unité (kg ou pièce) et le calibre des pièces selon leur poids (Cat. 1, Cat. 2 ou Cat. 3).</div>
+  <table><tr>${th(["Produit / Espèce", "Unité &amp; Calibre<br>(kg / Pièce Cat. 1-2-3)", "Stock Précédent", "Nouvel Abattage (+)", "Quantité Livrée (-)", "Reste à Livrer", "Date Abattage / Client"])}</tr>${(S.fm || []).map(r => `<tr><td class="l">${e(r.produit)}</td><td>${e(ulab(r))}</td><td>${c(+r.stock_precedent)}</td><td>${c(+r.nouvel_abattage)}</td><td>${c(+r.quantite_livree)}</td><td>${c(+r.reste_a_livrer)}</td><td>${e(r.date_client || "")}</td></tr>`).join("")}<tr class="t"><td>TOTAL EN STOCK</td><td>kg / pcs</td><td></td><td></td><td></td><td>${c(T.kg)} kg · ${c(T.pc)} pcs</td><td></td></tr></table>
+  <div class="sg2"><div>Visa et Signature du Responsable du suivi :</div><div style="border-left:1px solid #cfd8e5">Visa et Signature du Responsable CHARITURI :</div></div><div class="ft2"><span>CHARCUTERIE DE L'ITURI SARL (CHARITURI)</span><span>Page 1 of 1</span></div></div>`;
+  document.body.classList.add("pfmode");
+  const im = $("#pf img"), go = () => setTimeout(() => window.print(), 150);
+  if (im.complete) go(); else { im.onload = go; im.onerror = go; }
+}
 
 /* ================= Stock par colis ================= */
 function colisHTML(p) {
@@ -2692,6 +2797,30 @@ const A2 = {
   sopen(d) { const id = +d.id; S.sOpen = S.sOpen === id ? null : id; const r = (S.stockR || []).find(x => x.produit_id === id); if (S.sOpen) S.se[id] = {quantite: r ? r.quantite : 0, seuil: r ? r.seuil : 0, delta: ""}; render(); },
   async ssave(d) { const id = +d.id, x = S.se[id], r = (S.stockR || []).find(q => q.produit_id === id); await guard(async () => { let q = num(x.quantite); if (String(x.delta).trim() !== "") q = num(r ? r.quantite : 0) + num(x.delta); if (q < 0) return toast(t("Le stock ne peut pas être négatif.")); const b = {quantite: q, seuil: Math.max(0, num(x.seuil)), updated_at: new Date().toISOString()}; if (r) await rest("stock?id=eq." + r.id, {method: "PATCH", body: b, headers: {Prefer: "return=minimal"}}); else await rest("stock", {method: "POST", body: Object.assign({produit_id: id}, b), headers: {Prefer: "return=minimal"}}); S.sOpen = null; await loadStock(); toast(t("Enregistré")); }); render(); },
   async foadd() { await guard(async () => { if (!S.fo.nom.trim()) return toast(t("Indiquez le nom.")); await rest("fournisseurs", {method: "POST", body: {nom: S.fo.nom.trim(), telephone: S.fo.telephone || null, quartier: S.fo.quartier || null, produits: S.fo.produits || null}, headers: {Prefer: "return=minimal"}}); S.fo = {nom: "", telephone: "", quartier: "", produits: ""}; await loadStock(); toast(t("Ajouté")); }); render(); },
+  ssub(d) { S.ssub = d.k; S.fnewAsk = false; if (d.k === "maj") feInit(); if (d.k === "abat") S.ab = {a: {}, m: {}}; render(); },
+  async fsave() {
+    const X = S.fe; if (!X) return;
+    if (X.an.some(r => feA(r) < 0) || X.me.some(r => feM(r) < 0)) return toast(t("Vérifiez : un stock est négatif."), 4000);
+    await guard(async () => {
+      const H = {Prefer: "return=minimal"};
+      await Promise.all([].concat(
+        X.an.map(r => rest("stock_animaux?id=eq." + r.id, {method: "PATCH", headers: H, body: {stock_initial: num(r.stock_initial), entrees: num(r.entrees), abattus: num(r.abattus), ventes_pertes: num(r.ventes_pertes), observations: String(r.observations || "").trim() || null, updated_at: new Date().toISOString()}})),
+        X.me.map(r => rest("stock_viandes?id=eq." + r.id, {method: "PATCH", headers: H, body: {unite: r.unite, calibre: r.unite === "pièce" ? (r.calibre || "Cat. 1") : null, stock_precedent: num(r.stock_precedent), nouvel_abattage: num(r.nouvel_abattage), quantite_livree: num(r.quantite_livree), date_client: String(r.date_client || "").trim() || null, updated_at: new Date().toISOString()}})),
+        [rest("stock_fiche?id=eq.1", {method: "PATCH", headers: H, body: {date_maj: X.ff.date_maj || todayK(), periode: String(X.ff.periode || "").trim() || null, responsable: String(X.ff.responsable || "").trim() || "Christel Makelele"}})]));
+      await loadFiche(); S.ssub = "etat"; toast(t("Enregistré"));
+    }); render();
+  },
+  fnewask() { S.fnewAsk = !S.fnewAsk; render(); },
+  async fnewok() { await guard(async () => { await rpc("nouvelle_periode_stock"); await loadFiche(); feInit(); S.fnewAsk = false; toast(t("Nouvelle période commencée")); }); render(); },
+  async abok() {
+    const a = {}, m = {}; let any = false;
+    (S.fa || []).forEach((r, i) => { const v = num((S.ab.a || {})[i]); if (v > 0) { a[r.espece] = v; any = true; } });
+    (S.fm || []).forEach((r, i) => { const v = num((S.ab.m || {})[i]); if (v > 0) { m[r.produit] = v; any = true; } });
+    if (!any) return toast(t("Rien à enregistrer."));
+    await guard(async () => { await rpc("enregistrer_abattage", {p_animaux: a, p_viandes: m}); await loadFiche(); S.ab = {a: {}, m: {}}; S.ssub = "etat"; toast(t("Abattage enregistré, stock mis à jour")); }); render();
+  },
+  fpdf() { fichePrint(); },
+  fxls() { ficheXlsx(); },
   async fsub(d) { S.fsub = d.k; render(); await guard(loadFin); render(); },
   async mvadd() { await guard(async () => { if (!S.mv.motif.trim() || num(S.mv.montant) <= 0) return toast(t("Indiquez le motif et le montant.")); await rest("mouvements_caisse", {method: "POST", body: {compte: S.mv.compte, sens: S.mv.sens, motif: S.mv.motif.trim(), montant: num(S.mv.montant)}, headers: {Prefer: "return=minimal"}}); S.mv = {compte: "Cash", sens: "Entrée", motif: "", montant: ""}; await loadFin(); toast(t("Enregistré")); }); render(); },
   async dpadd() { await guard(async () => { const x = S.dp, stk = !has("directeur", "comptable"); if (num(x.montant) <= 0) return toast(t("Indiquez le montant.")); await rest("depenses", {method: "POST", body: {date_depense: x.date_depense || today(), categorie: stk ? "Achat de marchandises" : x.categorie, description: x.description || null, fournisseur: x.fournisseur || null, montant: num(x.montant), mode: x.mode}, headers: {Prefer: "return=minimal"}}); S.dp = newDp(); await loadFin(); toast(t("Enregistré")); }); render(); },
@@ -2749,6 +2878,7 @@ document.addEventListener("input", ev => {
   if (el.dataset.m === "nc.clientNom") { S.nc.clientId = null; $("#sugg").innerHTML = suggHTML(); }
   if (/^nc\.lines\./.test(el.dataset.m)) $("#tot").innerHTML = totalsHTML();
   if (/^calc\./.test(el.dataset.m) && $("#calcres")) $("#calcres").innerHTML = calcRes();
+  if (/^fe\./.test(el.dataset.m)) feCalc();
 });
 document.addEventListener("change", ev => {
   const el = ev.target; if (el && el.dataset && el.dataset.m === "jday") { S.jday = el.value || todayK(); guard(loadJour).then(render); return; }
@@ -2758,6 +2888,7 @@ document.addEventListener("change", ev => {
   const mm = m.match(/^nc\.lines\.(\d+)\.pid$/);
   if (mm) { S.nc.lines[+mm[1]].prix = ""; render(); }
   else if (/^te\./.test(m)) render();
+  else if (/^fe\./.test(m)) { const mi = m.match(/^fe\.me\.(\d+)\.unite$/); if (mi) { const r = S.fe.me[+mi[1]]; if (r.unite === "pièce" && !r.calibre) r.calibre = "Cat. 1"; render(); } else feCalc(); }
   else if (/^calc\./.test(m)) { if (m === "calc.devise" || m === "calc.pid") render(); else if ($("#calcres")) $("#calcres").innerHTML = calcRes(); }
   else if (/^nc\.lines\./.test(m)) $("#tot").innerHTML = totalsHTML();
 });
@@ -2798,7 +2929,7 @@ document.addEventListener("click", async ev => {
       if (d.k === "dash") { S.mjours = S.dper; if (has("directeur", "comptable")) loadMar().then(render).catch(() => {}); }
       if (d.k === "jour") loadJour().then(render).catch(er => toast(er.message));
       if (d.k === "mar") loadMar().then(render).catch(er => toast(er.message));
-      if (d.k === "stock") loadStock().then(render).catch(er => toast(er.message));
+      if (d.k === "stock") { if (has("directeur", "stock", "comptable")) loadStock().then(render).catch(er => toast(er.message)); if (canFV()) loadFiche().then(render).catch(er => toast(er.message)); }
       if (d.k === "fin") { if (!S.fsub || !finSubs().some(x => x[0] === S.fsub)) S.fsub = finSubs()[0][0]; if (!S.dp) S.dp = newDp(); loadFin().then(render).catch(er => toast(er.message)); }
       render(); window.scrollTo(0, 0); break;
     case "filt": S.filter = d.k; S.trashAsk = null; S.sel = {}; S.selAsk = null; S.selOn = false; render(); if (d.k === "corbeille") { await loadTrash(); render(); } break;
